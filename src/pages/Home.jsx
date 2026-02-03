@@ -1,22 +1,23 @@
-import HeroVideo from "../assets/Hero-Video.mp4";
 import Counter from "../components/Counter";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnglesDown } from "@fortawesome/free-solid-svg-icons";
-import studentLifeVideo from "../assets/student-life-video.mp4";
 import News from "./News";
+
+const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/5TKdIrdcyJ4";
 // eslint-disable-next-line no-unused-vars, react/prop-types
 export default function Home({ cardinalympicsData, newsData }) {
   return (
     <>
-      <video
-        autoPlay
-        muted
-        playsInline
-        controls={false}
-        src={HeroVideo}
-        className="hero-video"
-      ></video>
+      <div className="hero-video-wrapper">
+        <iframe
+          src={`${YOUTUBE_EMBED_URL}?autoplay=1&mute=1&loop=1&playlist=5TKdIrdcyJ4&controls=0&showinfo=0&rel=0`}
+          title="LSA Hero"
+          className="hero-video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
       <div className="video-credit">Video by Video Lowell</div>
       <div className="intro-container">
         <h2>Lowell Student Association</h2>
@@ -77,12 +78,15 @@ export default function Home({ cardinalympicsData, newsData }) {
       <News newsData={newsData} />
       <div className="life-at-lowell">
         <h2>WATCH: Student Life at Lowell High School</h2>
-        <video
-          controls
-          muted
-          src={studentLifeVideo}
-          className="responsive-video"
-        ></video>
+        <div className="responsive-video-wrapper">
+          <iframe
+            src={YOUTUBE_EMBED_URL}
+            title="Student Life at Lowell High School"
+            className="responsive-video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
       </div>
       <div className="preamble flex-center">
         <p>
