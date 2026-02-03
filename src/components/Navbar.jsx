@@ -1,20 +1,38 @@
-import {Link, useLocation} from "react-router-dom"
-import Logo from "../assets/LSA-Logo.png"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {faCaretUp, faPlus, faMinus, faBars, faXmark, faCaretDown, faHouse, faCheckToSlot, faBook, faUser, faUsers, faThumbTack, faThumbsUp, faCaretRight} from "@fortawesome/free-solid-svg-icons"
-import {useState, useEffect} from "react"
+import { Link, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
+import Logo from "../assets/LSA-Logo.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faMinus,
+  faBars,
+  faXmark,
+  faCaretDown,
+  faHouse,
+  faCheckToSlot,
+  faBook,
+  faUser,
+  faUsers,
+  faThumbTack,
+  faCaretRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect } from "react";
 
 
-//Navigation bar/hamburger menu, DO NOT TOUCH!!!!
+/* 
+New Navbar Component (Don't modify unless necessary) - Gavin Z. 2026
+This previous code gave me headache to fix T.T
+*/
 
-export default function Navbar(props){
-    const [hasScrolled, setHasScrolled] = useState(false);
-    const [hamburger, setHamburger] = useState(false);
-    const [clickedDropdown, setClickedDropdown] = useState(false);
+export default function Navbar({ clubData }) {
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [hamburger, setHamburger] = useState(false);
+  const [clickedDropdown, setClickedDropdown] = useState(false);
+  const location = useLocation();
 
-    function toggleBigSecondDropdown(index, event) {
-        setClickedDropdown(prev => (prev === index ? false : index));
-    }
+  function toggleBigSecondDropdown(index) {
+    setClickedDropdown((prev) => (prev === index ? false : index));
+  }
     
     const [hasDropped, setHasDropped] = useState([
         {
@@ -64,11 +82,9 @@ export default function Navbar(props){
         return () => window.removeEventListener("scroll", handleScroll);
       }, []);
 
-    useEffect(
-        ()=>{
-            setHamburger(false);
-        }
-    ,[useLocation()])
+  useEffect(() => {
+    setHamburger(false);
+  }, [location]);
 
     const scrolledStyle = {
         background: hasScrolled ? "white" : "transparent",
@@ -92,11 +108,10 @@ export default function Navbar(props){
         );
     }
 
-    const clubData = props.clubData;
-    const navLinks = [
+  const navLinks = [
         {
             name: "HOME",
-            hasDropdown: false,
+            hasDropDown: false,
             icon: faHouse,
             to: "/",
             id: 1,
@@ -560,7 +575,11 @@ export default function Navbar(props){
     });
     return(
         <>
-            <div className={useLocation().pathname === "/" ? "ham-offset" : "off-set ham-offset"}></div>
+            <div
+              className={
+                location.pathname === "/" ? "ham-offset" : "off-set ham-offset"
+              }
+            ></div>
             <div className="navbar">
                 <ul className="nav-links" style={hasScrolled ? scrolledStyle : {}}>
                     <Link className="logo" to="/"><img src={Logo} alt="Lowell Student Association" /></Link>
@@ -582,5 +601,14 @@ export default function Navbar(props){
                 {hamburgerNav}    
             </div>
         </>
-    )
+    );
 }
+
+Navbar.propTypes = {
+  clubData: PropTypes.arrayOf(
+    PropTypes.shape({
+      Name: PropTypes.string.isRequired,
+      Category: PropTypes.string.isRequired,
+    })
+  ),
+};

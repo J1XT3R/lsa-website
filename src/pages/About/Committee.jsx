@@ -1,19 +1,16 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
+import PropTypes from "prop-types";
+import LoadingTruck from "../../components/LoadingTruck";
 
-export default function Committees({ officerData: allOfficers }) {
-  const { BoardName: params } = useParams();
-  const [officerData, setOfficerData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Committee({ officerData: allOfficers }) {
+  const { CommitteeName: params } = useParams();
 
-  useEffect(() => {
-    if (allOfficers && params) {
-      const filtered = allOfficers.filter(
-        (officer) => officer.Team === params
-      );
-      setOfficerData(filtered);
-      setLoading(false);
+  const officerData = useMemo(() => {
+    if (!allOfficers || !params) {
+      return [];
     }
+    return allOfficers.filter((officer) => officer.Team === params);
   }, [allOfficers, params]);
 
   function extractFileId(driveUrl) {
@@ -21,7 +18,7 @@ export default function Committees({ officerData: allOfficers }) {
     return match ? match[1] : null;
   }
 
-  if (loading) {
+  if (!allOfficers) {
     return <LoadingTruck />;
   }
 
@@ -39,7 +36,9 @@ export default function Committees({ officerData: allOfficers }) {
   const displayOfficers = officerData.map((officer, index) => (
     <div key={index} className="team-member">
       <img
-        src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+        src={`https://drive.google.com/thumbnail?id=${extractFileId(
+          officer.Photo
+        )}`}
         alt={officer.Name}
         className="team-member-photo"
       />
@@ -59,10 +58,22 @@ export default function Committees({ officerData: allOfficers }) {
     <>
       <h1 className="team-name center">
         {committeeName}
-        <br /> 2025–2026
+        <br /> 2025-2026
       </h1>
 
       <div className="teams">{displayOfficers}</div>
     </>
   );
 }
+
+Committee.propTypes = {
+  officerData: PropTypes.arrayOf(
+    PropTypes.shape({
+      Team: PropTypes.string.isRequired,
+      Name: PropTypes.string.isRequired,
+      Role: PropTypes.string.isRequired,
+      Photo: PropTypes.string,
+      Description: PropTypes.string,
+    })
+  ),
+};

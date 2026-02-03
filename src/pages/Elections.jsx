@@ -1,4 +1,4 @@
-import React from "react";
+import PropTypes from "prop-types";
 
 export default function Elections({ electionData }) {
   // Use provided data or fallback to default
@@ -44,15 +44,45 @@ export default function Elections({ electionData }) {
               }}
             >
               <h3 style={{ color, marginBottom: "0.5rem" }}>{board}</h3>
-              <p><span className="bold">President:</span> {president}</p>
-              <p><span className="bold">Vice President:</span> {vicePresident}</p>
-              <p><span className="bold">Secretary:</span> {secretary}</p>
-              <p><span className="bold">Treasurer:</span> {treasurer}</p>
-              <p><span className="bold">Public Relations:</span> {publicRelations}</p>
-              {historian && <p><span className="bold">Historian:</span> {historian}</p>}
-              {clubCoordinator && <p><span className="bold">Club Coordinator:</span> {clubCoordinator}</p>}
-              {danceCoordinator && <p><span className="bold">Dance Coordinator:</span> {danceCoordinator}</p>}
-              {communityLiaison && <p><span className="bold">Community Liaison:</span> {communityLiaison}</p>}
+              <p>
+                <span className="bold">President:</span> {president}
+              </p>
+              <p>
+                <span className="bold">Vice President:</span> {vicePresident}
+              </p>
+              <p>
+                <span className="bold">Secretary:</span> {secretary}
+              </p>
+              <p>
+                <span className="bold">Treasurer:</span> {treasurer}
+              </p>
+              <p>
+                <span className="bold">Public Relations:</span>{" "}
+                {publicRelations}
+              </p>
+              {historian && (
+                <p>
+                  <span className="bold">Historian:</span> {historian}
+                </p>
+              )}
+              {clubCoordinator && (
+                <p>
+                  <span className="bold">Club Coordinator:</span>{" "}
+                  {clubCoordinator}
+                </p>
+              )}
+              {danceCoordinator && (
+                <p>
+                  <span className="bold">Dance Coordinator:</span>{" "}
+                  {danceCoordinator}
+                </p>
+              )}
+              {communityLiaison && (
+                <p>
+                  <span className="bold">Community Liaison:</span>{" "}
+                  {communityLiaison}
+                </p>
+              )}
             </div>
           </div>
         );
@@ -60,12 +90,21 @@ export default function Elections({ electionData }) {
     </section>
   );
 }
-function App() {
-  return (
-    <div style={{ padding: "2rem", backgroundColor: "#f7f7f7" }}>
-      <Elections />
-    </div>
-  );
-}
 
-export default App;
+Elections.propTypes = {
+  electionData: PropTypes.arrayOf(
+    PropTypes.shape({
+      board: PropTypes.string,
+      color: PropTypes.string,
+      president: PropTypes.string,
+      vicePresident: PropTypes.string,
+      secretary: PropTypes.string,
+      treasurer: PropTypes.string,
+      publicRelations: PropTypes.string,
+      historian: PropTypes.string,
+      clubCoordinator: PropTypes.string,
+      danceCoordinator: PropTypes.string,
+      communityLiaison: PropTypes.string,
+    })
+  ),
+};

@@ -1,13 +1,28 @@
 import { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 
-export default function Counter({ start = 0, end = 100, duration = 2000, color = "#861212", children, ...rest}) {
+export default function Counter({
+  start = 0,
+  end = 100,
+  duration = 2000,
+  color = "#861212",
+  children,
+  ...rest
+}) {
   const [count, setCount] = useState(start);
   const [statState, setStatState] = useState(false);
   const statsRef = useRef(null);
 
-
-  //A number counter Component
+  // Reset count when start or end changes
   useEffect(() => {
+    setCount(start);
+  }, [start, end]);
+
+  // A number counter Component
+  useEffect(() => {
+    const currentRef = statsRef.current;
+    if (!currentRef) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
@@ -16,12 +31,12 @@ export default function Counter({ start = 0, end = 100, duration = 2000, color =
       { threshold: 0.3 } // Trigger when at least 30% of the element is visible
     );
 
-    if (statsRef.current) {
-      observer.observe(statsRef.current);
-    }
+    observer.observe(currentRef);
 
     return () => {
-      if (statsRef.current) observer.unobserve(statsRef.current); // Cleanup
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
     };
   }, []);
 
@@ -42,5 +57,18 @@ export default function Counter({ start = 0, end = 100, duration = 2000, color =
     return () => clearInterval(timer); // Cleanup
   }, [statState, start, end, duration]);
 
-  return <h2 style={{color: color}}ref={statsRef} {...rest}>{statState ? `${Math.floor(count)}` : null}{children}</h2>;
+  return (
+    <h2 style={{ color: color }} ref={statsRef} {...rest}>
+      {statState ? `${Math.floor(count)}` : null}
+      {children}
+    </h2>
+  );
 }
+
+Counter.propTypes = {
+  start: PropTypes.number,
+  end: PropTypes.number,
+  duration: PropTypes.number,
+  color: PropTypes.string,
+  children: PropTypes.node,
+};

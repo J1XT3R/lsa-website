@@ -1,4 +1,4 @@
-@mixin info-page{
+@mixin info-page {
     max-width: 912px;
     margin: 0 auto;
     display: flex;
@@ -6,15 +6,18 @@
     gap: 20px;
     padding: 3rem;
 }
-.club-resources{
+
+.club-resources {
     @include info-page;
 }
-.club-buttons{
+
+.club-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
 }
-.clubs{
+
+.clubs {
     max-width: 1000px;
     margin: 0 auto;
     display: flex;
@@ -24,49 +27,58 @@
     justify-content: space-evenly;
     color: black;
 }
-.club{
+
+.club {
     width: 240px;
     border: 3px solid var(--lowell-red);
     padding: 1rem;
-    border-radius: 1rem; display: flex;
+    border-radius: 1rem;
+    display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     border-radius: 10px;
     min-height: 364px;
-    img{
+
+    img {
         width: 202px;
         height: 200px;
         object-fit: cover;
     }
-    .club-name{
+
+    .club-name {
         font-weight: bold;
         text-align: center;
     }
 }
 
-.club-category{
+.club-category {
     padding: 10px;
 }
-.club-filters{
+
+.club-filters {
     max-width: 912px;
     margin: 0 auto;
 }
-.club-info{
+
+.club-info {
     display: flex;
     align-items: center;
     justify-content: start;
     flex-direction: column;
     gap: 50px;
-  }
-.club-description{
+}
+
+.club-description {
     max-width: 800px;
-  }
-.meeting-times{
+}
+
+.meeting-times {
     font-size: 1.3rem;
     max-width: 800px;
     width: 100%;
-  }
-.club-officers{
+}
+
+.club-officers {
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -77,15 +89,17 @@
     margin-top: 1.5rem;
     margin-bottom: 2rem;
     gap: 20px;
-  }
-.filter-button{
+}
+
+.filter-button {
     display: flex;
     gap: 20px;
     padding: 1rem;
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
-    button{
+
+    button {
         width: 200px;
         padding: 0.5rem;
         cursor: pointer;
@@ -96,15 +110,17 @@
     }
 }
 
-.filter-button button:hover, .load-button:hover{
+.filter-button button:hover,
+.load-button:hover {
     opacity: 0.7;
 }
-.clear-button{
+
+.clear-button {
     border: none;
     background: none;
 }
 
-.clear-button::after{
+.clear-button::after {
     content: "";
     position: absolute;
     height: 2px;
@@ -113,7 +129,8 @@
     width: 100%;
     left: 0;
 }
-.load-button{
+
+.load-button {
     width: 200px;
     padding: 0.5rem;
     cursor: pointer;
@@ -126,23 +143,25 @@
 }
 
 
-.margin-1rem{
+.margin-1rem {
     margin: 0 1rem 1rem 1rem;
 }
-.club-banner{
-    display: block;      
+
+.club-banner {
+    display: block;
     background: #000;
     border: none;
-    height: 30vh;   
+    height: 30vh;
     width: 100vw;
 }
 
 
 
-@media (max-width: 700px){
-    .filter-button{
+@media (max-width: 700px) {
+    .filter-button {
         gap: 10px;
-        button{
+
+        button {
             width: 100px;
             font-size: 0.6rem;
             height: 40px;
@@ -150,13 +169,16 @@
             background: none;
         }
     }
-    .clubs{
+
+    .clubs {
         padding-top: none;
     }
-    .club-name{
+
+    .club-name {
         font-size: 1rem;
     }
-    .club-description{
+
+    .club-description {
         padding: 1rem;
     }
 }
