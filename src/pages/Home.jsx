@@ -11,11 +11,10 @@ export default function Home({ cardinalympicsData, newsData }) {
     <>
       <div className="hero-video-wrapper">
         <iframe
-          src={`${YOUTUBE_EMBED_URL}?autoplay=1&mute=1&loop=1&playlist=5TKdIrdcyJ4&controls=0&showinfo=0&rel=0`}
+          src={`${YOUTUBE_EMBED_URL}?autoplay=1&mute=1&loop=1&playlist=5TKdIrdcyJ4&controls=0&showinfo=0&rel=0&disablekb=1&fs=0&playsinline=1`}
           title="LSA Hero"
           className="hero-video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
+          allow="accelerometer; autoplay; muted; encrypted-media"
         />
       </div>
       <div className="video-credit">Video by Video Lowell</div>
