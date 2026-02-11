@@ -11,7 +11,7 @@
 
 export default {
   /** "contesting" | "polling" | "result" (only used when elections are enabled) */
-  state: "result",
+  state: "contesting",
 
   /** Shown when state is "contesting" or "polling" (election in progress) */
   banner: {
