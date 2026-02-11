@@ -1,11 +1,13 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useState, useMemo } from "react";
 import PropTypes from "prop-types";
+import { getCategoryColorMap } from "../../config/clubs/index.js";
 
 export default function Clubs({ clubData }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [visibleClubs, setVisibleClubs] = useState(9);
   const categoryFilter = searchParams.get("category");
+  const colorMap = useMemo(() => getCategoryColorMap(), []);
 
   function loadMore() {
     setVisibleClubs((prev) => prev + 9);
@@ -18,21 +20,6 @@ export default function Clubs({ clubData }) {
   }
 
   function getCategoryColor(category, useBackground = true) {
-    const colorMap = {
-      Sports: "red",
-      VPA: "purple",
-      "Volunteering and Public Service": "green",
-      "Culture/Religion": "orange",
-      Finance: "gold",
-      "Food/Crafts": "brown",
-      "Games and Fantasy": "darkblue",
-      "Literature and Media": "teal",
-      "Politics and Public Speaking": "lightcoral",
-      "Visual and Performing Arts Club": "magenta",
-      "Health and Environmental": "forestgreen",
-      STEM: "#861212",
-    };
-
     const color = colorMap[category] || "gray";
     return useBackground
       ? { color: "white", background: color }
@@ -44,21 +31,24 @@ export default function Clubs({ clubData }) {
     const clubColor = getCategoryColor(Category);
 
     return (
-      <Link className="clubs" key={index} to={Name}>
-        <div className="club">
-          {Picture && (
+      <Link className="club-card" key={index} to={Name}>
+        <div className="club-card__image-wrap">
+          {Picture ? (
             <img
+              className="club-card__image"
               src={`https://drive.google.com/thumbnail?id=${extractFileId(
                 Picture
-              )}&sz=w250`}
+              )}&sz=w300`}
               alt={Name}
             />
+          ) : (
+            <div className="club-card__placeholder" style={{ background: clubColor.background || "var(--lowell-red)" }} />
           )}
-          <p className="club-name">{Name}</p>
-          <p style={clubColor} className="club-category">
+          <span className="club-card__category" style={clubColor}>
             {Category}
-          </p>
+          </span>
         </div>
+        <h3 className="club-card__name">{Name}</h3>
       </Link>
     );
   }
@@ -84,30 +74,33 @@ export default function Clubs({ clubData }) {
     const isActive = categoryFilter === category;
 
     return (
-      <div key={index}>
-        <button
-          style={isActive ? clubColor : {}}
-          onClick={() => {
-            setSearchParams({ category });
-          }}
-        >
-          {category}
-        </button>
-      </div>
+      <button
+        type="button"
+        key={index}
+        className={`clubs-page__filter-btn ${isActive ? "clubs-page__filter-btn--active" : ""}`}
+        style={isActive ? clubColor : {}}
+        onClick={() => setSearchParams({ category })}
+      >
+        {category}
+      </button>
     );
   });
 
   return (
-    <>
-      <div className="title">
-        <h1>All Registered Clubs and Sports</h1>
+    <section className="clubs-page">
+      <div className="clubs-page__hero">
+        <h1>Clubs &amp; Sports</h1>
+        <p className="clubs-page__tagline">
+          Browse all registered clubs and sports at Lowell. Use filters to find by category.
+        </p>
       </div>
-      <div className="club-filters">
-        <div className="filter-button">
+      <div className="clubs-page__filters">
+        <div className="clubs-page__filter-list">
           {filterButtons}
           {categoryFilter && (
             <button
-              className="clear-button relative"
+              type="button"
+              className="clubs-page__clear"
               onClick={() => {
                 setSearchParams({});
                 setVisibleClubs(9);
@@ -118,15 +111,15 @@ export default function Clubs({ clubData }) {
           )}
         </div>
       </div>
-      <div className="clubs">{displayClubs}</div>
-      <div className="flex-center margin-1rem">
-        {!categoryFilter && visibleClubs < filteredClubs.length && (
-          <button className="load-button" onClick={loadMore}>
-            Load More Clubs
+      <div className="clubs-page__grid">{displayClubs}</div>
+      {!categoryFilter && visibleClubs < filteredClubs.length && (
+        <div className="clubs-page__load-wrap">
+          <button type="button" className="clubs-page__load" onClick={loadMore}>
+            Load more clubs
           </button>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </section>
   );
 }
 

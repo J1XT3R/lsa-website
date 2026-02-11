@@ -29,9 +29,9 @@ import ShieldAndScroll from './pages/Organizations/ShieldAndScroll'
 import Archives from './pages/More/Archives'
 import Forensic from './pages/Organizations/Forensic'
 import Cardinalympics from './pages/Cardinalympics'
-
-//note to self - at the end of all this, create a jsx file with all the array
-//to be changed every year 
+import { site } from './config/site.config.js'
+import applicationsSheetConfig from './config/applications.config.js'
+import ApplicationsOpen from './pages/ApplicationsOpen'
 
 function App() {
     //General data for the website
@@ -50,6 +50,9 @@ function App() {
     //Elections data
     const SHEET_NAME4 = "Elections";
     const [electionData, setElectionData] = useState([]);
+
+    //Applications open (clubs/orgs with open applications)
+    const [applicationsData, setApplicationsData] = useState([]);
 
     //API Calls
     useEffect(() => {
@@ -102,6 +105,25 @@ function App() {
       fetchCardinalympicsData();
     },[]);
 
+    useEffect(() => {
+      async function fetchApplicationsData() {
+        try {
+          const { spreadsheetId, sheetName } = applicationsSheetConfig;
+          const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}?key=${KEY}`;
+          const res = await fetch(url);
+          const json = await res.json();
+          if (json.error) {
+            console.warn("Applications sheet fetch error:", json.error.message);
+            return;
+          }
+          setApplicationsData(processApplicationsSheetData(json.values));
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      fetchApplicationsData();
+    }, []);
+
 
     function arrayCleanUp(array) {
       const cleanedArray = [];
@@ -128,14 +150,40 @@ function App() {
         });
     }
 
+    /** Applications sheet may have a title row (e.g. "Event_tasks" in A1); find the real header row. */
+    function processApplicationsSheetData(data) {
+        if (!data || data.length === 0) return [];
+        let headerRowIndex = 0;
+        for (let i = 0; i < Math.min(data.length, 5); i++) {
+            const row = data[i];
+            if (Array.isArray(row) && row.some(cell => {
+                const s = String(cell || "").trim();
+                return s === "Status" || s === "Name of Org/Club";
+            })) {
+                headerRowIndex = i;
+                break;
+            }
+        }
+        const headers = data[headerRowIndex];
+        const rows = data.slice(headerRowIndex + 1);
+        return rows.map(row => {
+            const obj = {};
+            headers.forEach((header, index) => {
+                const key = String(header ?? "").trim() || `Column${index}`;
+                obj[key] = row[index] != null ? String(row[index]) : "";
+            });
+            return obj;
+        });
+    }
+
   return (
     <>
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          <Route element={<Layout clubData = {clubData} />}>
-            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData}/>} />
-            <Route path="Elections" element={<Elections electionData={electionData}/>} />
+          <Route element={<Layout clubData={clubData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />}>
+            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} clubData={clubData} applicationsData={applicationsData} />} />
+            <Route path="Elections" element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />} />
             
             <Route path="LSA" element={<Outlet />}>
               <Route index element={<AboutLSA/>} />
@@ -165,6 +213,7 @@ function App() {
               <Route path="Fundraising" element={<Fundraising />} />
             </Route>
 
+            <Route path="ApplicationsOpen" element={<ApplicationsOpen applicationsData={applicationsData} />} />
             <Route element={<Outlet />}>
               <Route path="Wellness" element={<Wellness />} />
               <Route path="TitleIX" element = {<TitleIX />} />

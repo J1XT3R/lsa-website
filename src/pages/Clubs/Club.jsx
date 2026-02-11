@@ -65,6 +65,16 @@ export default function Club({ clubData: clubDataProp }) {
         <p>
           <strong>Other Officers:</strong> {clubData.OtherOfficers}
         </p>
+        {(clubData.Website || clubData.CustomWebsite) && (
+          <a
+            href={clubData.Website || clubData.CustomWebsite}
+            className="link-button flex-center club-website-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit our website →
+          </a>
+        )}
         <GlowCapture>
           <Glow color="purple">
             {clubData.Instagram && (
@@ -102,6 +112,8 @@ Club.propTypes = {
       VP: PropTypes.string,
       OtherOfficers: PropTypes.string,
       Instagram: PropTypes.string,
+      Website: PropTypes.string,
+      CustomWebsite: PropTypes.string,
     })
   ).isRequired,
 };

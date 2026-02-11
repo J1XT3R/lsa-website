@@ -24,7 +24,7 @@ New Navbar Component (Don't modify unless necessary) - Gavin Z. 2026
 This previous code gave me headache to fix T.T
 */
 
-export default function Navbar({ clubData }) {
+export default function Navbar({ clubData, electionsEnabled = true }) {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [hamburger, setHamburger] = useState(false);
   const [clickedDropdown, setClickedDropdown] = useState(false);
@@ -397,6 +397,10 @@ export default function Navbar({ clubData }) {
             icon: faThumbTack,
             subLinks: [
                 {
+                    name: "Applications open",
+                    to: "ApplicationsOpen"
+                },
+                {
                     name: "Lowell Wellness Center",
                     to: "Wellness"
                 },
@@ -431,6 +435,9 @@ export default function Navbar({ clubData }) {
         },
     ];
 
+    const navLinksFiltered = electionsEnabled
+        ? navLinks
+        : navLinks.filter((link) => link.name !== "ELECTIONS");
 
     function toggleChildDropdown(parentId, childId) {
         setChildDropdown(prev => ({
@@ -438,7 +445,7 @@ export default function Navbar({ clubData }) {
             [`${parentId}-${childId}`]: !prev[`${parentId}-${childId}`],
         }));
     }
-    const navbar = navLinks.map(link=>{
+    const navbar = navLinksFiltered.map(link=>{
         const {name, subLinks, hasDropDown, icon, id, to, bigSubLink} = link
         return(
             <div className="relative first-dropdowns" key={id}>
@@ -493,7 +500,7 @@ export default function Navbar({ clubData }) {
             </div>
         )
     });
-    const hamburgerNav = navLinks.map(link => {
+    const hamburgerNav = navLinksFiltered.map(link => {
         const { name, subLinks = [], hasDropDown, icon, id, to } = link;  // Ensure subLinks is an array
         const isDropped = hasDropped.find(drop => drop.id === id)?.dropped;
     
@@ -611,4 +618,5 @@ Navbar.propTypes = {
       Category: PropTypes.string.isRequired,
     })
   ),
+  electionsEnabled: PropTypes.bool,
 };
