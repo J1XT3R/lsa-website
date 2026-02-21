@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
+import "./About.scss";
 
 export default function ClassBoard({ officerData: officerDataProp }) {
   const params = useParams().BoardName;
@@ -14,52 +15,54 @@ export default function ClassBoard({ officerData: officerDataProp }) {
   }, [officerDataProp, params]);
 
   function extractFileId(driveUrl) {
-    const match = driveUrl.match(/[?&]id=([^&]+)/);
-    return match ? match[1] : null; // Return the file ID if matched, otherwise null
+    const match = driveUrl?.match(/[?&]id=([^&]+)/);
+    return match ? match[1] : null;
   }
 
-  const displayOfficers = officerData.map((officer, index) => {
-    return (
-      <div key={index}>
-        <div className="team-member">
-          <img
-            src={`https://drive.google.com/thumbnail?id=${extractFileId(
-              officer.Photo
-            )}`}
-            alt={officer.Name}
-            className="team-member-photo"
-          />
-          <div>
-            <h2>
-              <span className="team-member-role" style={{ color: "#861212" }}>
-                {officer.Role}
-              </span>
-              <span className="team-member-name"> {officer.Name}</span>
-            </h2>
-            <p className="team-member-description">{officer.Description}</p>
-          </div>
-        </div>
-      </div>
-    );
-  });
+  if (!officerDataProp || !params) {
+    return <LoadingTruck />;
+  }
 
-  if (!officerData || officerData.length === 0) {
+  if (officerData.length === 0) {
     return <LoadingTruck />;
   }
 
   return (
     <>
-      <h1 className="team-name center">
-        LSA {params}
-        <br /> 2025-2026
-      </h1>
-      {/* <div className="team-info">
-                    <p><strong>LOCATION - </strong>The Cave (Room 80A) during 1st block Leadership</p>
-                    <p><strong>EMAIL - </strong>lowellhssbc@gmail.com</p>
-                    <p><strong>INSTAGRAM - </strong>@lowellhs</p>
-                    <p><strong>FACEBOOK PAGE - </strong>Lowell Student Association</p>
-                </div> */}
-      <div className="teams">{displayOfficers}</div>
+      <header className="board-hero board-hero--class">
+        <h1 className="board-hero-title">LSA {params}</h1>
+        <span className="board-hero-year">2025-2026</span>
+      </header>
+
+      <section className="board-officers">
+        <h2 className="board-officers-heading">Meet the board</h2>
+        <div className="board-officers-grid">
+          {officerData.map((officer, index) => (
+            <article key={index} className="board-officer-card">
+              <div className="board-officer-card-photo-wrap">
+                <img
+                  src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+                  alt={officer.Name}
+                  className="board-officer-card-photo"
+                />
+              </div>
+              {/* Single frame: bar by default, morphs into full popup on hover */}
+              <div className="board-officer-card-frame">
+                <div className="board-officer-card-frame-header">
+                  <span className="board-officer-card-role">{officer.Role}</span>
+                  <h3 className="board-officer-card-name">{officer.Name}</h3>
+                </div>
+                {officer.Description && (
+                  <div className="board-officer-card-frame-body">
+                    <p className="board-officer-card-preview">{officer.Description}</p>
+                    <p className="board-officer-card-description">{officer.Description}</p>
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </>
   );
 }

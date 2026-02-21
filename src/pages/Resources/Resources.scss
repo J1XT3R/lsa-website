@@ -1,8 +1,197 @@
-.wellness{
-    max-width: 912px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 3rem;
+// Shared resource page layout (Wellness, Title IX, etc.)
+.resource-page {
+  padding-bottom: 2rem;
+
+  section {
+    min-height: unset;
+    padding: 0;
+  }
+}
+
+.resource-hero {
+  background: linear-gradient(135deg, var(--title-color) 0%, var(--lowell-red) 100%);
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+
+  .title {
+    margin: 0;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    gap: 0;
+  }
+
+  .title h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+  }
+}
+
+.resource-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+}
+
+.resource-section {
+  margin-bottom: 1.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resource-section__heading {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--lowell-red);
+}
+
+.resource-section p {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.resource-section a {
+  color: var(--lowell-red);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.resource-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.resource-link-btn {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  background: var(--lowell-red);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: var(--title-color);
+    color: white;
+    transform: translateY(-2px);
+  }
+}
+
+// Buttons must stay white (override .resource-section a when inside section)
+.resource-section a.resource-link-btn {
+  color: white;
+
+  &:hover {
+    color: white;
+  }
+}
+
+// Resource cards (e.g. for Title IX contact blocks)
+.resource-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--lowell-red);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resource-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+
+  a {
+    color: var(--lowell-red);
+  }
+}
+
+.resource-card__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #444;
+
+  li {
+    margin-bottom: 0.25rem;
+    list-style: decimal;
+  }
+}
+
+.resource-card__meta {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+// Freshmen Corner — clean card grid
+.freshmen-corner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.freshmen-corner__card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--lowell-red);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.freshmen-corner__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.freshmen-corner__card a {
+  align-self: flex-start;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .freshmen-corner {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Legacy overrides (keep .wellness working)
+.wellness {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+  gap: 1rem;
+}
+
+.title-ix {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+  gap: 0;
 }

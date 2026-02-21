@@ -1,0 +1,204 @@
+// Cardinalympics page redesign
+.cardinalympics-page {
+  padding-bottom: 2rem;
+}
+
+// Override global section rules
+.cardinalympics-page section {
+  min-height: unset;
+  padding: 0;
+}
+
+.cardinalympics-hero {
+  background: linear-gradient(135deg, var(--title-color) 0%, var(--lowell-red) 100%);
+  color: white;
+  padding: 1.5rem 1rem 1rem;
+  text-align: center;
+
+  .title {
+    margin: 0 0 0.5rem;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    gap: 0;
+  }
+
+  .title h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+  }
+}
+
+.cardinalympics-hero__logo {
+  margin-top: 0.5rem;
+}
+
+.cardinalympics-scores-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem;
+}
+
+.cardinalympics-intro-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 1.25rem 1rem;
+  margin: 0 auto 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    font-size: 1.35rem;
+    margin: 0 0 1rem;
+    font-weight: 600;
+  }
+}
+
+.cardinalympics-scores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 0;
+  flex-wrap: unset;
+
+  .cardinalympics-score {
+    margin: 0;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    min-height: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cardinalympics-score h2 {
+    font-size: 0.9rem;
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    opacity: 0.95;
+  }
+
+  .cardinalympics-counter {
+    position: static;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.cardinalympics-links {
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  padding: 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  a {
+    display: inline-block;
+    padding: 0.6rem 1.1rem;
+    background: var(--lowell-red);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      background: var(--title-color);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.cardinalympics-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+  min-height: unset;
+}
+
+.cardinalympics-day {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.cardinalympics-day__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--lowell-red);
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--lowell-red);
+}
+
+.cardinalympics-event {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--lowell-red);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h3.event-description {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #1a1a1a;
+
+    span {
+      color: var(--lowell-red);
+      font-weight: 600;
+    }
+  }
+
+  p.event-description {
+    margin: 0.35rem 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #444;
+  }
+
+  a.event-description {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--lowell-red);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .cardinalympics-intro-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .cardinalympics-scores .cardinalympics-counter {
+    font-size: 1.25rem;
+  }
+}

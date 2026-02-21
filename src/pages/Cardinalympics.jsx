@@ -1,16 +1,22 @@
 import CardinalympicLogo from "../components/CardinalympicLogo";
 import Counter from "../components/Counter";
+import "./Cardinalympics.scss";
 // eslint-disable-next-line react/prop-types
 export default function Cardinalympics({ cardinalympicsData }) {
   return (
-    <>
-      <div className="title">
-        <h1>2025 Cardinalympics</h1>
-      </div>
-      <CardinalympicLogo />
-      <div className="cardinalympics-intro-container">
-        <h1>Spirit Week Total</h1>
-        <div className="cardinalympics-scores">
+    <div className="cardinalympics-page">
+      <header className="cardinalympics-hero">
+        <div className="title">
+          <h1>2025 Cardinalympics</h1>
+        </div>
+        <div className="cardinalympics-hero__logo">
+          <CardinalympicLogo />
+        </div>
+      </header>
+      <div className="cardinalympics-scores-section">
+        <div className="cardinalympics-intro-container">
+          <h1>Spirit Week Total</h1>
+          <div className="cardinalympics-scores">
           <div className="cardinalympics-score">
             <h2>Freshman:&nbsp;</h2>
             <Counter
@@ -64,30 +70,28 @@ export default function Cardinalympics({ cardinalympicsData }) {
             </Counter>
           </div>
         </div>
+        </div>
       </div>
-      <section className="info-page">
-        <h3>
-          Check out the entire activities list:{" "}
-          <a
-            target="_blank"
-            href="https://docs.google.com/document/d/1VLrgGont0-x0QVqtaHyixDYa2Iyn0bpqV3ZVu8KGmGs/edit?tab=t.0"
-          >
-            Here
-          </a>
-        </h3>
-        <h3>
-          For the detailed scores breakdown:{" "}
-          <a
-            target="_blank"
-            href="https://docs.google.com/spreadsheets/d/1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4/edit?gid=5259979411"
-          >
-            Here
-          </a>
-        </h3>
-        <div>
-          <div>
-            <h1>Special Kick-off Events</h1>
-            <div className="event">
+      <div className="cardinalympics-links">
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://docs.google.com/document/d/1VLrgGont0-x0QVqtaHyixDYa2Iyn0bpqV3ZVu8KGmGs/edit?tab=t.0"
+        >
+          Full activities list
+        </a>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://docs.google.com/spreadsheets/d/1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4/edit?gid=5259979411"
+        >
+          Detailed scores breakdown
+        </a>
+      </div>
+      <section className="cardinalympics-content info-page">
+        <div className="cardinalympics-day">
+          <h1 className="cardinalympics-day__title">Special Kick-off Events</h1>
+            <div className="event cardinalympics-event">
               <h3 className="event-description">
                 Escape <span>(300 pts)</span>
               </h3>
@@ -105,7 +109,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
                 <strong>Sign up form</strong>
               </a>
             </div>
-            <div className="event">
+            <div className="event cardinalympics-event">
               <h3 className="event-description">
                 Dodgeball Tournament <span>(300 pts)</span>
               </h3>
@@ -133,9 +137,10 @@ export default function Cardinalympics({ cardinalympicsData }) {
                 <strong>Student VS Teacher</strong>
               </a>
             </div>
-          </div>
-          <h1>Monday</h1>
-          <div className="event">
+        </div>
+        <div className="cardinalympics-day">
+          <h1 className="cardinalympics-day__title">Monday</h1>
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Coloring Contest <span>(100 pts)</span>
             </h3>
@@ -168,7 +173,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Times Tables Comp <span>(100 pts)</span>
             </h3>
@@ -198,7 +203,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Geography Bee <span>(100 pts)</span>
             </h3>
@@ -231,7 +236,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               3-Point Contest <span>(100 pts)</span>
             </h3>
@@ -262,7 +267,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Climb a Wall <span>(100 pts)</span>
             </h3>
@@ -291,7 +296,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Origami! <span>(100 pts)</span>
             </h3>
@@ -322,7 +327,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Know Lowell Treasure Hunt <span>(100 pts)</span>
             </h3>
@@ -354,7 +359,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Reflection Journaling <span>(300 pts)</span>
             </h3>
@@ -385,7 +390,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               card” one day, two days, or ALL days!
             </p>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Costume Contest, Character Chaos Monday{" "}
               <span>(Lunch A, 100 pts; Lunch B, 100 pts)</span>
@@ -408,9 +413,9 @@ export default function Cardinalympics({ cardinalympicsData }) {
             </p>
           </div>
         </div>
-        <div>
-          <h1>Tuesday</h1>
-          <div className="event">
+        <div className="cardinalympics-day">
+          <h1 className="cardinalympics-day__title">Tuesday</h1>
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               General Trivia <span>(100 pts)</span>
             </h3>
@@ -443,7 +448,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Air-Dry Sculpture Making <span>(100 pts)</span>
             </h3>
@@ -476,7 +481,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               History Trivia Bowl <span>(100 pts)</span>
             </h3>
@@ -510,7 +515,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               GeoGuesser Competition <span>(100 pts)</span>
             </h3>
@@ -545,7 +550,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Paper Airplane Fly-Away! <span>(100 pts)</span>
             </h3>
@@ -574,7 +579,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Costume Contest, Twin Tuesday{" "}
               <span>(Lunch A, 100 pts; Lunch B, 100 pts)</span>
@@ -596,9 +601,9 @@ export default function Cardinalympics({ cardinalympicsData }) {
             </p>
           </div>
         </div>
-        <div>
-          <h1>Wednesday</h1>
-          <div className="event">
+        <div className="cardinalympics-day">
+          <h1 className="cardinalympics-day__title">Wednesday</h1>
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Photography Competition <span>(100 pts)</span>
             </h3>
@@ -631,7 +636,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Hello? Hello, Kitty?! <span>(250 pts)</span>
             </h3>
@@ -668,7 +673,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               3 x 3 Basketball Tourney (Boys) <span>(250 pts)</span>
             </h3>
@@ -699,7 +704,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               3 x 3 Basketball Tourney (Girls) <span>(250 pts)</span>
             </h3>
@@ -730,7 +735,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Karaoke Contest <span>(250 pts)</span>
             </h3>
@@ -769,7 +774,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Penalty Kicks! <span>(100 pts)</span>
             </h3>
@@ -799,7 +804,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Move the Mat! <span>(100 pts)</span>
             </h3>
@@ -827,7 +832,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Table Tennis Tournament <span>(100 pts)</span>
             </h3>
@@ -858,7 +863,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Slow Fashion Contest <span>(300 pts)</span>
             </h3>
@@ -892,7 +897,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Costume Contest, Live, Laugh, Love Lowell Wednesday{" "}
               <span>(100 pts)</span>
@@ -916,9 +921,9 @@ export default function Cardinalympics({ cardinalympicsData }) {
             </p>
           </div>
         </div>
-        <div>
-          <h1>Thursday</h1>
-          <div className="event">
+        <div className="cardinalympics-day">
+          <h1 className="cardinalympics-day__title">Thursday</h1>
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Rubik&apos;s Cube Competition <span>(100 pts)</span>
             </h3>
@@ -949,7 +954,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               LEGOs, LEGOs, LEGOs! <span>(100 pts)</span>
             </h3>
@@ -979,7 +984,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Unscramble Words Competition <span>(100 pts)</span>
             </h3>
@@ -1010,7 +1015,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Sling-Shot Bulls-Eye! <span>(100 pts)</span>
             </h3>
@@ -1040,7 +1045,7 @@ export default function Cardinalympics({ cardinalympicsData }) {
               <strong>Sign up for this event</strong>
             </a>
           </div>
-          <div className="event">
+          <div className="event cardinalympics-event">
             <h3 className="event-description">
               Costume Contest, Mismatch Thursday{" "}
               <span>(Lunch A, 100 pts; Lunch B, 100 pts)</span>
@@ -1065,6 +1070,6 @@ export default function Cardinalympics({ cardinalympicsData }) {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
