@@ -1,3 +1,9 @@
+/* Override global section min-height so LSA page doesn't get huge gaps */
+.about-lsa section {
+    min-height: unset;
+    padding: 1.5rem 0;
+}
+
 .about-lsa,
 .charter-intro,
 .charter>p {
