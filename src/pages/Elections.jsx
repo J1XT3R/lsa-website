@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import electionsConfig from "../config/elections.config.js";
+import "./Elections.scss";
 
 /** Map sheet column names (any casing/spacing) to camelCase keys the component uses */
 function normalizeElectionRow(row) {
@@ -29,6 +31,56 @@ function normalizeElectionRow(row) {
   return out;
 }
 
+/** Role key → display label for results */
+const RESULT_ROLES = [
+  ["president", "President"],
+  ["vicePresident", "Vice President"],
+  ["secretary", "Secretary"],
+  ["treasurer", "Treasurer"],
+  ["publicRelations", "Public Relations"],
+  ["historian", "Historian"],
+  ["clubCoordinator", "Club Coordinator"],
+  ["danceCoordinator", "Dance Coordinator"],
+  ["communityLiaison", "Community Liaison"],
+];
+
+function getResultRows(element) {
+  const rows = [];
+  for (const [key, label] of RESULT_ROLES) {
+    const value = element[key];
+    if (value != null && String(value).trim() !== "") rows.push({ role: label, value: String(value).trim() });
+  }
+  return rows;
+}
+
+/** Single board election card (smaller design per board) */
+function ElectionBoardCard({ board, color, rows }) {
+  const accent = color || "var(--title-color)";
+  return (
+    <article className="election-board-card">
+      <div className="election-board-card-header" style={{ borderLeftColor: accent }}>
+        <h3 className="election-board-card-title">{board}</h3>
+      </div>
+      <div className="election-board-card-body">
+        {rows.map(({ role, value }, i) => (
+          <div key={i} className="election-board-card-row">
+            <span className="election-board-card-role">{role}:</span>
+            <span className="election-board-card-value">{value}</span>
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+ElectionBoardCard.propTypes = {
+  board: PropTypes.string.isRequired,
+  color: PropTypes.string,
+  rows: PropTypes.arrayOf(
+    PropTypes.shape({ role: PropTypes.string.isRequired, value: PropTypes.string.isRequired })
+  ).isRequired,
+};
+
 export default function Elections({
   electionData,
   electionsEnabled = true,
@@ -41,14 +93,18 @@ export default function Elections({
   // Elections feature is turned off site-wide
   if (!electionsEnabled) {
     return (
-      <section className="election-section election-state-off">
-        <div className="election-outer-container">
-          <div className="election-inner-container election-message-box">
+      <div className="elections-page">
+        <header className="elections-hero">
+          <h1 className="elections-hero-title">LSA Board</h1>
+          <p className="elections-hero-subtitle">Elections</p>
+        </header>
+        <section className="election-section election-state-off">
+          <div className="elections-message-box">
             <h2>No elections at this time</h2>
             <p>{config?.notHappeningMessage ?? "Elections are not currently happening. Check back later for updates."}</p>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     );
   }
 
@@ -56,61 +112,75 @@ export default function Elections({
   if (state === "contesting") {
     const contenders = config?.contenders ?? [];
     return (
-      <section className="election-section">
-        <div className="election-state-header">
-          <h1>{config?.contestingTitle ?? "Meet the candidates"}</h1>
-          <p>{config?.contestingSubtitle ?? "Voting will open soon. Get to know the contenders."}</p>
-        </div>
-        {contenders.length === 0 ? (
-          <div className="election-outer-container">
-            <div className="election-inner-container election-message-box">
+      <div className="elections-page">
+        <header className="elections-hero">
+          <h1 className="elections-hero-title">LSA Board</h1>
+          <p className="elections-hero-subtitle">Elections</p>
+        </header>
+        <section className="election-section">
+          <div className="elections-state-header">
+            <h1>{config?.contestingTitle ?? "Meet the candidates"}</h1>
+            <p>{config?.contestingSubtitle ?? "Voting will open soon. Get to know the contenders."}</p>
+          </div>
+          {contenders.length === 0 ? (
+            <div className="elections-message-box">
               <p>Candidate information will be posted here once available.</p>
             </div>
-          </div>
-        ) : (
-          contenders.map((group, index) => (
-            <div key={index} className="election-outer-container">
-              <div
-                className="election-inner-container election-contenders"
-                style={{
-                  borderLeft: `6px solid ${group.color}`,
-                  padding: "1rem",
-                  marginBottom: "1rem",
-                  backgroundColor: "#fff",
-                }}
-              >
-                <h3 style={{ color: group.color, marginBottom: "0.75rem" }}>{group.board}</h3>
-                {group.roles?.map((r, i) => (
-                  <div key={i} className="contender-role">
-                    <span className="bold">{r.role}:</span>{" "}
-                    {Array.isArray(r.candidates) ? r.candidates.join(", ") : r.candidates}
-                  </div>
-                ))}
-              </div>
+          ) : (
+            <div className="elections-board-cards">
+              {contenders.map((group, index) => {
+                const rows = (group.roles ?? []).map((r) => {
+                  const cands = Array.isArray(r.candidates) ? r.candidates : [];
+                  const names = cands.map((c) => (typeof c === "string" ? c : c?.name ?? "")).filter(Boolean);
+                  return { role: r.role, value: names.join(", ") };
+                });
+                const slug = group.slug;
+                const card = (
+                  <ElectionBoardCard
+                    key={index}
+                    board={group.board}
+                    color={group.color}
+                    rows={rows}
+                  />
+                );
+                return slug ? (
+                  <Link key={index} to={`/Elections/${slug}`} className="elections-board-card-link">
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={index}>{card}</div>
+                );
+              })}
             </div>
-          ))
-        )}
-      </section>
+          )}
+        </section>
+      </div>
     );
   }
 
   // State: polling — vote now message + optional results preview
   if (state === "polling") {
     return (
-      <section className="election-section">
-        <div className="election-state-header">
-          <h1>{config?.pollingTitle ?? "Elections — vote now"}</h1>
-          <p>{config?.pollingSubtitle ?? "Polls are open. Cast your vote below."}</p>
-        </div>
-        <div className="election-outer-container">
-          <div className="election-inner-container election-message-box">
+      <div className="elections-page">
+        <header className="elections-hero">
+          <h1 className="elections-hero-title">LSA Board</h1>
+          <p className="elections-hero-subtitle">Elections</p>
+        </header>
+        <section className="election-section">
+          <div className="elections-state-header">
+            <h1>{config?.pollingTitle ?? "Elections — vote now"}</h1>
+            <p>{config?.pollingSubtitle ?? "Polls are open. Cast your vote below."}</p>
+          </div>
+          <div className="elections-message-box">
             <p>Voting is open. After polls close, official results will be posted on this page.</p>
             {ElectionResults.length > 0 && (
-              <p className="election-results-preview-note">Results will appear here once tabulated.</p>
+              <p style={{ marginTop: "0.75rem", fontStyle: "italic", color: "#666" }}>
+                Results will appear here once tabulated.
+              </p>
             )}
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     );
   }
 
@@ -129,48 +199,25 @@ export default function Elections({
   ];
 
   return (
-    <section className="election-section">
-      {displayResults.map((element, index) => {
-        const {
-          board,
-          color,
-          president,
-          vicePresident,
-          secretary,
-          treasurer,
-          publicRelations,
-          historian,
-          clubCoordinator,
-          danceCoordinator,
-          communityLiaison,
-        } = element;
-
-        return (
-          <div key={index} className="election-outer-container">
-            <div
-              className="election-inner-container"
-              style={{
-                borderLeft: `6px solid ${color}`,
-                padding: "1rem",
-                marginBottom: "1rem",
-                backgroundColor: "#fff",
-              }}
-            >
-              <h3 style={{ color, marginBottom: "0.5rem" }}>{board}</h3>
-              <p><span className="bold">President:</span> {president}</p>
-              <p><span className="bold">Vice President:</span> {vicePresident}</p>
-              <p><span className="bold">Secretary:</span> {secretary}</p>
-              <p><span className="bold">Treasurer:</span> {treasurer}</p>
-              <p><span className="bold">Public Relations:</span> {publicRelations}</p>
-              {historian && <p><span className="bold">Historian:</span> {historian}</p>}
-              {clubCoordinator && <p><span className="bold">Club Coordinator:</span> {clubCoordinator}</p>}
-              {danceCoordinator && <p><span className="bold">Dance Coordinator:</span> {danceCoordinator}</p>}
-              {communityLiaison && <p><span className="bold">Community Liaison:</span> {communityLiaison}</p>}
-            </div>
-          </div>
-        );
-      })}
-    </section>
+    <div className="elections-page">
+      <header className="elections-hero">
+        <h1 className="elections-hero-title">LSA Board</h1>
+        <p className="elections-hero-subtitle">Elections</p>
+        <span className="elections-hero-badge">Results</span>
+      </header>
+      <section className="election-section">
+        <div className="elections-board-cards">
+          {displayResults.map((element, index) => (
+            <ElectionBoardCard
+              key={index}
+              board={element.board}
+              color={element.color}
+              rows={getResultRows(element)}
+            />
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
 

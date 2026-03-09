@@ -386,9 +386,16 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
         },
         {
             name: "ELECTIONS",
-            hasDropDown: false,
+            hasDropDown: true,
             icon: faCheckToSlot,
             to: "/Elections",
+            subLinks: [
+                { name: "SBC", to: "SBC" },
+                { name: "LSA 2027", to: "LSA-2027" },
+                { name: "LSA 2028", to: "LSA-2028" },
+                { name: "LSA 2029", to: "LSA-2029" },
+                { name: "LSA 2030", to: "LSA-2030" },
+            ],
             id: 5,
         },
         {

@@ -3,6 +3,7 @@ import './App.scss'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import Home from "./pages/Home"
 import Elections from "./pages/Elections"
+import ElectionBoard from "./pages/Elections/ElectionBoard"
 import Layout from "./pages/Layout"
 import Club from "./pages/Clubs/Club"
 import TitleIX from './pages/Resources/TitleIX'
@@ -47,9 +48,9 @@ function App() {
     const SHEET_NAME3 = "Sp, 25";
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
 
-    //Elections data
+    //Elections data (reserved for future sheet-driven results)
     const SHEET_NAME4 = "Elections";
-    const [electionData, setElectionData] = useState([]);
+    const [electionData, setElectionData] = useState([]); // eslint-disable-line no-unused-vars
 
     //Applications open (clubs/orgs with open applications)
     const [applicationsData, setApplicationsData] = useState([]);
@@ -183,7 +184,10 @@ function App() {
         <Routes>
           <Route element={<Layout clubData={clubData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />}>
             <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} clubData={clubData} applicationsData={applicationsData} />} />
-            <Route path="Elections" element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />} />
+            <Route path="Elections" element={<Outlet />}>
+              <Route index element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />} />
+              <Route path=":boardSlug" element={<ElectionBoard electionsConfig={site.elections} />} />
+            </Route>
             
             <Route path="LSA" element={<Outlet />}>
               <Route index element={<AboutLSA/>} />
