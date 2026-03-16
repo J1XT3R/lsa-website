@@ -1,6 +1,5 @@
 import "./Club.scss";
 import LinkButton from "../../components/LinkButton";
-//more to implement
 
 export default function ClubResources() {
   return (

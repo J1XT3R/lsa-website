@@ -7,6 +7,7 @@ export default function Clubs({ clubData }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [visibleClubs, setVisibleClubs] = useState(9);
   const categoryFilter = searchParams.get("category");
+  const searchQuery = (searchParams.get("q") || "").toLowerCase();
   const colorMap = useMemo(() => getCategoryColorMap(), []);
 
   function loadMore() {
@@ -54,11 +55,26 @@ export default function Clubs({ clubData }) {
   }
 
   const filteredClubs = useMemo(() => {
-    if (!categoryFilter) {
-      return clubData;
+    let result = clubData;
+
+    if (categoryFilter) {
+      result = result.filter((club) => club.Category === categoryFilter);
     }
-    return clubData.filter((club) => club.Category === categoryFilter);
-  }, [clubData, categoryFilter]);
+
+    if (searchQuery) {
+      const loweredQuery = searchQuery.toLowerCase();
+      result = result.filter((club) => {
+        const name = club.Name || "";
+        const description = club.ClubDescription || "";
+        return (
+          name.toLowerCase().includes(loweredQuery) ||
+          description.toLowerCase().includes(loweredQuery)
+        );
+      });
+    }
+
+    return result;
+  }, [clubData, categoryFilter, searchQuery]);
 
   const displayClubs = filteredClubs
     .slice(0, categoryFilter ? filteredClubs.length : visibleClubs)
@@ -79,7 +95,17 @@ export default function Clubs({ clubData }) {
         key={index}
         className={`clubs-page__filter-btn ${isActive ? "clubs-page__filter-btn--active" : ""}`}
         style={isActive ? clubColor : {}}
-        onClick={() => setSearchParams({ category })}
+        onClick={() =>
+          setSearchParams((prev) => {
+            const current = Object.fromEntries(prev.entries());
+            if (current.category === category) {
+              delete current.category;
+            } else {
+              current.category = category;
+            }
+            return current;
+          })
+        }
       >
         {category}
       </button>
@@ -91,28 +117,67 @@ export default function Clubs({ clubData }) {
       <div className="clubs-page__hero">
         <h1>Clubs &amp; Sports</h1>
         <p className="clubs-page__tagline">
-          Browse all registered clubs and sports at Lowell. Use filters to find by category.
+          Browse all registered clubs and sports at Lowell. Use filters or search to find a specific club.
         </p>
       </div>
       <div className="clubs-page__filters">
-        <div className="clubs-page__filter-list">
-          {filterButtons}
-          {categoryFilter && (
-            <button
-              type="button"
-              className="clubs-page__clear"
-              onClick={() => {
-                setSearchParams({});
+        <div className="clubs-page__filters-row">
+          <div className="clubs-page__search">
+            <label className="clubs-page__search-label" htmlFor="club-search">
+              Search clubs
+            </label>
+            <input
+              id="club-search"
+              type="text"
+              className="clubs-page__search-input"
+              placeholder="Search by name or description..."
+              value={searchParams.get("q") || ""}
+              onChange={(event) => {
+                const value = event.target.value;
                 setVisibleClubs(9);
+                setSearchParams((prev) => {
+                  const current = Object.fromEntries(prev.entries());
+                  if (value) {
+                    current.q = value;
+                  } else {
+                    delete current.q;
+                  }
+                  return current;
+                });
               }}
-            >
-              Clear filter
-            </button>
-          )}
+            />
+          </div>
+          <div className="clubs-page__filter-list">
+            {filterButtons}
+            {(categoryFilter || searchQuery) && (
+              <button
+                type="button"
+                className="clubs-page__clear"
+                onClick={() => {
+                  setSearchParams({});
+                  setVisibleClubs(9);
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      <div className="clubs-page__grid">{displayClubs}</div>
-      {!categoryFilter && visibleClubs < filteredClubs.length && (
+      <div className="clubs-page__grid">
+        {filteredClubs.length === 0 ? (
+          <div className="clubs-page__empty">
+            <h2 className="clubs-page__empty-title">No clubs found</h2>
+            <p className="clubs-page__empty-text">
+              Try checking your spelling or adjusting the filters. If you are looking for a team or activity that is not a club,
+              please also check the Organizations tab.
+            </p>
+          </div>
+        ) : (
+          displayClubs
+        )}
+      </div>
+      {!categoryFilter && filteredClubs.length > 0 && visibleClubs < filteredClubs.length && (
         <div className="clubs-page__load-wrap">
           <button type="button" className="clubs-page__load" onClick={loadMore}>
             Load more clubs
