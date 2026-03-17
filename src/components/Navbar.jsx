@@ -86,6 +86,23 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
     setHamburger(false);
   }, [location]);
 
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    if (hamburger) document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [hamburger]);
+
+  useEffect(() => {
+    if (!hamburger) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setHamburger(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [hamburger]);
+
     const scrolledStyle = {
         background: hasScrolled ? "white" : "transparent",
         opacity: hasScrolled ? 1 : 0.5,
@@ -608,7 +625,16 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
                     style={{display: hamburger ? "none" : "block"}}
                 />
             </div>
-            <div className={hamburger ? "hamburger-nav left" : "hamburger-nav right"}>
+            {hamburger && (
+              <div
+                className="navbar-drawer-backdrop"
+                onClick={() => setHamburger(false)}
+                role="button"
+                tabIndex={-1}
+                aria-label="Close menu"
+              />
+            )}
+            <div className={hamburger ? "hamburger-nav left" : "hamburger-nav right hamburger-nav--closed"}>
                 <FontAwesomeIcon icon={hamburger ? faXmark : faBars} className="hamburger-button2"
                     onClick = {toggleHamburger}
                 />

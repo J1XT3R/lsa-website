@@ -38,3 +38,14 @@
     width: 100%;
   }
 }
+
+@media (max-width: 640px) {
+  .sheng {
+    width: min(260px, 70vw);
+    height: auto;
+  }
+
+  .sheng-description {
+    padding: 0 1rem;
+  }
+}

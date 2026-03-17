@@ -1,8 +1,196 @@
+import { useState } from "react";
 import CardinalympicLogo from "../components/CardinalympicLogo";
 import Counter from "../components/Counter";
 import "./Cardinalympics.scss";
+
+const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
+const CLASS_SLUGS = ["freshman", "sophomore", "junior", "senior"];
+const POINTS_POSSIBLE = 9750;
+
+/** Parses a cell to number or returns empty string */
+function parseScore(val) {
+  if (val == null || val === "") return "";
+  const n = parseInt(String(val).replace(/[^0-9-]/g, ""), 10);
+  return isNaN(n) ? "" : n;
+}
+
+/** Detect if row looks like header (Date, Points Poss., Freshmen, etc.) */
+function isHeaderRow(row) {
+  if (!row || !row[0]) return false;
+  const first = String(row[0]).toLowerCase();
+  const second = row[1] ? String(row[1]).toLowerCase() : "";
+  return (
+    first.includes("date") ||
+    second.includes("points") ||
+    (first.includes("points") && second.includes("poss"))
+  );
+}
+
+/** Detect if row is a totals row */
+function isTotalRow(row) {
+  const label = String(row[0] ?? "").toUpperCase();
+  return label.includes("TOTAL") && !label.includes("EVENTS TOTAL");
+}
+
+/** Blank column between Points possible and Freshman: scores are at indices 4,5,6,7; winner at 8 */
+const IDX_FR = 4;
+const IDX_SO = 5;
+const IDX_JR = 6;
+const IDX_SR = 7;
+const IDX_WINNER = 8;
+
+/** Detect if row is a section/category label (e.g. "Shorter Daily Events") */
+function isSectionRow(row) {
+  if (!row || row.length < 8) return true;
+  const hasScores = [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
+  return !hasScores && String(row[0] ?? "").trim().length > 0;
+}
+
+/** True if row has at least one class score (event row) */
+function isEventRow(row) {
+  if (!row || row.length < 8) return false;
+  return [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
+}
+
+/** Get winner text from row; winner can be in column 8 or 9 depending on sheet layout */
+function getWinner(row) {
+  for (let c = IDX_WINNER; c <= IDX_WINNER + 2; c++) {
+    const val = row[c] != null ? String(row[c]).trim() : "";
+    if (val && !/^\d+$/.test(val)) return val;
+  }
+  return "";
+}
+
+const INITIAL_VISIBLE_ROWS = 12;
+
 // eslint-disable-next-line react/prop-types
-export default function Cardinalympics({ cardinalympicsData }) {
+function ScoreboardTable({ rows }) {
+  const [sidebar, setSidebar] = useState(null); // { eventName, winner }
+  const [showAllRows, setShowAllRows] = useState(false);
+
+  if (!rows || rows.length === 0) return null;
+  const isSpiritTotalRow = (row) =>
+    String(row[0] ?? "").toUpperCase().includes("SPIRIT WEEK TOTALS") &&
+    row[1] != null && !isNaN(parseInt(String(row[1]), 10));
+  const withoutSpiritTotal = rows.filter((r) => !isSpiritTotalRow(r));
+  const headerRow = withoutSpiritTotal.find(isHeaderRow);
+  const dataRows = headerRow
+    ? withoutSpiritTotal.slice(withoutSpiritTotal.indexOf(headerRow) + 1)
+    : withoutSpiritTotal;
+  const effectiveRows = headerRow ? dataRows : withoutSpiritTotal;
+  const visibleRows = showAllRows ? effectiveRows : effectiveRows.slice(0, INITIAL_VISIBLE_ROWS);
+  const hasMore = effectiveRows.length > INITIAL_VISIBLE_ROWS;
+
+  const renderRow = (row, idx) => {
+    const label = String(row[0] ?? "").trim();
+    const date = String(row[1] ?? "").trim();
+    const ptsPoss = row[2] != null ? String(row[2]).trim() : "";
+    const fr = parseScore(row[IDX_FR]);
+    const so = parseScore(row[IDX_SO]);
+    const jr = parseScore(row[IDX_JR]);
+    const sr = parseScore(row[IDX_SR]);
+    const winner = getWinner(row);
+    if (!label && !date && fr === "" && so === "" && jr === "" && sr === "") return null;
+    if (isHeaderRow(row)) return null;
+
+    const totalClass = isTotalRow(row) ? "scoreboard-row-total" : "";
+    const sectionClass = isSectionRow(row) && !totalClass ? "scoreboard-row-section" : "";
+    const isEvent = isEventRow(row);
+    const hasWinner = !!winner;
+
+    return (
+      <tr key={idx} className={`${totalClass} ${sectionClass}`.trim()}>
+        <td>{label}</td>
+        <td>{date}</td>
+        <td>{ptsPoss}</td>
+        <td className="score-cell">{fr !== "" ? fr : "—"}</td>
+        <td className="score-cell">{so !== "" ? so : "—"}</td>
+        <td className="score-cell">{jr !== "" ? jr : "—"}</td>
+        <td className="score-cell">{sr !== "" ? sr : "—"}</td>
+        <td className="scoreboard-arrow-cell">
+          {isEvent && hasWinner ? (
+            <button
+              type="button"
+              className="scoreboard-arrow-btn"
+              onClick={() => setSidebar({ eventName: label, winner })}
+              title="View winner(s)"
+              aria-label={`View winner for ${label}`}
+            >
+              ▶
+            </button>
+          ) : (
+            "—"
+          )}
+        </td>
+      </tr>
+    );
+  };
+
+  return (
+    <>
+      <table className="cardinalympics-scoreboard-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Date</th>
+            <th>Pts poss.</th>
+            <th className="score-cell">Fr</th>
+            <th className="score-cell">So</th>
+            <th className="score-cell">Jr</th>
+            <th className="score-cell">Sr</th>
+            <th className="scoreboard-arrow-header"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {visibleRows.map((row, idx) => renderRow(row, idx))}
+        </tbody>
+      </table>
+      {hasMore && (
+        <button
+          type="button"
+          className="cardinalympics-scoreboard-show-more"
+          onClick={() => setShowAllRows(!showAllRows)}
+        >
+          {showAllRows ? "Show fewer" : `Show more (${effectiveRows.length - INITIAL_VISIBLE_ROWS} more)`}
+        </button>
+      )}
+      {sidebar && (
+        <>
+          <div
+            className="cardinalympics-sidebar-backdrop"
+            onClick={() => setSidebar(null)}
+            onKeyDown={(e) => e.key === "Escape" && setSidebar(null)}
+            role="button"
+            tabIndex={-1}
+            aria-label="Close sidebar"
+          />
+          <aside className="cardinalympics-winner-sidebar" aria-label="Winner details">
+            <div className="cardinalympics-winner-sidebar-header">
+              <h3>Winner(s)</h3>
+              <button
+                type="button"
+                className="cardinalympics-winner-sidebar-close"
+                onClick={() => setSidebar(null)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <p className="cardinalympics-winner-sidebar-event">{sidebar.eventName}</p>
+            <p className="cardinalympics-winner-sidebar-winner">{sidebar.winner || "—"}</p>
+          </aside>
+        </>
+      )}
+    </>
+  );
+}
+
+// eslint-disable-next-line react/prop-types
+export default function Cardinalympics({ cardinalympicsData, scoreboardRows = [] }) {
+  const leaderIndex = cardinalympicsData.length === 4
+    ? cardinalympicsData.indexOf(Math.max(...cardinalympicsData))
+    : -1;
+
   return (
     <div className="cardinalympics-page">
       <header className="cardinalympics-hero">
@@ -16,78 +204,39 @@ export default function Cardinalympics({ cardinalympicsData }) {
       <div className="cardinalympics-scores-section">
         <div className="cardinalympics-intro-container">
           <h1>Spirit Week Total</h1>
+          <p className="spirit-week-subtitle">
+            {POINTS_POSSIBLE.toLocaleString()} points possible
+          </p>
           <div className="cardinalympics-scores">
-          <div className="cardinalympics-score">
-            <h2>Freshman:&nbsp;</h2>
-            <Counter
-              start={0}
-              end={cardinalympicsData[0]}
-              duration={2000}
-              className="cardinalympics-counter"
-              color="green"
-            >
-              {" "}
-              pts
-            </Counter>
-          </div>
-          <div className="cardinalympics-score">
-            <h2>Sophomore:&nbsp;</h2>
-            <Counter
-              start={0}
-              end={cardinalympicsData[1]}
-              duration={2000}
-              className="cardinalympics-counter"
-              color="purple"
-            >
-              {" "}
-              pts
-            </Counter>
-          </div>
-          <div className="cardinalympics-score">
-            <h2>Junior:&nbsp;</h2>
-            <Counter
-              start={0}
-              end={cardinalympicsData[2]}
-              duration={2000}
-              className="cardinalympics-counter"
-              color="#5353f6"
-            >
-              {" "}
-              pts
-            </Counter>
-          </div>
-          <div className="cardinalympics-score">
-            <h2>Senior:&nbsp;</h2>
-            <Counter
-              start={0}
-              end={cardinalympicsData[3]}
-              duration={2000}
-              className="cardinalympics-counter"
-              color="#9c1919"
-            >
-              {" "}
-              pts
-            </Counter>
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`cardinalympics-score ${CLASS_SLUGS[i]}${leaderIndex === i ? " leader" : ""}`}
+              >
+                <h2>{CLASS_NAMES[i]}</h2>
+                <Counter
+                  start={0}
+                  end={cardinalympicsData[i] ?? 0}
+                  duration={2000}
+                  className="cardinalympics-counter"
+                  color={i === 0 ? "green" : i === 1 ? "purple" : i === 2 ? "#5353f6" : "#9c1919"}
+                >
+                  {" "}
+                  pts
+                </Counter>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
+      {scoreboardRows.length > 0 && (
+        <div className="cardinalympics-scoreboard">
+          <h2>Detailed scoreboard</h2>
+          <div className="cardinalympics-scoreboard-table-wrap">
+            <ScoreboardTable rows={scoreboardRows} />
+          </div>
         </div>
-      </div>
-      <div className="cardinalympics-links">
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://docs.google.com/document/d/1VLrgGont0-x0QVqtaHyixDYa2Iyn0bpqV3ZVu8KGmGs/edit?tab=t.0"
-        >
-          Full activities list
-        </a>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://docs.google.com/spreadsheets/d/1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4/edit?gid=5259979411"
-        >
-          Detailed scores breakdown
-        </a>
-      </div>
+      )}
       <section className="cardinalympics-content info-page">
         <div className="cardinalympics-day">
           <h1 className="cardinalympics-day__title">Special Kick-off Events</h1>
@@ -1070,6 +1219,15 @@ export default function Cardinalympics({ cardinalympicsData }) {
           </div>
         </div>
       </section>
+      <div className="cardinalympics-links">
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://docs.google.com/document/d/1VLrgGont0-x0QVqtaHyixDYa2Iyn0bpqV3ZVu8KGmGs/edit?tab=t.0"
+        >
+          Full activities list
+        </a>
+      </div>
     </div>
   );
 }

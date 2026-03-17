@@ -47,6 +47,7 @@ function App() {
     const SPREADSHEET_ID2 = "1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4";
     const SHEET_NAME3 = "Sp, 25";
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
+    const [scoreboardRows, setScoreboardRows] = useState([]);
 
     //Elections data (reserved for future sheet-driven results)
     const SHEET_NAME4 = "Elections";
@@ -95,10 +96,17 @@ function App() {
     useEffect(()=>{
       async function fetchCardinalympicsData() {
         try {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID2}/values/${SHEET_NAME3}?key=${KEY}`;
+            const range = encodeURIComponent(SHEET_NAME3);
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID2}/values/${range}?key=${KEY}`;
             const res = await fetch(url);
             const data = await res.json();
-            setCardinalympicsData(arrayCleanUp(data.values[0]));
+            if (data.values && data.values.length > 0) {
+              const totals = arrayCleanUp(data.values[0]);
+              // Sheet may have 5 numbers (points possible + 4 classes) or 4 (classes only)
+              const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
+              setCardinalympicsData(classTotals);
+              setScoreboardRows(data.values);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -226,7 +234,7 @@ function App() {
             <Route path="FreshmenCorner" element= {<FreshMenCorner />} />
             <Route path="AboutSite" element={<Site />} />
             <Route path="Archives" element={<Archives />} />
-            <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData}/>} />  
+            <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} />} />  
           </Route>
         </Routes>
       </BrowserRouter>

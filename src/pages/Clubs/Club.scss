@@ -286,10 +286,29 @@
   .clubs-page__filters-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .clubs-page__filters {
+    padding: 0.75rem 1rem 1rem;
   }
 
   .clubs-page__search {
     align-items: stretch;
+    min-width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .clubs-page__search-input {
+    max-width: 100%;
+  }
+
+  .clubs-page__filter-list {
+    justify-content: flex-start;
+  }
+
+  .clubs-page__clear {
+    align-self: flex-start;
   }
 }
 

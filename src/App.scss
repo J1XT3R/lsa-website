@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 3rem;
+  padding: var(--page-pad-y) var(--page-pad-x);
 }
 
 .info-page {
@@ -69,6 +69,21 @@
     font-size: 1rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+  }
+}
+
+@media (max-width: 640px) {
+  .preamble {
+    margin: 1.5rem auto;
+    padding: 1.25rem 1rem;
+    font-size: 1.05rem;
+  }
+
+  .title {
+    height: auto;
+    min-height: 140px;
+    gap: 14px;
+    padding: 1.25rem 1rem;
   }
 }
 
@@ -383,7 +398,9 @@
   justify-content: space-evenly;
   padding: 0 5% 0 5%;
   height: 120px;
-  width: 100vw;
+  left: 0;
+  right: 0;
+  width: 100%;
   font-weight: bold;
   z-index: 1000;
   top: 0;
@@ -748,7 +765,7 @@
   top: 120px;
   left: 0;
   border: 3px solid var(--lowell-red);
-  width: 100vw;
+  width: 100%;
   display: none;
 
 }
@@ -766,7 +783,7 @@
   background: var(--title-color);
   flex-wrap: wrap;
   left: 0;
-  width: 100vw;
+  width: 100%;
   position: fixed;
   top: inherit;
   padding: 2rem 15% 2rem 15%;
@@ -1373,10 +1390,9 @@
 
 .hamburger-nav {
   position: fixed;
-  width: 100vw;
-  max-width: 700px;
+  width: min(700px, 100%);
   margin: 0 auto;
-  right: 0%;
+  right: 0;
   top: 2%;
   background: white;
   height: 95%;
@@ -1384,7 +1400,7 @@
   flex-direction: column;
   align-items: start;
   padding: 20px;
-  z-index: 3;
+  z-index: 2001;
   padding-bottom: 30px;
   border-radius: 10px;
   font-weight: bold;
@@ -1392,6 +1408,17 @@
   display: none;
   overflow-y: auto;
   color: var(--lowell-red);
+}
+
+.hamburger-nav--closed {
+  pointer-events: none;
+}
+
+.navbar-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 2000;
 }
 
 .ham-second-dropdowns {
@@ -1402,7 +1429,7 @@
   border-left: 3px solid var(--lowell-red);
   color: inherit;
   padding-left: 10px;
-  overflow-x: none;
+  overflow-x: hidden;
 
   a {
     font-size: 1rem;
@@ -1467,7 +1494,7 @@
   }
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1024px) {
   .off-set {
     height: 0;
   }
