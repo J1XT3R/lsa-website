@@ -12,7 +12,7 @@ export default function AboutLSA() {
         <section className="about-lsa-section about-lsa-intro">
           <p>
             Lowell Student Association is the umbrella term for Lowell&apos;s student
-            government — all the boards together — including the Student Body
+            government - all the boards together - including the Student Body
             Council (SBC) and class boards for Seniors, Juniors, Sophomores, and
             Freshmen. We represent the student population and operate under the
             rules in our charter.
@@ -57,7 +57,7 @@ export default function AboutLSA() {
           <h2>How to join LSA</h2>
           <p>
             Two elections are held each year. In the <strong>fall</strong>, only
-            freshmen run — that election selects the Freshman board. In the{" "}
+            freshmen run - that election selects the Freshman board. In the{" "}
             <strong>spring</strong>, all grades (except seniors) can run for SBC
             and class boards. The Election Commissioner runs both; watch for
             posters and info meetings when the time comes.
@@ -67,8 +67,8 @@ export default function AboutLSA() {
         <section className="about-lsa-section">
           <h2>Where to find us</h2>
           <p>
-            LSA meets in <strong>Room 80A</strong> — also known as &quot;the
-            Cave&quot; — the small room to the right from the art wing. We&apos;re
+            LSA meets in <strong>Room 80A</strong> - also known as &quot;the
+            Cave&quot; - the small room to the right from the art wing. We&apos;re
             there during 1st block Leadership. You can also reach out to any LSA
             member at school; photos and info are in the &quot;Meet the
             Members&quot; section.

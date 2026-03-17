@@ -468,12 +468,12 @@
     top: 50%;
     left: 50%;
     width: 100vw;
-    min-width: 177.78vh; // 16/9 aspect ratio
+    min-width: 177.78vh; // 16:9 so the video doesn't get squished
     min-height: 100vh;
     height: 56.25vw;
     transform: translate(-50%, -50%);
     border: none;
-    pointer-events: none; // non-interactive background; overlays remain clickable
+    pointer-events: none; // video is just decoration - buttons on top still work
   }
 }
 
@@ -751,7 +751,7 @@
   position: absolute;
   z-index: 1;
   top: 100%;
-  /* Position dropdown below the parent */
+  // sit right under the nav item that opened it
   left: 0;
   border: 3px solid var(--lowell-red);
   width: 200px;
@@ -1180,7 +1180,7 @@
   display: block;
 }
 
-/* truck loading animation */
+// the little truck that bounces while we load - it's cute okay
 .loader {
   width: fit-content;
   height: fit-content;
@@ -1202,7 +1202,7 @@
   overflow-x: hidden;
 }
 
-/* truck upper body */
+// truck cab part
 .truckBody {
   width: 130px;
   height: fit-content;
@@ -1210,7 +1210,7 @@
   animation: motion 1s linear infinite;
 }
 
-/* truck suspension animation*/
+// bouncy bouncy
 @keyframes motion {
   0% {
     transform: translateY(0px);
@@ -1225,7 +1225,7 @@
   }
 }
 
-/* truck's tires */
+// wheels on the truck
 .truckTires {
   width: 130px;
   height: fit-content;

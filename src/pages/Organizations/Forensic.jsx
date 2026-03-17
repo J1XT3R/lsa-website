@@ -87,7 +87,7 @@ export default function Forensic() {
         <p>
           Unique to Congress, you get to decide which side of a topic (we call
           it legislation) you stand on. Our topics address a broad range of real
-          world issues—from housing in California to defense systems in space.
+          world issues-from housing in California to defense systems in space.
           You can even write and submit your own legislation for debate at
           tournaments.
         </p>
@@ -212,7 +212,7 @@ export default function Forensic() {
           countries should develop the Arctic.
         </p>
         <p>
-          We compete at the national level—TOC, CHSSA—and travel to LA, Vegas,
+          We compete at the national level-TOC, CHSSA-and travel to LA, Vegas,
           Chicago, and Lexington. Frequent travel is one of the best perks!
         </p>
         <p>
@@ -220,7 +220,7 @@ export default function Forensic() {
           have access to alumni who&apos;ve gone to places like Harvard, Princeton,
           and UC Berkeley.
         </p>
-        <p>Feel free to email us with any questions—we&apos;re happy to chat!</p>
+        <p>Feel free to email us with any questions-we&apos;re happy to chat!</p>
       </section>
     </>
   );

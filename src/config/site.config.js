@@ -1,15 +1,11 @@
-/**
- * Global site configuration.
- * Edit this file to toggle features and set site-wide options.
- */
-
+// main site config - turn stuff on/off and wire up elections, clubs, etc.
 import electionsConfig from "./elections.config.js";
 import { clubCategories, clubSpotlights } from "./clubs/index.js";
 
 export const site = {
-  /** Show Elections in nav and allow /Elections route */
+  // show Elections in nav and let people hit /Elections
   electionsEnabled: true,
-  /** Elections sub-config (state, messages, etc.) */
+  // all the election state and copy lives in elections.config
   elections: electionsConfig,
 };
 

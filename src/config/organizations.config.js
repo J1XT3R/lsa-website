@@ -1,8 +1,4 @@
-/**
- * Organizations at Lowell.
- * link: internal path (e.g. "MockTrial") or full URL for external sites.
- */
-
+// orgs that get their own pages - link is either a route name (e.g. "MockTrial") or a full URL
 export default [
   {
     name: "The Lowell (Journalism)",

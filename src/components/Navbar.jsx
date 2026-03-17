@@ -19,11 +19,7 @@ import {
 import { useState, useEffect } from "react";
 
 
-/* 
-New Navbar Component (Don't modify unless necessary) - Gavin Z. 2026
-This previous code gave me headache to fix T.T
-*/
-
+// navbar - please don't touch unless you're ready for pain. the old version gave me a real headache to fix 😭
 export default function Navbar({ clubData, electionsEnabled = true }) {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [hamburger, setHamburger] = useState(false);
@@ -525,10 +521,10 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
         )
     });
     const hamburgerNav = navLinksFiltered.map(link => {
-        const { name, subLinks = [], hasDropDown, icon, id, to } = link;  // Ensure subLinks is an array
+        const { name, subLinks = [], hasDropDown, icon, id, to } = link;  // default to [] so we don't crash when subLinks is missing
         const isDropped = hasDropped.find(drop => drop.id === id)?.dropped;
     
-        // Calculate margin based on child dropdowns safely
+        // figure out how much space the nested dropdowns need (this logic is kinda gross but it works)
         const additionalMargin = subLinks.reduce((acc, subLink, index) => {
             const isChildDropped = childDropdown[`${id}-${index}`];
             return isChildDropped && subLink.subLinks2 

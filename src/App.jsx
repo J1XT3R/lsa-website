@@ -35,7 +35,7 @@ import applicationsSheetConfig from './config/applications.config.js'
 import ApplicationsOpen from './pages/ApplicationsOpen'
 
 function App() {
-    //General data for the website
+    // main site data from Google Sheets (yes the key is here, we're not doing auth for a read-only sheet)
     const KEY = "AIzaSyAgshc5Aqd8B149h5RpsenMh_SQAeb4AXc";
     const SPREADSHEET_ID = "1Kk7Bs58DAWZ9pHvqD-RFvoV1ePeThQ1Yr9c5RsDeAq4";
     const SHEET_NAME = "Website Info"
@@ -43,30 +43,29 @@ function App() {
     const [clubData, setClubData] = useState([]);
     const [officerData, setOfficerData] = useState([]);
 
-    //Cardinalympics data
+    // Cardinalympics has its own sheet - points and scoreboard
     const SPREADSHEET_ID2 = "1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4";
     const SHEET_NAME3 = "Sp, 25";
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
     const [scoreboardRows, setScoreboardRows] = useState([]);
 
-    //Elections data (reserved for future sheet-driven results)
+    // elections results can come from a sheet later - for now we use config
     const SHEET_NAME4 = "Elections";
     const [electionData, setElectionData] = useState([]); // eslint-disable-line no-unused-vars
 
-    //Applications open (clubs/orgs with open applications)
+    // which clubs/orgs have applications open right now
     const [applicationsData, setApplicationsData] = useState([]);
 
-    //API Calls
+    // okay so we have like 4 useEffects for 4 sheets - not pretty but it works
     useEffect(() => {
       async function fetchData() {
           try {
-              // Fetch the first data
+              // clubs + officers (first two sheets)
               const url1 = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${KEY}`;
               const res1 = await fetch(url1);
               const data1 = await res1.json();
               setClubData(processSheetData(data1.values));
   
-              // Fetch the second data
               const url2 = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME2}?key=${KEY}`;
               const res2 = await fetch(url2);
               const data2 = await res2.json();
@@ -102,7 +101,7 @@ function App() {
             const data = await res.json();
             if (data.values && data.values.length > 0) {
               const totals = arrayCleanUp(data.values[0]);
-              // Sheet may have 5 numbers (points possible + 4 classes) or 4 (classes only)
+              // sheet layout is inconsistent - sometimes 5 cols (points + 4 classes), sometimes just 4. fun!
               const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
               setCardinalympicsData(classTotals);
               setScoreboardRows(data.values);
@@ -134,11 +133,12 @@ function App() {
     }, []);
 
 
+    // this code is not great - sheet has random blanks and strings, we just shove numbers through and hope
     function arrayCleanUp(array) {
       const cleanedArray = [];
       for (let i = 0; i < array.length; i++) {
         if (array[i] !== "" && !isNaN(parseInt(array[i]))) {
-          cleanedArray.push(parseInt(array[i])); 
+          cleanedArray.push(parseInt(array[i]));
         }
       }
       return cleanedArray;
@@ -159,7 +159,7 @@ function App() {
         });
     }
 
-    /** Applications sheet may have a title row (e.g. "Event_tasks" in A1); find the real header row. */
+    // applications sheet loves to put a random title in row 1 - hunt for the actual header row
     function processApplicationsSheetData(data) {
         if (!data || data.length === 0) return [];
         let headerRowIndex = 0;

@@ -46,7 +46,7 @@ export default function ClassBoard({ officerData: officerDataProp }) {
                   className="board-officer-card-photo"
                 />
               </div>
-              {/* Single frame: bar by default, morphs into full popup on hover */}
+              {/* same deal - bar that turns into full popup on hover */}
               <div className="board-officer-card-frame">
                 <div className="board-officer-card-frame-header">
                   <span className="board-officer-card-role">{officer.Role}</span>

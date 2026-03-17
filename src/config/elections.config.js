@@ -1,17 +1,5 @@
-/**
- * Elections configuration.
- * Set enabled in site.config.js. Here you control state and copy.
- *
- * State: "off" | "contesting" | "polling" | "result"
- * - off: not used when elections are disabled (site.config)
- * - contesting: only contenders are shown (campaign period)
- * - polling: voting open; show "Vote now" + optional live results bar
- * - result: show final results
- *
- * Each candidate: { name, description, pfp, video }
- * - pfp: profile photo URL
- * - video: URL to play on hover over pfp (mp4 recommended)
- */
+// elections config - state (contesting / polling / result), copy, and all the contender data
+// candidate objects: name, description, pfp (photo url), video (plays on hover, mp4 pls)
 
 const PLACEHOLDER_VIDEO = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 
@@ -19,36 +7,36 @@ function avatar(id) {
   return `https://i.pravatar.cc/400?u=${encodeURIComponent(id)}`;
 }
 
-// Long paragraph-style descriptions (like candidate bios)
+// long bios for each role so candidates don't have to write novels every time
 const LONG_DESC = {
   electionsCommissioner: "Hey everyone! I'm very excited to serve as your SBC Elections Commissioner this year!! I will be running the Freshmen Elections in the fall and General Elections in the spring!! My biggest goal this year is making sure both elections run as smoothly as possible, as well as boosting Freshmen class spirit prior to Freshmen Elections. Outside of SBC, you might find me re-binging TV shows, hanging out with friends or preparing for my next dance showcase/competition. I'll always appreciate a good show recommendation. I'm looking forward to another successful school year with you all. Feel free to reach out through email for any questions or suggestions!!",
-  president: "Hey everyone! I'm running to be your SBC President and I couldn't be more excited. My main goals are strengthening student voice, improving transparency between the administration and students, and making sure every student feels represented. I have experience in student government and event planning, and I'm committed to listening to your ideas and turning them into action. Outside of school I love spending time with friends, exploring the city, and staying active. I'd be honored to serve you—reach out anytime with questions or suggestions!!",
-  vicePresident: "Hi everyone! I'm running for Vice President because I care deeply about spirit, community, and making LSA events inclusive and fun for everyone. I want to support the President and the rest of the board in bringing your ideas to life and making sure our events and initiatives reflect what students actually want. I'm organized, approachable, and ready to put in the work. When I'm not in meetings you can find me at school events or studying with friends. Let's make this year one to remember—feel free to reach out!!",
-  secretary: "Hey! I'm running for Secretary because I believe clear, organized records and communication are the backbone of an effective board. I'm detail-oriented and committed to keeping minutes accurate and accessible so that everyone stays on the same page. I also want to make sure students can easily find information about what SBC is doing. Outside of SBC I enjoy reading, writing, and coffee runs with friends. I'm excited to contribute to the team and would love to hear from you—email me anytime!!",
-  treasurer: "Hi everyone! I'm running for Treasurer because I care about responsible, transparent budgeting. I have experience with finance and numbers, and my goal is to make sure every dollar supports student initiatives and events in a way that's clear and accountable. I want to work with the board to fund what matters to you. When I'm not crunching numbers I like hiking, gaming, and hanging out with friends. Questions about budgets or ideas? Reach out—I'm here for it!!",
+  president: "Hey everyone! I'm running to be your SBC President and I couldn't be more excited. My main goals are strengthening student voice, improving transparency between the administration and students, and making sure every student feels represented. I have experience in student government and event planning, and I'm committed to listening to your ideas and turning them into action. Outside of school I love spending time with friends, exploring the city, and staying active. I'd be honored to serve you-reach out anytime with questions or suggestions!!",
+  vicePresident: "Hi everyone! I'm running for Vice President because I care deeply about spirit, community, and making LSA events inclusive and fun for everyone. I want to support the President and the rest of the board in bringing your ideas to life and making sure our events and initiatives reflect what students actually want. I'm organized, approachable, and ready to put in the work. When I'm not in meetings you can find me at school events or studying with friends. Let's make this year one to remember-feel free to reach out!!",
+  secretary: "Hey! I'm running for Secretary because I believe clear, organized records and communication are the backbone of an effective board. I'm detail-oriented and committed to keeping minutes accurate and accessible so that everyone stays on the same page. I also want to make sure students can easily find information about what SBC is doing. Outside of SBC I enjoy reading, writing, and coffee runs with friends. I'm excited to contribute to the team and would love to hear from you-email me anytime!!",
+  treasurer: "Hi everyone! I'm running for Treasurer because I care about responsible, transparent budgeting. I have experience with finance and numbers, and my goal is to make sure every dollar supports student initiatives and events in a way that's clear and accountable. I want to work with the board to fund what matters to you. When I'm not crunching numbers I like hiking, gaming, and hanging out with friends. Questions about budgets or ideas? Reach out-I'm here for it!!",
   pr: "Hey! I'm running for Public Relations because I love storytelling, design, and making sure everyone knows what's going on. I want to boost our social media presence, improve outreach, and make LSA events and news impossible to miss. I'm creative, responsive, and ready to work with the rest of the board to get the word out. Outside of that I'm into photography, music, and exploring new spots with friends. Hit me up with ideas or feedback anytime!!",
   clubCoordinator: "Hi everyone! I'm running for Club Coordinator because I want to help every club thrive. I'm focused on connecting clubs with resources, streamlining processes, and fostering collaboration between different groups. Whether you're in an existing club or thinking of starting one, I want to be a go-to resource. I'm organized and love building community. When I'm not in the club room I'm usually at practice or hanging with friends. Reach out for anything club-related!!",
-  eventsCoordinator: "Hey! I'm running for Events Coordinator because I love bringing people together. I want to plan memorable spirit and community events that actually reflect what students want—and run them smoothly from start to finish. I have experience with logistics and creativity, and I'm ready to work with the board and hear your ideas. Outside of planning I enjoy concerts, food, and time with friends. Let's make this year's events the best yet—feel free to reach out!!",
+  eventsCoordinator: "Hey! I'm running for Events Coordinator because I love bringing people together. I want to plan memorable spirit and community events that actually reflect what students want-and run them smoothly from start to finish. I have experience with logistics and creativity, and I'm ready to work with the board and hear your ideas. Outside of planning I enjoy concerts, food, and time with friends. Let's make this year's events the best yet-feel free to reach out!!",
   danceCoordinator: "Hi everyone! I'm running for Dance Coordinator because I want our dances to be safe, fun, and inclusive for every student. I care about themes, venues, and making sure everyone has a great time while keeping everything organized and within budget. I've been involved in dance and events before and I'm ready to bring that experience to the board. When I'm not planning you might find me at the gym or with friends. Questions or ideas? I'd love to hear from you!!",
   communityLiaison: "Hey! I'm running for Community Liaison because I believe strong connections between LSA and the wider community make us all stronger. I want to build partnerships, support outreach, and make sure our school is a positive force in the community. I'm communicative and dedicated to bridging different groups. Outside of that I enjoy volunteering, reading, and spending time with family and friends. Reach out with any questions or suggestions!!",
-  classPresident: "Hey everyone! I'm running to represent our class and amplify your voice. I want to make sure we're united, heard, and that our events and initiatives reflect what we care about. I'm committed to transparency, collaboration, and making this year one we'll remember. When I'm not in meetings I love hanging with friends and staying involved in school life. Feel free to reach out anytime—I'm here for you!!",
-  classRole: "Hi! I'm running for this position because I want to contribute to our class and support the board. I'm organized, dedicated, and ready to listen to your ideas and turn them into action. I believe in teamwork and making sure every student feels included. Outside of school I enjoy spending time with friends and staying active. Reach out if you have questions or suggestions—I'd love to hear from you!!",
+  classPresident: "Hey everyone! I'm running to represent our class and amplify your voice. I want to make sure we're united, heard, and that our events and initiatives reflect what we care about. I'm committed to transparency, collaboration, and making this year one we'll remember. When I'm not in meetings I love hanging with friends and staying involved in school life. Feel free to reach out anytime-I'm here for you!!",
+  classRole: "Hi! I'm running for this position because I want to contribute to our class and support the board. I'm organized, dedicated, and ready to listen to your ideas and turn them into action. I believe in teamwork and making sure every student feels included. Outside of school I enjoy spending time with friends and staying active. Reach out if you have questions or suggestions-I'd love to hear from you!!",
 };
 
 export default {
-  /** "contesting" | "polling" | "result" (only used when elections are enabled) */
+  // "contesting" | "polling" | "result" - only matters when elections are on
   state: "contesting",
 
-  /** Shown when state is "contesting" or "polling" (election in progress) */
+  // big banner when elections are happening (contesting or polling)
   banner: {
     enabled: true,
     title: "Elections in progress",
-    message: "Make your voice heard — vote in LSA elections.",
+    message: "Make your voice heard - vote in LSA elections.",
     ctaText: "Vote now",
     ctaPath: "/Elections",
   },
 
-  /** Shown in Layout when state is "polling" (e.g. "Polling for results") */
+  // the little "polls are open" bar in the layout when we're in polling mode
   pollingBar: {
     enabled: true,
     message: "Polls are open. Results will be posted after voting ends.",
@@ -56,21 +44,18 @@ export default {
     resultsPath: "/Elections",
   },
 
-  /** Shown on Elections page when state is "off" (elections disabled globally) */
+  // when elections are off site-wide - message on the Elections page
   notHappeningMessage: "Elections are not currently happening. Check back later for updates.",
 
-  /** Shown on Elections page when state is "contesting" (before voting) */
+  // contesting = before voting opens. title + subtitle on Elections page
   contestingTitle: "Meet the candidates",
   contestingSubtitle: "Voting will open soon. Get to know the contenders.",
 
-  /** Shown when state is "polling" */
-  pollingTitle: "Elections — vote now",
+  // polling = vote now! title + subtitle
+  pollingTitle: "Elections - vote now",
   pollingSubtitle: "Polls are open. Cast your vote below.",
 
-  /**
-   * Contenders for state "contesting". Each board has slug for URL (e.g. /Elections/SBC).
-   * Candidates have: name, description, pfp, video.
-   */
+  // when state is contesting we show these boards. slug = URL (e.g. /Elections/SBC). each candidate: name, description, pfp, video
   contenders: [
     {
       slug: "SBC",

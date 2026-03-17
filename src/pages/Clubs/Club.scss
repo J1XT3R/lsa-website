@@ -17,7 +17,7 @@
   gap: 15px;
 }
 
-// —— Clubs listing page (redesign) ——
+// clubs listing - hero, filters, grid of cards
 .clubs-page {
   min-height: 80vh;
   padding: 0;
@@ -312,7 +312,7 @@
   }
 }
 
-// —— Legacy / individual club page ——
+// old club grid layout (still used somewhere, don't delete yet)
 .clubs {
   max-width: 1000px;
   margin: 0 auto;
@@ -356,8 +356,8 @@
   margin: 0 auto;
 }
 
-// —— Individual club page (redesign) ——
-// Override global section rules that add huge min-height and padding
+// single club page - banner, description, leaders, etc.
+// kill the default section min-height or we get giant gaps
 .club-page section,
 .club-page .club-section {
   min-height: unset;
@@ -561,7 +561,7 @@
   }
 }
 
-// —— Legacy (keep for any remaining refs) ——
+// more legacy class names - something might still reference these
 .club-info {
   display: flex;
   align-items: center;

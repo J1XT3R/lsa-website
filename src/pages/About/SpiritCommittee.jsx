@@ -37,7 +37,7 @@ export default function SpiritCommittee() {
           Artsy or creative? Art Committee is the right place to be! Art
           Committee takes care of covering the assigned hallway for each class
           with posters according to their theme. The main job here is to make
-          beautiful posters. Everyone is welcome to join — Art Committee&apos;s main
+          beautiful posters. Everyone is welcome to join - Art Committee&apos;s main
           goal here is to bring your class closer together. As long as you can
           hold a brush and color in the lines, you are exactly what we&apos;re
           looking for.{" "}
@@ -56,7 +56,7 @@ export default function SpiritCommittee() {
           Since freshmen will not yet have their own class board, the SBC Club
           Coordinator and SBC Election Commissioner will be in charge of the
           Freshmen Spirit Committee. An info meeting will be held early in the
-          year — keep your eyes posted for more information!
+          year - keep your eyes posted for more information!
         </p>
         <h2>Late Night</h2>
         <p>

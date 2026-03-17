@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import CardinalympicLogo from "../components/CardinalympicLogo";
 import Counter from "../components/Counter";
@@ -7,14 +8,14 @@ const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
 const CLASS_SLUGS = ["freshman", "sophomore", "junior", "senior"];
 const POINTS_POSSIBLE = 9750;
 
-/** Parses a cell to number or returns empty string */
+// turn a cell value into a number or bail with empty string (sheet data is messy)
 function parseScore(val) {
   if (val == null || val === "") return "";
   const n = parseInt(String(val).replace(/[^0-9-]/g, ""), 10);
   return isNaN(n) ? "" : n;
 }
 
-/** Detect if row looks like header (Date, Points Poss., Freshmen, etc.) */
+// is this row the header row? (Date, Points Poss., etc.)
 function isHeaderRow(row) {
   if (!row || !row[0]) return false;
   const first = String(row[0]).toLowerCase();
@@ -26,33 +27,33 @@ function isHeaderRow(row) {
   );
 }
 
-/** Detect if row is a totals row */
+// "TOTAL" row at the bottom - we skip or style it different
 function isTotalRow(row) {
   const label = String(row[0] ?? "").toUpperCase();
   return label.includes("TOTAL") && !label.includes("EVENTS TOTAL");
 }
 
-/** Blank column between Points possible and Freshman: scores are at indices 4,5,6,7; winner at 8 */
+// sheet columns: Freshman Soph Junior Senior scores then winner. layout is kinda weird but here we are
 const IDX_FR = 4;
 const IDX_SO = 5;
 const IDX_JR = 6;
 const IDX_SR = 7;
 const IDX_WINNER = 8;
 
-/** Detect if row is a section/category label (e.g. "Shorter Daily Events") */
+// section headers like "Shorter Daily Events" - no scores, just a label
 function isSectionRow(row) {
   if (!row || row.length < 8) return true;
   const hasScores = [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
   return !hasScores && String(row[0] ?? "").trim().length > 0;
 }
 
-/** True if row has at least one class score (event row) */
+// real event row = has at least one class score
 function isEventRow(row) {
   if (!row || row.length < 8) return false;
   return [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
 }
 
-/** Get winner text from row; winner can be in column 8 or 9 depending on sheet layout */
+// winner text might be in col 8 or 9 depending on who edited the sheet last 🙃
 function getWinner(row) {
   for (let c = IDX_WINNER; c <= IDX_WINNER + 2; c++) {
     const val = row[c] != null ? String(row[c]).trim() : "";
@@ -65,7 +66,7 @@ const INITIAL_VISIBLE_ROWS = 12;
 
 // eslint-disable-next-line react/prop-types
 function ScoreboardTable({ rows }) {
-  const [sidebar, setSidebar] = useState(null); // { eventName, winner }
+  const [sidebar, setSidebar] = useState(null); // { eventName, winner } when you click a row
   const [showAllRows, setShowAllRows] = useState(false);
 
   if (!rows || rows.length === 0) return null;
@@ -103,10 +104,10 @@ function ScoreboardTable({ rows }) {
         <td>{label}</td>
         <td>{date}</td>
         <td>{ptsPoss}</td>
-        <td className="score-cell">{fr !== "" ? fr : "—"}</td>
-        <td className="score-cell">{so !== "" ? so : "—"}</td>
-        <td className="score-cell">{jr !== "" ? jr : "—"}</td>
-        <td className="score-cell">{sr !== "" ? sr : "—"}</td>
+        <td className="score-cell">{fr !== "" ? fr : "-"}</td>
+        <td className="score-cell">{so !== "" ? so : "-"}</td>
+        <td className="score-cell">{jr !== "" ? jr : "-"}</td>
+        <td className="score-cell">{sr !== "" ? sr : "-"}</td>
         <td className="scoreboard-arrow-cell">
           {isEvent && hasWinner ? (
             <button
@@ -119,7 +120,7 @@ function ScoreboardTable({ rows }) {
               ▶
             </button>
           ) : (
-            "—"
+            "-"
           )}
         </td>
       </tr>
@@ -177,7 +178,7 @@ function ScoreboardTable({ rows }) {
               </button>
             </div>
             <p className="cardinalympics-winner-sidebar-event">{sidebar.eventName}</p>
-            <p className="cardinalympics-winner-sidebar-winner">{sidebar.winner || "—"}</p>
+            <p className="cardinalympics-winner-sidebar-winner">{sidebar.winner || "-"}</p>
           </aside>
         </>
       )}

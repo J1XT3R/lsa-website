@@ -30,16 +30,16 @@ export default function SBC({ officerData: officerDataProp }) {
 
       <div className="board-contact">
         <span className="board-contact-item">
-          <strong>Location</strong> — The Cave (Room 80A), 1st block Leadership
+          <strong>Location</strong> - The Cave (Room 80A), 1st block Leadership
         </span>
         <span className="board-contact-item">
-          <strong>Email</strong> — lowellhssbc@gmail.com
+          <strong>Email</strong> - lowellhssbc@gmail.com
         </span>
         <span className="board-contact-item">
-          <strong>Instagram</strong> — @lowellhs
+          <strong>Instagram</strong> - @lowellhs
         </span>
         <span className="board-contact-item">
-          <strong>Facebook</strong> — Lowell Student Association
+          <strong>Facebook</strong> - Lowell Student Association
         </span>
       </div>
 
@@ -55,7 +55,7 @@ export default function SBC({ officerData: officerDataProp }) {
                   className="board-officer-card-photo"
                 />
               </div>
-              {/* Single frame: bar by default, morphs into full popup on hover */}
+              {/* officer card: little bar by default, expands to full bio on hover */}
               <div className="board-officer-card-frame">
                 <div className="board-officer-card-frame-header">
                   <span className="board-officer-card-role">{officer.Role}</span>

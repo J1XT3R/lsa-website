@@ -11,7 +11,7 @@ export default function Archives() {
       <div className="resource-content">
         <section className="resource-section">
           <p>
-            The nature of high school lends it to being transitory—people come to
+            The nature of high school lends it to being transitory-people come to
             Lowell for four years and move on to bigger and better things. The LSA
             Archives are a way to remember that high school experience. All
             boards, committees, and other elected officials are archived under the

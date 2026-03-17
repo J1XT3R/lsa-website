@@ -1,8 +1,4 @@
-/**
- * Club categories and their display colors.
- * Used for filters and badges on Clubs page and in Navbar.
- */
-
+// club categories + colors for filters and badges (Clubs page + nav)
 export const clubCategories = [
   { name: "Sports", color: "red" },
   { name: "VPA", color: "purple" },
@@ -18,7 +14,7 @@ export const clubCategories = [
   { name: "STEM", color: "#861212" },
 ];
 
-/** Map category name -> color (for backward compatibility with existing code) */
+// turns category list into a name -> color map (old code still uses this)
 export function getCategoryColorMap() {
   return Object.fromEntries(clubCategories.map((c) => [c.name, c.color]));
 }

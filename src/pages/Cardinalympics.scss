@@ -1,9 +1,9 @@
-// Cardinalympics page redesign
+// Cardinalympics - spirit points, scoreboard, all the fun
 .cardinalympics-page {
   padding-bottom: 2rem;
 }
 
-// Override global section rules
+// don't let the global section min-height make this page huge
 .cardinalympics-page section {
   min-height: unset;
   padding: 0;
@@ -272,7 +272,7 @@
   }
 }
 
-// Scoreboard table (detailed stats from sheet)
+// the big table of events and scores from the sheet
 .cardinalympics-scoreboard {
   max-width: 960px;
   margin: 0 auto 2rem;

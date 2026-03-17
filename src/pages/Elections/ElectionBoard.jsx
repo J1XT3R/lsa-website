@@ -5,7 +5,7 @@ import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
 import "./ElectionBoard.scss";
 
-/** Candidate card: pfp with hover-to-play video, role, name, description, vote button */
+// one candidate: photo (hover = video), name, bio, vote button
 function ElectionCandidateCard({ candidate, accentColor }) {
   const { name, description, pfp, video } = candidate;
 
@@ -79,7 +79,7 @@ ElectionCandidateCard.propTypes = {
   accentColor: PropTypes.string,
 };
 
-/** Normalize candidate: support both string (legacy) and object */
+// config sometimes gives us just a name string - turn it into a proper candidate object so we don't explode
 function normalizeCandidate(c) {
   if (typeof c === "string") {
     return { name: c, description: "", pfp: `https://i.pravatar.cc/400?u=${encodeURIComponent(c)}`, video: "" };

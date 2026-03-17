@@ -13,12 +13,12 @@ export default function Counter({
   const [statState, setStatState] = useState(false);
   const statsRef = useRef(null);
 
-  // Reset count when start or end changes
+  // when start/end change we reset the count (otherwise it looks stuck)
   useEffect(() => {
     setCount(start);
   }, [start, end]);
 
-  // A number counter Component
+  // animate the number when this thing scrolls into view - intersection observer magic
   useEffect(() => {
     const currentRef = statsRef.current;
     if (!currentRef) return;

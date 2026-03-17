@@ -4,7 +4,7 @@
   --secondary-color: #e87b7b;
   --primary-font: 'Inter', sans-serif;
 
-  /* Responsive layout primitives */
+  // spacing that shrinks on smaller screens so we don't run out of room
   --page-pad: 3rem;
   --page-pad-x: 3rem;
   --page-pad-y: 3rem;
@@ -157,7 +157,7 @@ img, svg, video, canvas {
   height: auto;
 }
 
-/* Container padding breakpoints (phones/tablets) */
+// phones and tablets get less padding so content can breathe
 @media (max-width: 1024px) {
   :root {
     --page-pad: 1.5rem;

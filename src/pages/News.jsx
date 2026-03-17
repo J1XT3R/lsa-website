@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 
 export default function News({ newsData }) {
-  // Use provided data or fallback to default
+  // use whatever we're passed or fall back to defaults so the page doesn't explode
   const newsItems = newsData || [
     {
       title: "Welcome to the New School Year!",

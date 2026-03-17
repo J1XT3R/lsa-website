@@ -1,9 +1,4 @@
-/**
- * Google Sheet for "Clubs with Applications Open".
- * Sheet must have columns: Name of Org/Club, Status, Date Added, Notes, Application URL.
- * Status values: "Open" or "Applications Open" = shown; "Closed" = hidden.
- */
-
+// sheet that lists which clubs have apps open - needs Name of Org/Club, Status, Application URL, etc. Status "Open" = show, "Closed" = hide
 export default {
   spreadsheetId: "13rqqMCfNtdZPmrgPtOqAH5-5udgyoVyvVurBlDkOgMM",
   sheetName: "Event_tasks",

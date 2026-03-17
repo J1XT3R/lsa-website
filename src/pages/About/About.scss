@@ -1,4 +1,4 @@
-/* Override global section min-height so LSA page doesn't get huge gaps */
+// same deal - global section min-height makes everything huge, nope
 .about-lsa section {
     min-height: unset;
     padding: 1.5rem 0;
@@ -36,7 +36,7 @@
     justify-content: center;
 }
 
-/* ——— About LSA redesign ——— */
+// main about LSA content blocks
 .about-lsa-section {
     width: 100%;
     max-width: 912px;
@@ -130,7 +130,7 @@
     opacity: 0.9;
 }
 
-/* ——— Board pages (SBC & Class Board) ——— */
+// SBC and Class Board pages - hero + officer cards
 .board-hero {
     text-align: center;
     padding: 3rem 2rem;
@@ -244,7 +244,7 @@
     transform: scale(1.08);
 }
 
-/* Single frame: solid white bar below image; becomes frosted glass when it expands on hover */
+// the bar under the photo - normal at rest, goes frosted-glass full overlay on hover
 .board-officer-card-frame {
     position: absolute;
     bottom: 0;
@@ -310,7 +310,7 @@
     margin-top: 0.35rem;
 }
 
-/* Preview: visible in bar state (2 lines) */
+// short preview when the card is collapsed (2 lines max)
 .board-officer-card-preview {
     margin: 0;
     font-size: 0.75rem;
@@ -329,7 +329,7 @@
     pointer-events: none;
 }
 
-/* Full description: visible when frame expanded, scrollable */
+// full bio when you hover and the frame expands - scrollable
 .board-officer-card-frame-body .board-officer-card-description {
     margin: 0;
     font-size: 0.88rem;
@@ -460,7 +460,7 @@
 
 .dsa {
     display: flex;
-    /* flex-wrap: wrap; */
+    // flex-wrap: wrap; // turned off for now, layout looked weird
     justify-content: center;
     align-items: center;
     gap: 30px;

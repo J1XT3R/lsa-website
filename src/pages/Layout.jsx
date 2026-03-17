@@ -1,3 +1,4 @@
+// prop types are a mess in this file, don't @ us
 /* eslint-disable react/prop-types */
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";

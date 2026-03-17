@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import electionsConfig from "../config/elections.config.js";
 import "./Elections.scss";
 
-/** Map sheet column names (any casing/spacing) to camelCase keys the component uses */
+// sheet columns can be "President" or "president" or whatever - normalize to camelCase so we don't cry
 function normalizeElectionRow(row) {
   if (!row || typeof row !== "object") return row;
   const keyMap = {
@@ -31,7 +31,7 @@ function normalizeElectionRow(row) {
   return out;
 }
 
-/** Role key → display label for results */
+// which roles we show and what we call them on the results cards
 const RESULT_ROLES = [
   ["president", "President"],
   ["vicePresident", "Vice President"],
@@ -53,12 +53,13 @@ function getResultRows(element) {
   return rows;
 }
 
-/** Single board election card (smaller design per board) */
+// one little card per board - title, accent color, list of roles/names
 function ElectionBoardCard({ board, color, rows }) {
   const accent = color || "var(--title-color)";
+
   return (
-    <article className="election-board-card">
-      <div className="election-board-card-header" style={{ borderLeftColor: accent }}>
+    <article className="election-board-card" style={{ "--board-accent": accent }}>
+      <div className="election-board-card-header">
         <h3 className="election-board-card-title">{board}</h3>
       </div>
       <div className="election-board-card-body">
@@ -90,7 +91,7 @@ export default function Elections({
   const rawElections = electionData || [];
   const ElectionResults = rawElections.map(normalizeElectionRow).filter((r) => r.board);
 
-  // Elections feature is turned off site-wide
+  // nobody's voting right now - show the "elections are closed" message
   if (!electionsEnabled) {
     return (
       <div className="elections-page">
@@ -108,7 +109,7 @@ export default function Elections({
     );
   }
 
-  // State: contesting — show contenders only
+  // campaign season - show the candidates before voting opens
   if (state === "contesting") {
     const contenders = config?.contenders ?? [];
     return (
@@ -158,7 +159,7 @@ export default function Elections({
     );
   }
 
-  // State: polling — vote now message + optional results preview
+  // polls are open! tell people to vote (results show after close)
   if (state === "polling") {
     return (
       <div className="elections-page">
@@ -168,7 +169,7 @@ export default function Elections({
         </header>
         <section className="election-section">
           <div className="elections-state-header">
-            <h1>{config?.pollingTitle ?? "Elections — vote now"}</h1>
+            <h1>{config?.pollingTitle ?? "Elections - vote now"}</h1>
             <p>{config?.pollingSubtitle ?? "Polls are open. Cast your vote below."}</p>
           </div>
           <div className="elections-message-box">
@@ -184,7 +185,7 @@ export default function Elections({
     );
   }
 
-  // State: result — show full results (default)
+  // the good stuff - final results (or placeholder if sheet is empty)
   const displayResults = ElectionResults.length > 0 ? ElectionResults : [
     {
       board: "LSA 2029 Election Results",

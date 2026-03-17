@@ -1,4 +1,4 @@
-// Shared resource page layout (Wellness, Title IX, etc.)
+// wellness, Title IX, etc. - shared layout for resource pages
 .resource-page {
   padding-bottom: 2rem;
 
@@ -92,7 +92,7 @@
   }
 }
 
-// Buttons must stay white (override .resource-section a when inside section)
+// keep these buttons white or they inherit the section link color and look wrong
 .resource-section a.resource-link-btn {
   color: white;
 
@@ -101,7 +101,7 @@
   }
 }
 
-// Resource cards (e.g. for Title IX contact blocks)
+// little cards for contact blocks and such (Title IX, etc.)
 .resource-card {
   background: #f8f9fa;
   border-radius: 10px;
@@ -144,7 +144,7 @@
   color: #555;
 }
 
-// Freshmen Corner — clean card grid
+// Freshmen Corner - grid of cards, nice and simple
 .freshmen-corner {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -181,7 +181,7 @@
   }
 }
 
-// Legacy overrides (keep .wellness working)
+// old .wellness class - leave this or that page breaks
 .wellness {
   max-width: 800px;
   margin: 0 auto;

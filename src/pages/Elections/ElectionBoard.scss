@@ -1,12 +1,10 @@
-/**
- * Election board page: one board, roles, candidate cards. Color scheme and glows use --board-accent.
- */
+// per-board election page - hero, role sections, candidate cards. --board-accent drives the colors
 
 .election-board-page {
   position: relative;
   padding-bottom: 3rem;
   min-height: 100vh;
-  /* Light accent tint via gradient only (no blur = much better performance) */
+  // subtle tint from board color; no blur so we don't murder performance
   background: #f5f5f5 linear-gradient(135deg, color-mix(in srgb, var(--board-accent, #9c1919) 6%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--board-accent, #9c1919) 4%, transparent) 100%);
   background-attachment: scroll;
 
@@ -63,13 +61,13 @@
   border-left: 4px solid var(--board-accent, var(--title-color));
 }
 
-// 2 cards per row; if 1 card in row (odd last), center it
+// 2 cards per row; when there's an odd one out at the end we center it so it doesn't look sad
 .election-board-candidates-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 
-  // Single card in last row (odd total): center it
+  // that lonely last card when we have 3 or 5 or 7 candidates
   .election-candidate-card:last-child:nth-child(odd) {
     grid-column: 1 / -1;
     justify-self: center;
@@ -105,7 +103,7 @@
   }
 }
 
-// —— Card: pfp/video left, name + description right, footer + vote (button on card edge) ——
+// candidate card: photo/video on left, name + bio on right, vote button at the bottom
 .election-candidate-card {
   background: #fff;
   border-radius: 14px;
@@ -150,7 +148,7 @@
   border-radius: 14px 0 0 0;
 }
 
-// Color-coded bar below pfp: thick, rounded; "HOVER TO VIEW VIDEO" on top
+// the little bar under the photo that says "HOVER TO VIEW VIDEO" - board color
 .election-candidate-card-media-bar {
   position: absolute;
   bottom: 0;
@@ -267,7 +265,7 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 }
 
-// —— Bottom nav: Last board | All boards | Next board ——
+// back/forward between boards + link to all boards
 .election-board-nav {
   position: relative;
   z-index: 1;

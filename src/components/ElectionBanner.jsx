@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-/**
- * Full-width banner shown when elections are in progress (contesting or polling).
- */
+// big elections banner when we're in contesting or polling - "vote now!" etc.
 export default function ElectionBanner({ config }) {
   if (!config?.banner?.enabled) return null;
 

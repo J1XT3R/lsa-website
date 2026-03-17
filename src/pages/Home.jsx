@@ -54,7 +54,7 @@ function parseDateAdded(str) {
   return new Date(str).getTime() || 0;
 }
 
-// eslint-disable-next-line no-unused-vars, react/prop-types
+// eslint-disable-next-line no-unused-vars, react/prop-types - spotlights prop is for future use
 export default function Home({ cardinalympicsData, newsData, clubData = [], applicationsData = [] }) {
   const spotlights = clubSpotlights || [];
   const weekIndex = getWeekIndex();
