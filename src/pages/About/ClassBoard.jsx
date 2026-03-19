@@ -1,9 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
 import "./About.scss";
+
+const CLASS_BOARD_ORDER = [
+  "Senior Board",
+  "Junior Board",
+  "Sophomore Board",
+  "Freshman Board",
+];
 
 export default function ClassBoard({ officerData: officerDataProp }) {
   const params = useParams().BoardName;
@@ -28,12 +35,44 @@ export default function ClassBoard({ officerData: officerDataProp }) {
     return <LoadingTruck />;
   }
 
+  const currentIndex = CLASS_BOARD_ORDER.findIndex((board) => board === params);
+  const prevBoard =
+    currentIndex <= 0
+      ? { name: "SBC", path: "/LSA/SBC" }
+      : {
+          name: CLASS_BOARD_ORDER[currentIndex - 1],
+          path: `/LSA/${encodeURIComponent(CLASS_BOARD_ORDER[currentIndex - 1])}`,
+        };
+  const nextBoard =
+    currentIndex >= 0 && currentIndex < CLASS_BOARD_ORDER.length - 1
+      ? {
+          name: CLASS_BOARD_ORDER[currentIndex + 1],
+          path: `/LSA/${encodeURIComponent(CLASS_BOARD_ORDER[currentIndex + 1])}`,
+        }
+      : null;
+
   return (
     <>
       <header className="board-hero board-hero--class">
         <h1 className="board-hero-title">LSA {params}</h1>
         <span className="board-hero-year">2025-2026</span>
       </header>
+
+      <nav className="board-nav" aria-label="Board navigation">
+        <Link to={prevBoard.path} className="board-nav__btn">
+          ← Previous board
+        </Link>
+        <Link to="/LSA-EXPLORE" className="board-nav__btn">
+          All boards
+        </Link>
+        {nextBoard ? (
+          <Link to={nextBoard.path} className="board-nav__btn">
+            Next board →
+          </Link>
+        ) : (
+          <span className="board-nav__btn board-nav__btn--disabled">Next board →</span>
+        )}
+      </nav>
 
       <section className="board-officers">
         <h2 className="board-officers-heading">Meet the board</h2>
@@ -65,6 +104,22 @@ export default function ClassBoard({ officerData: officerDataProp }) {
           ))}
         </div>
       </section>
+
+      <nav className="board-nav board-nav--bottom" aria-label="Board navigation bottom">
+        <Link to={prevBoard.path} className="board-nav__btn">
+          ← Previous board
+        </Link>
+        <Link to="/LSA-EXPLORE" className="board-nav__btn">
+          All boards
+        </Link>
+        {nextBoard ? (
+          <Link to={nextBoard.path} className="board-nav__btn">
+            Next board →
+          </Link>
+        ) : (
+          <span className="board-nav__btn board-nav__btn--disabled">Next board →</span>
+        )}
+      </nav>
     </>
   );
 }

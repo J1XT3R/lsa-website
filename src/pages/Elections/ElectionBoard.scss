@@ -269,49 +269,44 @@
 .election-board-nav {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem 1.5rem;
+  gap: 0.75rem;
   max-width: 912px;
   margin: 2rem auto 0;
-  padding: 2rem 1.5rem;
-  border-top: 1px solid #eee;
-  background: #fafafa;
+  padding: 0 1rem 2rem;
 }
 
 .election-board-nav-btn {
   display: inline-flex;
   align-items: center;
-  padding: 0.6rem 1.25rem;
-  background: var(--board-accent, var(--lowell-red));
-  color: white;
-  font-weight: 600;
-  text-decoration: none;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
-  transition: background 0.2s ease, transform 0.15s ease, filter 0.2s ease;
+  text-decoration: none;
+  color: var(--board-accent, var(--lowell-red));
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 
   &:hover {
-    filter: brightness(1.1);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: #fafafa;
   }
 }
 
 .election-board-nav-btn--disabled {
-  background: #ccc;
-  cursor: default;
+  color: #8a8a8a;
+  border-color: #ddd;
+  background: #f7f7f7;
   pointer-events: none;
-}
-
-.election-board-nav-link {
-  color: var(--board-accent, var(--title-color));
-  font-weight: 600;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
@@ -362,7 +357,12 @@
   }
 
   .election-board-nav {
-    flex-direction: column;
-    padding: 1.5rem 1rem;
+    padding: 0 0.75rem 1.5rem;
+  }
+
+  .election-board-nav-btn {
+    min-width: 0;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
   }
 }

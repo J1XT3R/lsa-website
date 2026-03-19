@@ -20,7 +20,7 @@ export default function Layout(props) {
     state === "polling";
   const showElectionsBar =
     electionsEnabled &&
-    state === "polling" &&
+    state === "results" &&
     electionsConfig?.pollingBar?.enabled;
 
   return (

@@ -36,11 +36,11 @@ export default {
     ctaPath: "/Elections",
   },
 
-  // the little "polls are open" bar in the layout when we're in polling mode
+  // top info bar in layout (shown when state is "results")
   pollingBar: {
     enabled: true,
-    message: "Polls are open. Results will be posted after voting ends.",
-    resultsLabel: "Results",
+    message: "Election results are now available.",
+    resultsLabel: "View results",
     resultsPath: "/Elections/Results",
   },
 

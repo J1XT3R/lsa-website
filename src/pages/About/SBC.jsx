@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
 import "./About.scss";
@@ -44,6 +45,16 @@ export default function SBC({ officerData: officerDataProp }) {
         </span>
       </div>
 
+      <nav className="board-nav" aria-label="Board navigation">
+        <span className="board-nav__btn board-nav__btn--disabled">← Previous board</span>
+        <Link to="/LSA-EXPLORE" className="board-nav__btn">
+          All boards
+        </Link>
+        <Link to="/LSA/Senior%20Board" className="board-nav__btn">
+          Next board →
+        </Link>
+      </nav>
+
       <section className="board-officers">
         <h2 className="board-officers-heading">Meet the board</h2>
         <div className="board-officers-grid">
@@ -74,6 +85,16 @@ export default function SBC({ officerData: officerDataProp }) {
           ))}
         </div>
       </section>
+
+      <nav className="board-nav board-nav--bottom" aria-label="Board navigation bottom">
+        <span className="board-nav__btn board-nav__btn--disabled">← Previous board</span>
+        <Link to="/LSA-EXPLORE" className="board-nav__btn">
+          All boards
+        </Link>
+        <Link to="/LSA/Senior%20Board" className="board-nav__btn">
+          Next board →
+        </Link>
+      </nav>
     </>
   );
 }

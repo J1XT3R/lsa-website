@@ -154,7 +154,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
         ) : (
           <span className="election-board-nav-btn election-board-nav-btn--disabled">← Last board</span>
         )}
-        <Link to="/Elections" className="election-board-nav-link">
+        <Link to="/Elections" className="election-board-nav-btn">
           All boards
         </Link>
         {nextSlug ? (
