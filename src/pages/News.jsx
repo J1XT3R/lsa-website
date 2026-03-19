@@ -1,34 +1,60 @@
+import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import announcements from "../config/announcements.config.js";
 
-export default function News({ newsData }) {
+const INITIAL_VISIBLE_COUNT = 2;
+const PREVIEW_LENGTH = 110;
+
+function getPreview(text) {
+  if (!text) return "";
+  if (text.length <= PREVIEW_LENGTH) return text;
+  return `${text.slice(0, PREVIEW_LENGTH).trimEnd()}...`;
+}
+
+export default function News({ newsData, previewMode = true }) {
   // use whatever we're passed or fall back to defaults so the page doesn't explode
-  const newsItems = newsData || [
-    {
-      title: "Welcome to the New School Year!",
-      date: "September 2025",
-      content:
-        "LSA is excited to welcome all students back to Lowell High School. Stay tuned for upcoming events and opportunities to get involved!",
-    },
-    {
-      title: "Student Government Elections",
-      date: "August 2025",
-      content:
-        "Congratulations to all newly elected board members. We look forward to working together to serve the Lowell community.",
-    },
-  ];
+  const newsItems = useMemo(
+    () => (newsData && newsData.length ? newsData : announcements),
+    [newsData]
+  );
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const visibleNews = previewMode
+    ? newsItems.slice(0, INITIAL_VISIBLE_COUNT)
+    : newsItems;
+  const hasMore = previewMode && newsItems.length > INITIAL_VISIBLE_COUNT;
 
   return (
     <div className="news-section center">
       <h2>News & Announcements</h2>
       <div className="news-container">
-        {newsItems.map((news, index) => (
-          <div key={index} className="news-item">
+        {visibleNews.map((news, index) => {
+          const globalIndex = index;
+          const isExpanded = expandedIndex === globalIndex;
+          const contentToRender = isExpanded ? news.content : getPreview(news.content);
+
+          return (
+          <button
+            type="button"
+            key={globalIndex}
+            className={`news-item ${isExpanded ? "expanded" : ""}`}
+            onClick={() => setExpandedIndex(isExpanded ? null : globalIndex)}
+            aria-expanded={isExpanded}
+          >
             <h3>{news.title}</h3>
             <p className="news-date">{news.date}</p>
-            <p className="news-content">{news.content}</p>
-          </div>
-        ))}
+            <p className="news-content">{contentToRender}</p>
+            <p className="news-item-hint">
+              {isExpanded ? "Click to collapse" : "Click to view more"}
+            </p>
+          </button>
+        )})}
       </div>
+      {hasMore && (
+        <Link to="/Announcements" className="news-load-more">
+          View more announcements
+        </Link>
+      )}
     </div>
   );
 }
@@ -41,4 +67,5 @@ News.propTypes = {
       content: PropTypes.string.isRequired,
     })
   ),
+  previewMode: PropTypes.bool,
 };

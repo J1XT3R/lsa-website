@@ -33,6 +33,7 @@ import Cardinalympics from './pages/Cardinalympics'
 import { site } from './config/site.config.js'
 import applicationsSheetConfig from './config/applications.config.js'
 import ApplicationsOpen from './pages/ApplicationsOpen'
+import Announcements from './pages/Announcements'
 
 function App() {
     // main site data from Google Sheets (yes the key is here, we're not doing auth for a read-only sheet)
@@ -43,7 +44,7 @@ function App() {
     const [clubData, setClubData] = useState([]);
     const [officerData, setOfficerData] = useState([]);
 
-    // Cardinalympics has its own sheet - points and scoreboard
+    // Cardinalympics points and scoreboard
     const SPREADSHEET_ID2 = "1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4";
     const SHEET_NAME3 = "Sp, 25";
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
@@ -51,7 +52,7 @@ function App() {
 
     // elections results can come from a sheet later - for now we use config
     const SHEET_NAME4 = "Elections";
-    const [electionData, setElectionData] = useState([]); // eslint-disable-line no-unused-vars
+    const [electionData, setElectionData] = useState([]);
 
     // which clubs/orgs have applications open right now
     const [applicationsData, setApplicationsData] = useState([]);
@@ -101,7 +102,6 @@ function App() {
             const data = await res.json();
             if (data.values && data.values.length > 0) {
               const totals = arrayCleanUp(data.values[0]);
-              // sheet layout is inconsistent - sometimes 5 cols (points + 4 classes), sometimes just 4. fun!
               const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
               setCardinalympicsData(classTotals);
               setScoreboardRows(data.values);
@@ -159,7 +159,7 @@ function App() {
         });
     }
 
-    // applications sheet loves to put a random title in row 1 - hunt for the actual header row
+    // applications sheet 
     function processApplicationsSheetData(data) {
         if (!data || data.length === 0) return [];
         let headerRowIndex = 0;
@@ -226,6 +226,7 @@ function App() {
             </Route>
 
             <Route path="ApplicationsOpen" element={<ApplicationsOpen applicationsData={applicationsData} />} />
+            <Route path="Announcements" element={<Announcements />} />
             <Route element={<Outlet />}>
               <Route path="Wellness" element={<Wellness />} />
               <Route path="TitleIX" element = {<TitleIX />} />
