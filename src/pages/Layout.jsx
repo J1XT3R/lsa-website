@@ -17,7 +17,7 @@ export default function Layout(props) {
   const showElectionBanner =
     electionsEnabled &&
     electionsConfig?.banner?.enabled &&
-    (state === "contesting" || state === "polling");
+    state === "polling";
   const showElectionsBar =
     electionsEnabled &&
     state === "polling" &&

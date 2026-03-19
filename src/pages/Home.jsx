@@ -6,6 +6,8 @@ import News from "./News";
 import { clubSpotlights } from "../config/clubs/index.js";
 import { site } from "../config/site.config.js";
 import ElectionBanner from "../components/ElectionBanner";
+import PropTypes from "prop-types";
+import SafeImage from "../components/SafeImage";
 
 const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/5TKdIrdcyJ4";
 
@@ -54,7 +56,9 @@ function parseDateAdded(str) {
   return new Date(str).getTime() || 0;
 }
 
-// eslint-disable-next-line no-unused-vars, react/prop-types - spotlights prop is for future use
+// `cardinalympicsData` is currently only used in a commented-out section.
+// Keep the prop for future use, but avoid unused var lint noise.
+// eslint-disable-next-line no-unused-vars
 export default function Home({ cardinalympicsData, newsData, clubData = [], applicationsData = [] }) {
   const spotlights = clubSpotlights || [];
   const weekIndex = getWeekIndex();
@@ -74,6 +78,19 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
     site.elections?.banner?.enabled &&
     (site.elections?.state === "contesting" || site.elections?.state === "polling");
 
+  const spotlightDisplayName = spotlightClub
+    ? spotlightClub.Name
+    : spotlight?.clubName || "";
+  const spotlightDisplayBlurb =
+    spotlight?.blurb || spotlightClub?.ClubDescription || "";
+  const spotlightHref = spotlightClub
+    ? `/Clubs/${encodeURIComponent(spotlightClub.Name)}`
+    : "/Clubs";
+  const spotlightCtaText = spotlightClub ? "Learn more →" : "Browse clubs →";
+  const spotlightInitial = spotlightDisplayName.trim()
+    ? spotlightDisplayName.trim().charAt(0).toUpperCase()
+    : "";
+
   return (
     <>
       <div className="hero-video-wrapper">
@@ -92,6 +109,8 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
       {showElectionBanner && (
         <ElectionBanner config={site.elections} />
       )}
+
+      {/* TODO: Add back in Cardinalympics section when it's back */}
       {/* <div className="intro-container">
                 <h2>2025 Cardinalympics!</h2>
                 <div className="cardinalympics-scores">
@@ -123,24 +142,45 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
           representing the Senior, Junior, Sophomore, and Freshmen classes.
         </p>
         <h2 className="center">We connect with</h2>
-        <div className="stats">
-          <div className="center">
-            <Counter start={0} end={2500} duration={2000} className="counter">
-              +
-            </Counter>
-            <p>Students</p>
+        <div className="stats" aria-label="We connect with statistics">
+          <div className="stat-card center">
+            <div className="stat-card__value">
+              <Counter
+                start={0}
+                end={2500}
+                duration={2000}
+                className="counter"
+                color="var(--lowell-red)"
+              />
+              <span className="stat-card__plus">+</span>
+            </div>
+            <p className="stat-card__label">Students</p>
           </div>
-          <div className="center">
-            <Counter start={0} end={150} duration={2000} className="counter">
-              +
-            </Counter>
-            <p>Clubs</p>
+          <div className="stat-card center">
+            <div className="stat-card__value">
+              <Counter
+                start={0}
+                end={150}
+                duration={2000}
+                className="counter"
+                color="var(--lowell-red)"
+              />
+              <span className="stat-card__plus">+</span>
+            </div>
+            <p className="stat-card__label">Clubs</p>
           </div>
-          <div className="center">
-            <Counter start={0} end={9000} duration={2000} className="counter">
-              +
-            </Counter>
-            <p>Alumni</p>
+          <div className="stat-card center">
+            <div className="stat-card__value">
+              <Counter
+                start={0}
+                end={9000}
+                duration={2000}
+                className="counter"
+                color="var(--lowell-red)"
+              />
+              <span className="stat-card__plus">+</span>
+            </div>
+            <p className="stat-card__label">Alumni</p>
           </div>
         </div>
       </div>
@@ -148,30 +188,25 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
         <div className="club-spotlight-section center">
           <h2>Club spotlight</h2>
           <div className="club-spotlight">
-            {spotlightClub ? (
-              <>
-                {spotlightClub.Picture && (
-                  <img
-                    src={`https://drive.google.com/thumbnail?id=${extractFileId(spotlightClub.Picture)}&sz=w300`}
-                    alt={spotlightClub.Name}
-                    className="club-spotlight-img"
-                  />
-                )}
-                <div className="club-spotlight-text">
-                  <h3>{spotlightClub.Name}</h3>
-                  <p>{spotlight.blurb || spotlightClub.ClubDescription}</p>
-                  <Link to={`/Clubs/${encodeURIComponent(spotlightClub.Name)}`} className="club-spotlight-link">
-                    Learn more →
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <div className="club-spotlight-text">
-                <h3>{spotlight.clubName}</h3>
-                <p>{spotlight.blurb}</p>
-                <Link to="/Clubs" className="club-spotlight-link">Browse clubs →</Link>
-              </div>
-            )}
+            <div className="club-spotlight__media" aria-hidden="true">
+              {spotlightClub?.Picture ? (
+                <SafeImage
+                  src={`https://drive.google.com/thumbnail?id=${extractFileId(spotlightClub.Picture)}&sz=w300`}
+                  alt={spotlightDisplayName}
+                  className="club-spotlight__img"
+                  variant="club"
+                />
+              ) : (
+                <div className="club-spotlight__placeholder">{spotlightInitial}</div>
+              )}
+            </div>
+            <div className="club-spotlight__content">
+              <h3>{spotlightDisplayName}</h3>
+              <p>{spotlightDisplayBlurb}</p>
+              <Link to={spotlightHref} className="club-spotlight-link">
+                {spotlightCtaText}
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -228,3 +263,23 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
     </>
   );
 }
+
+Home.propTypes = {
+  // Used by a commented-out block; still accepted as input for the page.
+  cardinalympicsData: PropTypes.arrayOf(PropTypes.number),
+  newsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      date: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+    })
+  ),
+  clubData: PropTypes.arrayOf(
+    PropTypes.shape({
+      Name: PropTypes.string,
+      Picture: PropTypes.string,
+      ClubDescription: PropTypes.string,
+    })
+  ),
+  applicationsData: PropTypes.arrayOf(PropTypes.object),
+};

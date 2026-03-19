@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
+import SafeImage from "../../components/SafeImage";
 import "./ElectionBoard.scss";
 
 // one candidate: photo (hover = video), name, bio, vote button
@@ -36,7 +37,13 @@ function ElectionCandidateCard({ candidate, accentColor }) {
         onMouseLeave={handleMouseLeave}
         style={{ "--card-accent": accentColor || "var(--title-color)" }}
       >
-        <img src={pfp} alt={name} className="election-candidate-card-pfp" loading="lazy" />
+        <SafeImage
+          src={pfp}
+          alt={name}
+          className="election-candidate-card-pfp"
+          loading="lazy"
+          variant="club"
+        />
         {video && (
           <video
             className="election-candidate-card-video"

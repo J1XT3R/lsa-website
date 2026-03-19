@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import electionsConfig from "../config/elections.config.js";
-import "./Elections.scss";
+import electionsConfig from "../../config/elections.config.js";
+import "../Elections.scss";
 
-// sheet columns can be "President" or "president" or whatever - normalize to camelCase so we don't cry
+// Normalize sheet rows (same mapping as `Elections.jsx` so results cards render consistently).
 function normalizeElectionRow(row) {
   if (!row || typeof row !== "object") return row;
   const keyMap = {
@@ -19,6 +19,7 @@ function normalizeElectionRow(row) {
     danceCoordinator: ["danceCoordinator", "Dance Coordinator", "DanceCoordinator"],
     communityLiaison: ["communityLiaison", "Community Liaison", "CommunityLiaison"],
   };
+
   const out = {};
   for (const [camelKey, possibleHeaders] of Object.entries(keyMap)) {
     for (const h of possibleHeaders) {
@@ -31,7 +32,6 @@ function normalizeElectionRow(row) {
   return out;
 }
 
-// which roles we show and what we call them on the results cards
 const RESULT_ROLES = [
   ["president", "President"],
   ["vicePresident", "Vice President"],
@@ -48,12 +48,13 @@ function getResultRows(element) {
   const rows = [];
   for (const [key, label] of RESULT_ROLES) {
     const value = element[key];
-    if (value != null && String(value).trim() !== "") rows.push({ role: label, value: String(value).trim() });
+    if (value != null && String(value).trim() !== "") {
+      rows.push({ role: label, value: String(value).trim() });
+    }
   }
   return rows;
 }
 
-// one little card per board - title, accent color, list of roles/names
 function ElectionBoardCard({ board, color, rows }) {
   const accent = color || "var(--title-color)";
 
@@ -82,7 +83,7 @@ ElectionBoardCard.propTypes = {
   ).isRequired,
 };
 
-export default function Elections({
+export default function ElectionResults({
   electionData,
   electionsEnabled = true,
   electionsConfig: config = electionsConfig,
@@ -91,13 +92,13 @@ export default function Elections({
   const rawElections = electionData || [];
   const ElectionResults = rawElections.map(normalizeElectionRow).filter((r) => r.board);
 
-  // nobody's voting right now - show the "elections are closed" message
+  // Elections are off site-wide.
   if (!electionsEnabled) {
     return (
       <div className="elections-page">
         <header className="elections-hero">
           <h1 className="elections-hero-title">LSA Board</h1>
-          <p className="elections-hero-subtitle">Elections</p>
+          <p className="elections-hero-subtitle">Election Results</p>
         </header>
         <section className="election-section election-state-off">
           <div className="elections-message-box">
@@ -105,102 +106,84 @@ export default function Elections({
             <p>{config?.notHappeningMessage ?? "Elections are not currently happening. Check back later for updates."}</p>
           </div>
         </section>
+        <div className="center" style={{ marginTop: "1rem" }}>
+          <Link to="/Elections">Back to elections</Link>
+        </div>
       </div>
     );
   }
 
-  // elections are approaching - show a "coming soon" message
+  // Elections exist, but results aren't ready yet.
   if (state === "pending") {
     return (
       <div className="elections-page">
         <header className="elections-hero">
           <h1 className="elections-hero-title">LSA Board</h1>
-          <p className="elections-hero-subtitle">Elections</p>
+          <p className="elections-hero-subtitle">Election Results</p>
           <span className="elections-hero-badge">Coming soon</span>
         </header>
-        <section className="election-section election-state-off">
+        <section className="election-section">
           <div className="elections-message-box">
             <h2>{config?.pendingTitle ?? "Elections are coming soon"}</h2>
-            <p>
-              {config?.pendingSubtitle ??
-                "Please stay tuned for updates."}
-            </p>
+            <p>{config?.pendingSubtitle ?? "Please stay tuned for updates."}</p>
           </div>
         </section>
+        <div className="center" style={{ marginTop: "1rem" }}>
+          <Link to="/Elections">Back to elections</Link>
+        </div>
       </div>
     );
   }
 
-  // campaign season - show the candidates (polls open soon / are in progress)
   if (state === "polling") {
-    const contenders = config?.contenders ?? [];
     return (
       <div className="elections-page">
         <header className="elections-hero">
           <h1 className="elections-hero-title">LSA Board</h1>
-          <p className="elections-hero-subtitle">Elections</p>
+          <p className="elections-hero-subtitle">Election Results</p>
+          <span className="elections-hero-badge">Results</span>
         </header>
         <section className="election-section">
-          <div className="elections-state-header">
-            <h1>{config?.contestingTitle ?? "Meet the candidates"}</h1>
-            <p>{config?.contestingSubtitle ?? "Voting will open soon. Get to know the contenders."}</p>
+          <div className="elections-message-box">
+            <h2>Results not posted yet</h2>
+            <p>
+              {config?.pollingBar?.message ??
+                "Results will be posted after voting ends."}
+            </p>
+            <p style={{ marginTop: "0.75rem", fontStyle: "italic", color: "#666" }}>
+              Check back when elections are closed.
+            </p>
           </div>
-          {contenders.length === 0 ? (
-            <div className="elections-message-box">
-              <p>Candidate information will be posted here once available.</p>
-            </div>
-          ) : (
-            <div className="elections-board-cards">
-              {contenders.map((group, index) => {
-                const rows = (group.roles ?? []).map((r) => {
-                  const cands = Array.isArray(r.candidates) ? r.candidates : [];
-                  const names = cands.map((c) => (typeof c === "string" ? c : c?.name ?? "")).filter(Boolean);
-                  return { role: r.role, value: names.join(", ") };
-                });
-                const slug = group.slug;
-                const card = (
-                  <ElectionBoardCard
-                    key={index}
-                    board={group.board}
-                    color={group.color}
-                    rows={rows}
-                  />
-                );
-                return slug ? (
-                  <Link key={index} to={`/Elections/${slug}`} className="elections-board-card-link">
-                    {card}
-                  </Link>
-                ) : (
-                  <div key={index}>{card}</div>
-                );
-              })}
-            </div>
-          )}
         </section>
+        <div className="center" style={{ marginTop: "1rem" }}>
+          <Link to="/Elections">Back to elections</Link>
+        </div>
       </div>
     );
   }
 
-  // the good stuff - final results (or placeholder if sheet is empty)
-  // (for any unexpected state, fall back to results view)
-  const displayResults = ElectionResults.length > 0 ? ElectionResults : [
-    {
-      board: "LSA 2029 Election Results",
-      color: "#9c1919",
-      president: "Taran Yang",
-      vicePresident: "Preston Wang",
-      secretary: "Violette Trinh-Hsu",
-      treasurer: "Shirley Guan",
-      publicRelations: "Zarina Gorji",
-      historian: "Ashley Zhao",
-    },
-  ];
+  // Final results (or placeholder if the sheet is empty).
+  const displayResults =
+    ElectionResults.length > 0
+      ? ElectionResults
+      : [
+        {
+          board: "LSA 2029 Election Results",
+          color: "#9c1919",
+          president: "Taran Yang",
+          vicePresident: "Preston Wang",
+          secretary: "Violette Trinh-Hsu",
+          treasurer: "Shirley Guan",
+          publicRelations: "Zarina Gorji",
+          historian: "Ashley Zhao",
+        },
+      ];
 
   return (
     <div className="elections-page">
       <header className="elections-hero">
         <h1 className="elections-hero-title">LSA Board</h1>
-        <p className="elections-hero-subtitle">Elections</p>
+        <p className="elections-hero-subtitle">Election Results</p>
         <span className="elections-hero-badge">Results</span>
       </header>
       <section className="election-section">
@@ -219,7 +202,7 @@ export default function Elections({
   );
 }
 
-Elections.propTypes = {
+ElectionResults.propTypes = {
   electionData: PropTypes.arrayOf(
     PropTypes.shape({
       board: PropTypes.string,
@@ -239,23 +222,12 @@ Elections.propTypes = {
   electionsConfig: PropTypes.shape({
     state: PropTypes.oneOf(["pending", "polling", "results"]),
     notHappeningMessage: PropTypes.string,
-    contestingTitle: PropTypes.string,
-    contestingSubtitle: PropTypes.string,
-    pendingTitle: PropTypes.string,
-    pendingSubtitle: PropTypes.string,
-    pollingTitle: PropTypes.string,
-    pollingSubtitle: PropTypes.string,
-    contenders: PropTypes.arrayOf(
-      PropTypes.shape({
-        board: PropTypes.string,
-        color: PropTypes.string,
-        roles: PropTypes.arrayOf(
-          PropTypes.shape({
-            role: PropTypes.string,
-            candidates: PropTypes.arrayOf(PropTypes.string),
-          })
-        ),
-      })
-    ),
+    pollingBar: PropTypes.shape({
+      message: PropTypes.string,
+      resultsLabel: PropTypes.string,
+      resultsPath: PropTypes.string,
+      enabled: PropTypes.bool,
+    }),
   }),
 };
+

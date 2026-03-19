@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
+import SafeImage from "../../components/SafeImage";
 
 export default function Committee({ officerData: allOfficers }) {
   const { CommitteeName: params } = useParams();
@@ -35,12 +36,13 @@ export default function Committee({ officerData: allOfficers }) {
 
   const displayOfficers = officerData.map((officer, index) => (
     <div key={index} className="team-member">
-      <img
+      <SafeImage
         src={`https://drive.google.com/thumbnail?id=${extractFileId(
           officer.Photo
         )}`}
         alt={officer.Name}
         className="team-member-photo"
+        variant="user"
       />
       <div>
         <h2>

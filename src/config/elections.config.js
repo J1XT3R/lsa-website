@@ -1,4 +1,4 @@
-// elections config - state (contesting / polling / result), copy, and all the contender data
+// elections config - state (pending / polling / results), copy, and all the contender data
 // candidate objects: name, description, pfp (photo url), video (plays on hover, mp4 pls)
 
 const PLACEHOLDER_VIDEO = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
@@ -24,10 +24,10 @@ const LONG_DESC = {
 };
 
 export default {
-  // "contesting" | "polling" | "result" - only matters when elections are on
-  state: "contesting",
+  // "pending" | "polling" | "results" - only matters when elections are on
+  state: "polling",
 
-  // big banner when elections are happening (contesting or polling)
+  // big banner when elections are happening (polling)
   banner: {
     enabled: true,
     title: "Elections in progress",
@@ -41,7 +41,7 @@ export default {
     enabled: true,
     message: "Polls are open. Results will be posted after voting ends.",
     resultsLabel: "Results",
-    resultsPath: "/Elections",
+    resultsPath: "/Elections/Results",
   },
 
   // when elections are off site-wide - message on the Elections page
@@ -50,6 +50,10 @@ export default {
   // contesting = before voting opens. title + subtitle on Elections page
   contestingTitle: "Meet the candidates",
   contestingSubtitle: "Voting will open soon. Get to know the contenders.",
+
+  // pending = before the election/campaign phase starts
+  pendingTitle: "Elections are coming soon",
+  pendingSubtitle: "Please stay tuned for updates.",
 
   // polling = vote now! title + subtitle
   pollingTitle: "Elections - vote now",

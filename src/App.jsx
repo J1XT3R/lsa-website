@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import Home from "./pages/Home"
 import Elections from "./pages/Elections"
 import ElectionBoard from "./pages/Elections/ElectionBoard"
+import ElectionResults from "./pages/Elections/ElectionResults"
 import Layout from "./pages/Layout"
 import Club from "./pages/Clubs/Club"
 import TitleIX from './pages/Resources/TitleIX'
@@ -11,6 +12,7 @@ import FreshMenCorner from './pages/More/FreshmenCorner'
 import Charter from './pages/About/Charter'
 import ClubResources from './pages/Clubs/ClubResources'
 import Wellness from './pages/Resources/Wellness'
+import Resources from './pages/Resources/Resources'
 import Clubs from './pages/Clubs/Clubs'
 import AboutLSA from './pages/About/AboutLSA'
 import Organization from './pages/Organizations/Organizations'
@@ -22,6 +24,7 @@ import Site from './pages/More/Site'
 import Committees from './pages/About/Committees'
 import SpiritCommittee from './pages/About/SpiritCommittee'
 import Committee from './pages/About/Committee'
+import LSAExplore from './pages/About/LSAExplore'
 import NewClub from './pages/Clubs/club_resources/NewClub'
 import EventPlanning from './pages/Clubs/club_resources/EventPlanning'
 import Fundraising from './pages/Clubs/club_resources/Fundraising'
@@ -195,6 +198,7 @@ function App() {
             <Route path="Elections" element={<Outlet />}>
               <Route index element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />} />
               <Route path=":boardSlug" element={<ElectionBoard electionsConfig={site.elections} />} />
+              <Route path="Results" element={<ElectionResults electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={site.elections} />} />
             </Route>
             
             <Route path="LSA" element={<Outlet />}>
@@ -227,6 +231,8 @@ function App() {
 
             <Route path="ApplicationsOpen" element={<ApplicationsOpen applicationsData={applicationsData} />} />
             <Route path="Announcements" element={<Announcements />} />
+            <Route path="Resources" element={<Resources />} />
+            <Route path="LSA-EXPLORE" element={<LSAExplore />} />
             <Route element={<Outlet />}>
               <Route path="Wellness" element={<Wellness />} />
               <Route path="TitleIX" element = {<TitleIX />} />

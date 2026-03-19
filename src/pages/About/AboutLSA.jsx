@@ -48,7 +48,7 @@ export default function AboutLSA() {
                 <strong>Positions:</strong> President, Vice President, Secretary,
                 Treasurer, Historian, Public Relations.
               </p>
-              <Link to="/LSA" className="about-lsa-card-link">Explore LSA →</Link>
+              <Link to="/LSA-EXPLORE" className="about-lsa-card-link">Explore LSA →</Link>
             </div>
           </div>
         </section>

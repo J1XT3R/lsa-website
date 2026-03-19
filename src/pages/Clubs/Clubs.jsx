@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { getCategoryColorMap } from "../../config/clubs/index.js";
+import SafeImage from "../../components/SafeImage";
 
 export default function Clubs({ clubData }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,12 +36,13 @@ export default function Clubs({ clubData }) {
       <Link className="club-card" key={index} to={Name}>
         <div className="club-card__image-wrap">
           {Picture ? (
-            <img
+            <SafeImage
               className="club-card__image"
               src={`https://drive.google.com/thumbnail?id=${extractFileId(
                 Picture
               )}&sz=w300`}
               alt={Name}
+              variant="club"
             />
           ) : (
             <div className="club-card__placeholder" style={{ background: clubColor.background || "var(--lowell-red)" }} />

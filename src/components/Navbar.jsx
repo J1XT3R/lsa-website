@@ -18,8 +18,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
 
-
-// navbar - please don't touch unless you're ready for pain. the old version gave me a real headache to fix 😭
+// TODO: Redo this entire file
+// navbar kinda scuffed code icl
 export default function Navbar({ clubData, electionsEnabled = true }) {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [hamburger, setHamburger] = useState(false);
@@ -430,7 +430,7 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
                 },
             ],
             id: 6,
-            to: "",
+            to: "/Resources",
         },
         {
             name: "CARDINALYMPICS",

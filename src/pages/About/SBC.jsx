@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
+import SafeImage from "../../components/SafeImage";
 import "./About.scss";
 
 export default function SBC({ officerData: officerDataProp }) {
@@ -49,10 +50,11 @@ export default function SBC({ officerData: officerDataProp }) {
           {officerData.map((officer, index) => (
             <article key={index} className="board-officer-card">
               <div className="board-officer-card-photo-wrap">
-                <img
+                <SafeImage
                   src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
                   alt={officer.Name}
                   className="board-officer-card-photo"
+                  variant="user"
                 />
               </div>
               {/* officer card: little bar by default, expands to full bio on hover */}
