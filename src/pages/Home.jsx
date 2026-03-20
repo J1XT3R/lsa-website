@@ -201,8 +201,10 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
               </div>
             ))}
           </div>
-          <p className="center" style={{ marginTop: "1rem" }}>
-            <Link to="/ApplicationsOpen">View all applications open →</Link>
+          <p className="center applications-news-view-all">
+            <Link to="/ApplicationsOpen" className="applications-news-view-all__button">
+              View all applications open
+            </Link>
           </p>
         </div>
       )}
