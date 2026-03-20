@@ -19,12 +19,11 @@ import Organization from './pages/Organizations/Organizations'
 import ScrollToTop from "./components/ScrollToTop";
 import SBC from './pages/About/SBC'
 import DSA from './pages/About/DSA'
-import ClassBoard from "./pages/About/ClassBoard"
 import Site from './pages/More/Site'
 import Events from './pages/More/Events'
 import Committees from './pages/About/Committees'
 import SpiritCommittee from './pages/About/SpiritCommittee'
-import Committee from './pages/About/Committee'
+import LsaTeamPage from './pages/About/LsaTeamPage'
 import LSAExplore from './pages/About/LSAExplore'
 import NewClub from './pages/Clubs/club_resources/NewClub'
 import EventPlanning from './pages/Clubs/club_resources/EventPlanning'
@@ -60,6 +59,8 @@ function App() {
 
     // which clubs/orgs have applications open right now
     const [applicationsData, setApplicationsData] = useState([]);
+    const [applicationsLoading, setApplicationsLoading] = useState(true);
+    const [applicationsError, setApplicationsError] = useState(null);
 
     // okay so we have like 4 useEffects for 4 sheets - not pretty but it works
     useEffect(() => {
@@ -119,18 +120,37 @@ function App() {
 
     useEffect(() => {
       async function fetchApplicationsData() {
+        setApplicationsError(null);
+        setApplicationsLoading(true);
         try {
-          const { spreadsheetId, sheetName } = applicationsSheetConfig;
-          const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}?key=${KEY}`;
-          const res = await fetch(url);
-          const json = await res.json();
-          if (json.error) {
-            console.warn("Applications sheet fetch error:", json.error.message);
+          const { spreadsheetId, sheetName, sheetNames } = applicationsSheetConfig;
+          const names = sheetNames?.length
+            ? sheetNames
+            : [sheetName].filter(Boolean);
+
+          let lastError = null;
+          for (const name of names) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(name)}?key=${KEY}`;
+            const res = await fetch(url);
+            const json = await res.json();
+            if (json.error) {
+              lastError = json.error.message || "Unknown API error";
+              console.warn("Applications sheet fetch:", name, lastError);
+              continue;
+            }
+            setApplicationsData(processApplicationsSheetData(json.values));
             return;
           }
-          setApplicationsData(processApplicationsSheetData(json.values));
+          setApplicationsData([]);
+          setApplicationsError(
+            lastError || "Could not load the applications spreadsheet tab."
+          );
         } catch (error) {
-          console.log(error);
+          console.warn(error);
+          setApplicationsData([]);
+          setApplicationsError(error?.message || "Network error loading applications.");
+        } finally {
+          setApplicationsLoading(false);
         }
       }
       fetchApplicationsData();
@@ -205,12 +225,11 @@ function App() {
             <Route path="LSA" element={<Outlet />}>
               <Route index element={<AboutLSA/>} />
               <Route path="SBC" element={<SBC officerData={officerData}/>} />
-              <Route path=":BoardName" element={<ClassBoard officerData={officerData}/>} />
               <Route path="DSA" element={<DSA />} />
               <Route path="Charter" element={<Charter />}/>
               <Route path="Commitees" element={<Committees />} />
               <Route path="Spirit Committee" element={<SpiritCommittee />} />
-              <Route path=":CommitteeName" element={<Committee/>} />
+              <Route path=":BoardName" element={<LsaTeamPage officerData={officerData} />} />
               
             </Route>
 
@@ -230,10 +249,23 @@ function App() {
               <Route path="Fundraising" element={<Fundraising />} />
             </Route>
 
-            <Route path="ApplicationsOpen" element={<ApplicationsOpen applicationsData={applicationsData} />} />
+            <Route
+              path="ApplicationsOpen"
+              element={
+                <ApplicationsOpen
+                  applicationsData={applicationsData}
+                  applicationsLoading={applicationsLoading}
+                  applicationsError={applicationsError}
+                />
+              }
+            />
             <Route path="Announcements" element={<Announcements />} />
             <Route path="Resources" element={<Outlet />}>
               <Route index element={<Resources />} />
+              <Route
+                path="ApplicationsOpen"
+                element={<Navigate to="/ApplicationsOpen" replace />}
+              />
               <Route path="Wellness" element={<Wellness />} />
               <Route path="TitleIX" element={<TitleIX />} />
             </Route>

@@ -1,18 +1,19 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
+import "./About.scss";
 
 export default function Committee({ officerData: allOfficers }) {
-  const { CommitteeName: params } = useParams();
+  const { BoardName: committeeKey } = useParams();
 
   const officerData = useMemo(() => {
-    if (!allOfficers || !params) {
+    if (!allOfficers || !committeeKey) {
       return [];
     }
-    return allOfficers.filter((officer) => officer.Team === params);
-  }, [allOfficers, params]);
+    return allOfficers.filter((officer) => officer.Team === committeeKey);
+  }, [allOfficers, committeeKey]);
 
   function extractFileId(driveUrl) {
     const match = driveUrl?.match(/[?&]id=([^&]+)/);
@@ -23,48 +24,67 @@ export default function Committee({ officerData: allOfficers }) {
     return <LoadingTruck />;
   }
 
+  const committeeName = officerData[0]?.Team || committeeKey;
+
   if (!officerData.length) {
     return (
-      <div className="center">
-        <h1 className="team-name">Committees {params}</h1>
-        <p>No officers found for this committee.</p>
-      </div>
+      <main className="committee-page">
+        <header className="committee-page__hero">
+          <h1 className="committee-page__title">{committeeKey}</h1>
+          <p className="committee-page__subtitle">Committee</p>
+        </header>
+        <section className="committee-page__empty">
+          <p>No officers are listed for this committee yet.</p>
+          <Link to="/LSA/Commitees" className="committee-page__back">
+            ← Back to committees
+          </Link>
+        </section>
+      </main>
     );
   }
 
-  const committeeName = officerData[0]?.Team || params;
-
   const displayOfficers = officerData.map((officer, index) => (
-    <div key={index} className="team-member">
-      <SafeImage
-        src={`https://drive.google.com/thumbnail?id=${extractFileId(
-          officer.Photo
-        )}`}
-        alt={officer.Name}
-        className="team-member-photo"
-        variant="user"
-      />
-      <div>
-        <h2>
-          <span className="team-member-role" style={{ color: "#861212" }}>
-            {officer.Role}
-          </span>
-          <span className="team-member-name"> {officer.Name}</span>
-        </h2>
-        <p className="team-member-description">{officer.Description}</p>
+    <article key={`${officer.Name}-${index}`} className="committee-member-card">
+      <div className="committee-member-card__media">
+        <SafeImage
+          src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+          alt={officer.Name}
+          className="committee-member-card__photo"
+          variant="user"
+        />
       </div>
-    </div>
+      <div className="committee-member-card__body">
+        <p className="committee-member-card__role">{officer.Role}</p>
+        <h3 className="committee-member-card__name">{officer.Name}</h3>
+        {officer.Description && (
+          <p className="committee-member-card__description">{officer.Description}</p>
+        )}
+      </div>
+    </article>
   ));
 
   return (
-    <>
-      <h1 className="team-name center">
-        {committeeName}
-        <br /> 2025-2026
-      </h1>
+    <main className="committee-page">
+      <header className="committee-page__hero">
+        <h1 className="committee-page__title">{committeeName}</h1>
+        <p className="committee-page__subtitle">Committee</p>
+        <span className="committee-page__year">2025–2026</span>
+      </header>
 
-      <div className="teams">{displayOfficers}</div>
-    </>
+      <nav className="committee-page__nav" aria-label="Committee navigation">
+        <Link to="/LSA/Commitees" className="committee-page__nav-link">
+          ← All committees
+        </Link>
+        <Link to="/LSA-EXPLORE" className="committee-page__nav-link">
+          Explore LSA
+        </Link>
+      </nav>
+
+      <section className="committee-page__officers">
+        <h2 className="committee-page__heading">Members</h2>
+        <div className="committee-page__grid">{displayOfficers}</div>
+      </section>
+    </main>
   );
 }
 

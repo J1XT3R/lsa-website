@@ -418,7 +418,8 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
             subLinks: [
                 {
                     name: "Applications open",
-                    to: "ApplicationsOpen"
+                    to: "/ApplicationsOpen",
+                    directLink: true,
                 },
                 {
                     name: "Lowell Wellness Center",

@@ -8,6 +8,12 @@ import { site } from "../config/site.config.js";
 import ElectionBanner from "../components/ElectionBanner";
 import PropTypes from "prop-types";
 import SafeImage from "../components/SafeImage";
+import {
+  normalizeApplicationRow,
+  isApplicationOpen,
+  isLikelyDataRow,
+  parseDateAdded,
+} from "../utils/applicationsSheet.js";
 
 const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/5TKdIrdcyJ4";
 
@@ -24,38 +30,6 @@ function extractFileId(url) {
   return match ? match[1] : null;
 }
 
-const STATUS_OPEN = ["open", "applications open"];
-function getAppByKey(row, ...possibleKeys) {
-  const keys = Object.keys(row || {});
-  for (const want of possibleKeys) {
-    const found = keys.find(k => String(k).trim().toLowerCase() === want.toLowerCase());
-    if (found && row[found] != null && String(row[found]).trim() !== "") return String(row[found]).trim();
-    if (row[want] != null && String(row[want]).trim() !== "") return String(row[want]).trim();
-  }
-  return "";
-}
-function normalizeAppRow(row) {
-  if (!row || typeof row !== "object") return null;
-  const name = getAppByKey(row, "Name of Org/Club", "Name", "name") || (row["Name of Org/Club"] ?? row["Name"] ?? row["name"] ?? "");
-  const statusRaw = getAppByKey(row, "Status", "status") || (row["Status"] ?? "");
-  const status = String(statusRaw).trim().toLowerCase();
-  const dateAdded = getAppByKey(row, "Date Added", "dateAdded") || (row["Date Added"] ?? row["dateAdded"] ?? "");
-  const notes = getAppByKey(row, "Notes", "notes") || (row["Notes"] ?? row["notes"] ?? "");
-  const link = getAppByKey(row, "Application URL", "Link", "Application Link", "link") || (row["Application URL"] ?? row["Link"] ?? row["Application Link"] ?? row["link"] ?? "");
-  return { name, status, dateAdded, notes, link };
-}
-function parseDateAdded(str) {
-  if (!str) return 0;
-  const parts = String(str).trim().split(/[/-]/);
-  if (parts.length >= 3) {
-    const m = parseInt(parts[0], 10);
-    const d = parseInt(parts[1], 10);
-    const y = parseInt(parts[2], 10);
-    if (!isNaN(m) && !isNaN(d) && !isNaN(y)) return new Date(y, m - 1, d).getTime();
-  }
-  return new Date(str).getTime() || 0;
-}
-
 // `cardinalympicsData` is currently only used in a commented-out section.
 // Keep the prop for future use, but avoid unused var lint noise.
 // eslint-disable-next-line no-unused-vars
@@ -68,8 +42,8 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
   );
 
   const applicationsOpenForNews = (applicationsData || [])
-    .map(normalizeAppRow)
-    .filter((r) => r && r.name && r.name !== "Name of Org/Club" && !/^name of org\/club$/i.test(r.name.trim()) && STATUS_OPEN.includes(r.status))
+    .map(normalizeApplicationRow)
+    .filter((r) => r && isLikelyDataRow(r) && isApplicationOpen(r))
     .sort((a, b) => parseDateAdded(b.dateAdded) - parseDateAdded(a.dateAdded))
     .slice(0, 5);
 
