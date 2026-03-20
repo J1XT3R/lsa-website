@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.scss'
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Home from "./pages/Home"
 import Elections from "./pages/Elections"
 import ElectionBoard from "./pages/Elections/ElectionBoard"
@@ -232,12 +232,14 @@ function App() {
 
             <Route path="ApplicationsOpen" element={<ApplicationsOpen applicationsData={applicationsData} />} />
             <Route path="Announcements" element={<Announcements />} />
-            <Route path="Resources" element={<Resources />} />
-            <Route path="LSA-EXPLORE" element={<LSAExplore />} />
-            <Route element={<Outlet />}>
+            <Route path="Resources" element={<Outlet />}>
+              <Route index element={<Resources />} />
               <Route path="Wellness" element={<Wellness />} />
-              <Route path="TitleIX" element = {<TitleIX />} />
+              <Route path="TitleIX" element={<TitleIX />} />
             </Route>
+            <Route path="LSA-EXPLORE" element={<LSAExplore />} />
+            <Route path="Wellness" element={<Navigate to="/Resources/Wellness" replace />} />
+            <Route path="TitleIX" element={<Navigate to="/Resources/TitleIX" replace />} />
             
             <Route path="FreshmenCorner" element= {<FreshMenCorner />} />
             <Route path="Events" element={<Events />} />

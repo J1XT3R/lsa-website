@@ -37,6 +37,36 @@ export default function Events() {
     });
   }, [searchQuery, selectedCategory]);
 
+  /** At most 5 dots; window slides so the active event stays in view when there are more. */
+  const DOT_MAX = 5;
+
+  const visibleDots = useMemo(() => {
+    const total = filteredEvents.length;
+    if (total === 0) return [];
+    if (total <= DOT_MAX) {
+      return filteredEvents.map((event, index) => ({ event, index }));
+    }
+    const half = Math.floor((DOT_MAX - 1) / 2);
+    const start = Math.min(
+      Math.max(0, activeIndex - half),
+      total - DOT_MAX
+    );
+    return Array.from({ length: DOT_MAX }, (_, i) => ({
+      event: filteredEvents[start + i],
+      index: start + i,
+    }));
+  }, [filteredEvents, activeIndex]);
+
+  /** Dot size + gap scale from visible dot count (1–5). */
+  const dotBarStyles = useMemo(() => {
+    const count = Math.min(DOT_MAX, Math.max(1, filteredEvents.length));
+    return {
+      "--dot-count": String(count),
+      "--dot-gap": `${Math.min(0.5, Math.max(0.1, 2.5 / count))}rem`,
+      "--dot-size": `${Math.min(10, Math.max(5, Math.round(70 / count)))}px`,
+    };
+  }, [filteredEvents.length]);
+
   useEffect(() => {
     const el = timelineRef.current;
     if (!el || filteredEvents.length === 0) {
@@ -44,38 +74,60 @@ export default function Events() {
       return;
     }
 
-    const onScroll = () => {
+    setActiveIndex((prev) =>
+      Math.min(prev, Math.max(0, filteredEvents.length - 1))
+    );
+
+    /**
+     * Active dot follows **equal scroll distance per event**: total horizontal scroll
+     * is split into (n − 1) steps from first to last dot (or one dot if n === 1).
+     * This adapts how far you scroll before the next dot highlights.
+     */
+    const getActiveIndexFromScroll = () => {
       const children = Array.from(el.querySelectorAll(".events-item"));
-      if (!children.length) return;
+      const n = children.length;
+      if (n <= 1) return 0;
 
-      const viewportCenter = el.scrollLeft + el.clientWidth / 2;
-      let closestIdx = 0;
-      let closestDist = Number.POSITIVE_INFINITY;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return 0;
 
-      children.forEach((child, idx) => {
-        const center = child.offsetLeft + child.clientWidth / 2;
-        const dist = Math.abs(center - viewportCenter);
-        if (dist < closestDist) {
-          closestDist = dist;
-          closestIdx = idx;
-        }
-      });
+      const t = Math.min(1, Math.max(0, el.scrollLeft / maxScroll));
+      return Math.round(t * (n - 1));
+    };
 
-      setActiveIndex(closestIdx);
+    const onScroll = () => {
+      setActiveIndex(getActiveIndexFromScroll());
     };
 
     onScroll();
+    const rafId = requestAnimationFrame(() => onScroll());
+
     el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => onScroll()) : null;
+    ro?.observe(el);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      el.removeEventListener("scroll", onScroll);
+      ro?.disconnect();
+    };
   }, [filteredEvents]);
 
   const scrollToIndex = (index) => {
     const el = timelineRef.current;
     if (!el) return;
     const items = el.querySelectorAll(".events-item");
-    const target = items[index];
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    if (!items[index]) return;
+
+    const n = items.length;
+    if (n <= 1) return;
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+
+    const targetLeft = (index / (n - 1)) * maxScroll;
+    el.scrollTo({ left: targetLeft, behavior: "smooth" });
   };
 
   return (
@@ -150,16 +202,25 @@ export default function Events() {
         </div>
 
         {filteredEvents.length > 0 && (
-          <div className="events-dot-scrollbar" aria-label="Timeline position">
-            {filteredEvents.map((event, index) => (
-              <button
-                key={`${event.id}-dot`}
-                type="button"
-                className={`events-dot-scrollbar__dot ${activeIndex === index ? "events-dot-scrollbar__dot--active" : ""}`}
-                onClick={() => scrollToIndex(index)}
-                aria-label={`Go to ${event.title}`}
-              />
-            ))}
+          <div className="events-dot-scrollbar-wrap">
+            <div
+              className="events-dot-scrollbar"
+              style={dotBarStyles}
+              aria-label="Timeline position"
+              data-dot-count={Math.min(DOT_MAX, filteredEvents.length)}
+              data-overflow={filteredEvents.length > DOT_MAX ? "true" : "false"}
+            >
+              {visibleDots.map(({ event, index }) => (
+                <button
+                  key={`${event.id}-dot-${index}`}
+                  type="button"
+                  className={`events-dot-scrollbar__dot ${activeIndex === index ? "events-dot-scrollbar__dot--active" : ""}`}
+                  onClick={() => scrollToIndex(index)}
+                  aria-label={`Go to ${event.title}`}
+                  aria-current={activeIndex === index ? "true" : undefined}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

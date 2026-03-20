@@ -269,20 +269,39 @@
   }
 }
 
-.events-dot-scrollbar {
+.events-dot-scrollbar-wrap {
+  align-self: center;
+  box-sizing: border-box;
+  width: min(100% - 2.5rem, 100%);
+  max-width: calc(100% - 2.5rem);
   margin: 0.55rem auto 0;
-  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
   display: flex;
   justify-content: center;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.events-dot-scrollbar {
+  box-sizing: border-box;
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.42rem;
-  padding: 0 1rem;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: var(--dot-gap, 0.35rem);
+  padding: 0.2rem 0.15rem;
 }
 
 .events-dot-scrollbar__dot {
-  width: 9px;
-  height: 9px;
+  flex: 0 0 auto;
+  width: var(--dot-size, 9px);
+  height: var(--dot-size, 9px);
   border-radius: 50%;
   border: none;
   background: #cad0db;
@@ -317,13 +336,9 @@
     padding: 1rem 0.9rem;
   }
 
-  .events-dot-scrollbar {
-    gap: 0.35rem;
-  }
-
-  .events-dot-scrollbar__dot {
-    width: 8px;
-    height: 8px;
+  .events-dot-scrollbar-wrap {
+    width: min(100% - 1.8rem, 100%);
+    max-width: calc(100% - 1.8rem);
   }
 
   .events-item__date {

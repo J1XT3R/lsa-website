@@ -2,10 +2,11 @@ import "./Resources.scss";
 
 export default function TitleIX() {
   return (
-    <div className="resource-page">
+    <main className="resource-page">
       <header className="resource-hero">
         <div className="title">
           <h1>Title IX Support</h1>
+          <p>Know your rights and where to get help.</p>
         </div>
       </header>
       <div className="resource-content">
@@ -43,37 +44,40 @@ export default function TitleIX() {
           </a>
         </section>
 
-        <section className="resource-section">
-          <h2 className="resource-section__heading">Office of Equity</h2>
-          <p>
+        <section className="resource-grid" aria-label="Title IX quick links">
+          <article className="resource-tile">
+            <h2>Office of Equity</h2>
+            <p>SFUSD guidance, processes, and district-level contact information.</p>
             <a
+              className="resource-link-btn resource-link-btn--ghost"
               target="_blank"
               rel="noopener noreferrer"
               href="https://www.sfusd.edu/departments/office-equity"
             >
-              Office of Equity
+              Visit Office of Equity
             </a>
-          </p>
-          <ul className="resource-card__list">
-            <li>
+          </article>
+          <article className="resource-tile">
+            <h2>Investigation resources</h2>
+            <div className="resource-links">
               <a
+                className="resource-link-btn resource-link-btn--ghost"
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://drive.google.com/file/d/1Lb_elI3OHaRCE6htqcGOWVIkzjNiL8b8/view"
               >
-                Investigation Overview
+                Investigation overview
               </a>
-            </li>
-            <li>
               <a
+                className="resource-link-btn resource-link-btn--ghost"
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://drive.google.com/file/d/1zcOlCWZxyqmgbFQ9JcD5jO2pnyxAFvXU/view"
               >
-                Student & Family FAQ
+                Student & family FAQ
               </a>
-            </li>
-          </ul>
+            </div>
+          </article>
         </section>
 
         <section className="resource-section">
@@ -151,7 +155,7 @@ export default function TitleIX() {
             </div>
           </div>
 
-          <p>
+          <p className="resource-note">
             <strong>Title IX Coordinators:</strong> Ms. Liverpool (liverpoolk@sfusd.edu), Ms. Fong (fongc3@sfusd.edu)
           </p>
         </section>
@@ -176,11 +180,11 @@ export default function TitleIX() {
               Lowell Incident Report Form
             </a>
           </div>
-          <p style={{ marginTop: "0.75rem", fontSize: "0.9rem", color: "#666" }}>
+          <p className="resource-note">
             tinyurl.com/titleixformalcomplaint · tinyurl.com/lhsincidentreport
           </p>
         </section>
       </div>
-    </div>
+    </main>
   );
 }

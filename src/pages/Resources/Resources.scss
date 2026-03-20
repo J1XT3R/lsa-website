@@ -1,5 +1,7 @@
 // wellness, Title IX, etc. - shared layout for resource pages
 .resource-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f8fb 0%, #ffffff 18%);
   padding-bottom: 2rem;
 
   section {
@@ -11,7 +13,7 @@
 .resource-hero {
   background: linear-gradient(135deg, var(--title-color) 0%, var(--lowell-red) 100%);
   color: white;
-  padding: 2rem 1rem;
+  padding: 2.4rem 1rem;
   text-align: center;
 
   .title {
@@ -27,12 +29,20 @@
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 700;
   }
+
+  .title p {
+    margin: 0.6rem auto 0;
+    max-width: 720px;
+    font-size: 1rem;
+    line-height: 1.55;
+    opacity: 0.94;
+  }
 }
 
 .resource-content {
-  max-width: 800px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 1.25rem 1rem;
+  padding: 1.5rem 1rem;
 }
 
 .resource-section {
@@ -74,6 +84,35 @@
   margin-top: 1rem;
 }
 
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.resource-tile {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(20, 23, 31, 0.06);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.07rem;
+    color: var(--title-color);
+  }
+
+  p {
+    margin: 0;
+    color: #454a55;
+  }
+}
+
 .resource-link-btn {
   display: inline-block;
   padding: 0.6rem 1.1rem;
@@ -92,6 +131,17 @@
   }
 }
 
+.resource-link-btn--ghost {
+  background: #fff;
+  color: var(--lowell-red);
+  border: 1px solid rgba(134, 18, 18, 0.32);
+
+  &:hover {
+    background: rgba(134, 18, 18, 0.08);
+    color: var(--lowell-red);
+  }
+}
+
 // keep these buttons white or they inherit the section link color and look wrong
 .resource-section a.resource-link-btn {
   color: white;
@@ -101,13 +151,23 @@
   }
 }
 
+.resource-section a.resource-link-btn--ghost {
+  color: var(--lowell-red);
+
+  &:hover {
+    color: var(--lowell-red);
+  }
+}
+
 // little cards for contact blocks and such (Title IX, etc.)
 .resource-card {
-  background: #f8f9fa;
+  background: #ffffff;
   border-radius: 10px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-left: 4px solid var(--lowell-red);
+  box-shadow: 0 6px 16px rgba(20, 23, 31, 0.05);
 
   &:last-child {
     margin-bottom: 0;
@@ -144,6 +204,12 @@
   color: #555;
 }
 
+.resource-note {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 // Freshmen Corner - grid of cards, nice and simple
 .freshmen-corner {
   display: grid;
@@ -176,6 +242,10 @@
 }
 
 @media (max-width: 640px) {
+  .resource-content {
+    padding: 1.2rem 0.9rem;
+  }
+
   .freshmen-corner {
     grid-template-columns: 1fr;
   }

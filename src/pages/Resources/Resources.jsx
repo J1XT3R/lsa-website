@@ -3,44 +3,54 @@ import "./Resources.scss";
 
 export default function Resources() {
   return (
-    <div className="resource-page">
+    <main className="resource-page resources-hub">
       <header className="resource-hero">
         <div className="title">
-          <h1>Resources</h1>
+          <h1>Student Resources</h1>
+          <p>Support, safety, and helpful links for Lowell students.</p>
         </div>
       </header>
 
       <div className="resource-content">
-        <section className="resource-section">
-          <h2 className="resource-section__heading">Get support</h2>
-          <p>
-            Lowell Student Association resources and referral pages for wellness and
-            Title IX support.
-          </p>
+        <section className="resource-grid" aria-label="Primary resource links">
+          <article className="resource-tile">
+            <h2>Wellness Center</h2>
+            <p>
+              Mental health and emotional support resources from the Lowell wellness
+              team.
+            </p>
+            <Link to="/Resources/Wellness" className="resource-link-btn">
+              Open wellness resources
+            </Link>
+          </article>
 
-          <div className="resource-links" aria-label="Resource links">
-            <Link to="/Wellness" className="resource-link-btn">
-              Lowell Wellness Center
+          <article className="resource-tile">
+            <h2>Title IX Support</h2>
+            <p>
+              Learn your rights, reporting options, and contact information for help.
+            </p>
+            <Link to="/Resources/TitleIX" className="resource-link-btn">
+              Open Title IX resources
             </Link>
-            <Link to="/TitleIX" className="resource-link-btn">
-              Title IX Support
-            </Link>
-          </div>
+          </article>
         </section>
 
         <section className="resource-section">
-          <h2 className="resource-section__heading">Other helpful pages</h2>
+          <h2 className="resource-section__heading">More helpful pages</h2>
           <div className="resource-links" aria-label="Other pages links">
-            <Link to="/ApplicationsOpen" className="resource-link-btn">
+            <Link to="/ApplicationsOpen" className="resource-link-btn resource-link-btn--ghost">
               Applications open
             </Link>
-            <Link to="/Clubs" className="resource-link-btn">
+            <Link to="/Clubs" className="resource-link-btn resource-link-btn--ghost">
               Browse clubs
+            </Link>
+            <Link to="/Announcements" className="resource-link-btn resource-link-btn--ghost">
+              Announcements
             </Link>
           </div>
         </section>
       </div>
-    </div>
+    </main>
   );
 }
 
