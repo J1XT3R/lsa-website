@@ -442,6 +442,14 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
             hasDropDown: true,
             subLinks: [
                 {
+                    name: "Events",
+                    to: "Events",
+                },
+                {
+                    name: "Announcements",
+                    to: "Announcements",
+                },
+                {
                     name: "Archives",
                     to: "Archives",
                 },

@@ -21,6 +21,7 @@ import SBC from './pages/About/SBC'
 import DSA from './pages/About/DSA'
 import ClassBoard from "./pages/About/ClassBoard"
 import Site from './pages/More/Site'
+import Events from './pages/More/Events'
 import Committees from './pages/About/Committees'
 import SpiritCommittee from './pages/About/SpiritCommittee'
 import Committee from './pages/About/Committee'
@@ -239,6 +240,7 @@ function App() {
             </Route>
             
             <Route path="FreshmenCorner" element= {<FreshMenCorner />} />
+            <Route path="Events" element={<Events />} />
             <Route path="AboutSite" element={<Site />} />
             <Route path="Archives" element={<Archives />} />
             <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} />} />  
