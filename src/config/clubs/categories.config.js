@@ -14,7 +14,7 @@ export const clubCategories = [
   { name: "STEM", color: "#861212" },
 ];
 
-// turns category list into a name -> color map (old code still uses this)
+// turns category list into a name -> color map (old code still uses this unforunately)
 export function getCategoryColorMap() {
   return Object.fromEntries(clubCategories.map((c) => [c.name, c.color]));
 }

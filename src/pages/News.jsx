@@ -13,7 +13,7 @@ function getPreview(text) {
 }
 
 export default function News({ newsData, previewMode = true }) {
-  // use whatever we're passed or fall back to defaults so the page doesn't explode
+  // use whatever we're passed or fall back to defaults so the page doesn't get angry
   const newsItems = useMemo(
     () => (newsData && newsData.length ? newsData : announcements),
     [newsData]

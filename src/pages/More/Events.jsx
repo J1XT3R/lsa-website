@@ -114,6 +114,36 @@ export default function Events() {
     };
   }, [filteredEvents]);
 
+  useEffect(() => {
+    const el = timelineRef.current;
+    if (!el) return;
+
+    const normalizeWheelDelta = (delta, deltaMode) => {
+      if (deltaMode === 1) return delta * 48; // line-based wheel (Windows mouse)
+      if (deltaMode === 2) return delta * el.clientWidth; // page-based
+      return delta; // pixel-based (trackpads)
+    };
+
+    const onWheel = (e) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      // Force wheel interaction over timeline to move horizontally.
+      e.preventDefault();
+      const deltaX = normalizeWheelDelta(e.deltaX, e.deltaMode);
+      const deltaY = normalizeWheelDelta(e.deltaY, e.deltaMode);
+
+      // Prefer the strongest wheel axis and amplify enough to move across snap points.
+      const axisDelta = Math.abs(deltaY) >= Math.abs(deltaX) ? deltaY : deltaX;
+      el.scrollBy({ left: axisDelta * 2, behavior: "auto" });
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, []);
+
   const scrollToIndex = (index) => {
     const el = timelineRef.current;
     if (!el) return;

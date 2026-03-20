@@ -157,7 +157,6 @@ function App() {
     }, []);
 
 
-    // this code is not great - sheet has random blanks and strings, we just shove numbers through and hope
     function arrayCleanUp(array) {
       const cleanedArray = [];
       for (let i = 0; i < array.length; i++) {

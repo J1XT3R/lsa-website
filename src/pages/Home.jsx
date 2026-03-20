@@ -84,7 +84,7 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
         <ElectionBanner config={site.elections} />
       )}
 
-      {/* TODO: Add back in Cardinalympics section when it's back */}
+      {/* TODO: Add back in Cardinalympics section on home page when it's back */}
       {/* <div className="intro-container">
                 <h2>2025 Cardinalympics!</h2>
                 <div className="cardinalympics-scores">

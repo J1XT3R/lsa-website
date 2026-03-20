@@ -110,7 +110,7 @@
   width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   padding: 1.2rem 1.25rem;
 
   // custom horizontal scrollbar

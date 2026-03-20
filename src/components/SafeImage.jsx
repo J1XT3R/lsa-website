@@ -74,8 +74,6 @@ SafeImage.propTypes = {
   alt: PropTypes.string,
   className: PropTypes.string,
   variant: PropTypes.oneOf(["user", "club"]),
-  // For cases where the calling code wants a "temporary icon" that differs
-  // from the styling/semantic variant.
   fallbackVariant: PropTypes.oneOf(["user", "club"]),
 };
 

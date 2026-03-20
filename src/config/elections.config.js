@@ -7,7 +7,7 @@ function avatar(id) {
   return `https://i.pravatar.cc/400?u=${encodeURIComponent(id)}`;
 }
 
-// long bios for each role so candidates don't have to write novels every time
+// long bios for each candidates (temp)
 const LONG_DESC = {
   electionsCommissioner: "Hey everyone! I'm very excited to serve as your SBC Elections Commissioner this year!! I will be running the Freshmen Elections in the fall and General Elections in the spring!! My biggest goal this year is making sure both elections run as smoothly as possible, as well as boosting Freshmen class spirit prior to Freshmen Elections. Outside of SBC, you might find me re-binging TV shows, hanging out with friends or preparing for my next dance showcase/competition. I'll always appreciate a good show recommendation. I'm looking forward to another successful school year with you all. Feel free to reach out through email for any questions or suggestions!!",
   president: "Hey everyone! I'm running to be your SBC President and I couldn't be more excited. My main goals are strengthening student voice, improving transparency between the administration and students, and making sure every student feels represented. I have experience in student government and event planning, and I'm committed to listening to your ideas and turning them into action. Outside of school I love spending time with friends, exploring the city, and staying active. I'd be honored to serve you-reach out anytime with questions or suggestions!!",

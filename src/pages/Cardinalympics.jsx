@@ -4,6 +4,9 @@ import CardinalympicLogo from "../components/CardinalympicLogo";
 import Counter from "../components/Counter";
 import "./Cardinalympics.scss";
 
+
+//TODO: AUTOMATE THE EVENTS LISTINGS WHY IS THIS FILE 1K LINES OF CODE NOT NECESSARY 
+
 const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
 const CLASS_SLUGS = ["freshman", "sophomore", "junior", "senior"];
 const POINTS_POSSIBLE = 9750;
@@ -53,7 +56,7 @@ function isEventRow(row) {
   return [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
 }
 
-// winner text might be in col 8 or 9 depending on who edited the sheet last 🙃
+// winner text might be in col 8 or 9 depending on who edited the sheet last 
 function getWinner(row) {
   for (let c = IDX_WINNER; c <= IDX_WINNER + 2; c++) {
     const val = row[c] != null ? String(row[c]).trim() : "";
@@ -64,7 +67,6 @@ function getWinner(row) {
 
 const INITIAL_VISIBLE_ROWS = 12;
 
-// eslint-disable-next-line react/prop-types
 function ScoreboardTable({ rows }) {
   const [sidebar, setSidebar] = useState(null); // { eventName, winner } when you click a row
   const [showAllRows, setShowAllRows] = useState(false);
@@ -174,7 +176,7 @@ function ScoreboardTable({ rows }) {
                 onClick={() => setSidebar(null)}
                 aria-label="Close"
               >
-                ×
+                x
               </button>
             </div>
             <p className="cardinalympics-winner-sidebar-event">{sidebar.eventName}</p>
@@ -186,7 +188,6 @@ function ScoreboardTable({ rows }) {
   );
 }
 
-// eslint-disable-next-line react/prop-types
 export default function Cardinalympics({ cardinalympicsData, scoreboardRows = [] }) {
   const leaderIndex = cardinalympicsData.length === 4
     ? cardinalympicsData.indexOf(Math.max(...cardinalympicsData))
@@ -328,7 +329,7 @@ export default function Cardinalympics({ cardinalympicsData, scoreboardRows = []
               Times Tables Comp <span>(100 pts)</span>
             </h3>
             <p className="event-description">
-              <strong>When:</strong> 3:50 – 4:10
+              <strong>When:</strong> 3:50 - 4:10
             </p>
             <p className="event-description">
               <strong>Where:</strong> Room 255
@@ -463,7 +464,7 @@ export default function Cardinalympics({ cardinalympicsData, scoreboardRows = []
               <strong>Description:</strong> Cranes! Lots and lots of cranes! Can
               you fold quickly and accurately, creating an origami crane? Join
               us to see who can make the most cranes in a timed competition.
-              Even if you DON’T know how to make a crane, join us as basic
+              Even if you DON&apos;T know how to make a crane, join us as basic
               instructions will be provided. All materials will be provided.
             </p>
             <p className="event-description">
@@ -1090,9 +1091,9 @@ export default function Cardinalympics({ cardinalympicsData, scoreboardRows = []
               <strong>Description:</strong> Do you have an urge to perfectly
               arrange moveable cubes so that all the colors are the same on each
               side? Are you fast? Do you want to challenge yourself against your
-              peers at Lowell? Come to the Rubik’s Cube Solving Competition. You
+              peers at Lowell? Come to the Rubik&apos;s Cube Solving Competition. You
               are allowed to bring your own Cube with you OR one can be provided
-              if you don’t have your own.
+              if you don&apos;t have your own.
             </p>
             <p className="event-description">
               <strong>Who?</strong> Up to 30 individuals.

@@ -1,4 +1,4 @@
-import "./About.scss"; // shared about page styles
+import "./About.scss";
 import { useState } from "react";
 import { GlowCapture, Glow } from "@codaworks/react-glow";
 export default function Charter() {

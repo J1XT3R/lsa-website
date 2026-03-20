@@ -1,5 +1,5 @@
 export default function LoadingTruck() {
-  // the cute little truck that bounces while data loads - way better than a spinner
+  // the cute little truck that bounces while data loads
 
   return (
     <>

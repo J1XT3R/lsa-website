@@ -86,7 +86,7 @@ ElectionCandidateCard.propTypes = {
   accentColor: PropTypes.string,
 };
 
-// config sometimes gives us just a name string - turn it into a proper candidate object so we don't explode
+// config sometimes gives us just a name string - turn it into a proper candidate object so we arent cooked
 function normalizeCandidate(c) {
   if (typeof c === "string") {
     return { name: c, description: "", pfp: `https://i.pravatar.cc/400?u=${encodeURIComponent(c)}`, video: "" };

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-// the "polls are open" bar that shows when we're in polling mode - usually at top of layout
+// the "polls are open" bar that shows when we're in polling mode
 export default function ElectionsBar({ config }) {
   if (!config?.pollingBar?.enabled) return null;
 

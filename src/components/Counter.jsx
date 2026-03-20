@@ -18,7 +18,7 @@ export default function Counter({
     setCount(start);
   }, [start, end]);
 
-  // animate the number when this thing scrolls into view - intersection observer magic
+  // animate the number when this thing scrolls into view
   useEffect(() => {
     const currentRef = statsRef.current;
     if (!currentRef) return;
@@ -48,7 +48,7 @@ export default function Counter({
       setCount((prev) => {
         if (prev >= end) {
           clearInterval(timer); // Stop the timer
-          return end; // Ensure it stops exactly at end
+          return end;
         }
         return prev + increment;
       });

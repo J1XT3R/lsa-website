@@ -6,7 +6,7 @@ import {
   faFacebook,
 } from "@fortawesome/free-brands-svg-icons";
 export default function Footer() {
-  // just the footer with social links, nothing fancy
+  // just the footer with social links
   return (
     <>
       <footer className="flex-center">
