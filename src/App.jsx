@@ -25,6 +25,7 @@ import Committees from './pages/About/Committees'
 import SpiritCommittee from './pages/About/SpiritCommittee'
 import LsaTeamPage from './pages/About/LsaTeamPage'
 import LSAExplore from './pages/About/LSAExplore'
+import Registry from './pages/Registry/Registry'
 import NewClub from './pages/Clubs/club_resources/NewClub'
 import EventPlanning from './pages/Clubs/club_resources/EventPlanning'
 import Fundraising from './pages/Clubs/club_resources/Fundraising'
@@ -273,6 +274,7 @@ function App() {
             <Route path="TitleIX" element={<Navigate to="/Resources/TitleIX" replace />} />
             
             <Route path="FreshmenCorner" element= {<FreshMenCorner />} />
+            <Route path="Registry" element={<Registry />} />
             <Route path="Events" element={<Events />} />
             <Route path="AboutSite" element={<Site />} />
             <Route path="Archives" element={<Archives />} />

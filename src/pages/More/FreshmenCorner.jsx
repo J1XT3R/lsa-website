@@ -38,7 +38,8 @@ export default function FreshMenCorner() {
               Review the master list for clubs, resources, and class information.
             </p>
             <LinkButton
-              to="https://docs.google.com/spreadsheets/d/1A-_2bJtMrByR2uPgT4uAyXeEx3Q6IYwWzZ-YuWLg65U/edit?gid=225032051#gid=225032051"
+              to="/Registry"
+              noTarget={true}
               style={cardButtonStyle}
             >
               View registry
