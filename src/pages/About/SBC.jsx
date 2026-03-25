@@ -68,6 +68,7 @@ export default function SBC({ officerData: officerDataProp }) {
                   variant="user"
                 />
               </div>
+              
               {/* officer card: little bar by default, expands to full bio on hover */}
               <div className="board-officer-card-frame">
                 <div className="board-officer-card-frame-header">
