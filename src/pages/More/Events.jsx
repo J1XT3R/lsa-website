@@ -37,45 +37,57 @@ export default function Events() {
     });
   }, [searchQuery, selectedCategory]);
 
-  /** At most 5 dots; window slides so the active event stays in view when there are more. */
-  const DOT_MAX = 5;
+  // Flip timeline so the newest event is on the left, older events on the right.
+  const displayedEvents = useMemo(() => {
+    return [...filteredEvents].reverse();
+  }, [filteredEvents]);
 
-  const visibleDots = useMemo(() => {
-    const total = filteredEvents.length;
-    if (total === 0) return [];
-    if (total <= DOT_MAX) {
-      return filteredEvents.map((event, index) => ({ event, index }));
-    }
-    const half = Math.floor((DOT_MAX - 1) / 2);
-    const start = Math.min(
-      Math.max(0, activeIndex - half),
-      total - DOT_MAX
-    );
-    return Array.from({ length: DOT_MAX }, (_, i) => ({
-      event: filteredEvents[start + i],
-      index: start + i,
-    }));
-  }, [filteredEvents, activeIndex]);
+  const extractYear = (dateStr) => {
+    const match = String(dateStr).match(/(19|20)\d{2}/);
+    return match ? match[0] : "";
+  };
 
-  /** Dot size + gap scale from visible dot count (1–5). */
+  const timelineEvents = useMemo(() => {
+    let prevYear = "";
+    return displayedEvents.map((event) => {
+      const year = extractYear(event.date);
+      const isYearStart = year && year !== prevYear;
+      prevYear = year;
+      return { ...event, year, isYearStart };
+    });
+  }, [displayedEvents]);
+
+  const DOT_SEGMENTS = 5;
+
+  const dotCount = useMemo(() => {
+    return Math.max(1, Math.min(DOT_SEGMENTS, displayedEvents.length));
+  }, [displayedEvents.length]);
+
+  // Active dot changes when activeIndex crosses 1/5, 2/5, etc boundaries.
+  const activeDotIndex = useMemo(() => {
+    if (displayedEvents.length <= 1) return 0;
+    const raw = Math.floor((activeIndex * dotCount) / displayedEvents.length);
+    return Math.min(dotCount - 1, Math.max(0, raw));
+  }, [activeIndex, displayedEvents.length, dotCount]);
+
+  // Dot size + gap based on the fixed number of segments.
   const dotBarStyles = useMemo(() => {
-    const count = Math.min(DOT_MAX, Math.max(1, filteredEvents.length));
+    const count = Math.max(1, dotCount);
     return {
-      "--dot-count": String(count),
-      "--dot-gap": `${Math.min(0.5, Math.max(0.1, 2.5 / count))}rem`,
-      "--dot-size": `${Math.min(10, Math.max(5, Math.round(70 / count)))}px`,
+      "--dot-gap": `${Math.min(0.55, Math.max(0.12, 2.2 / count))}rem`,
+      "--dot-size": `${Math.min(10, Math.max(5, Math.round(90 / count)))}px`,
     };
-  }, [filteredEvents.length]);
+  }, [dotCount]);
 
   useEffect(() => {
     const el = timelineRef.current;
-    if (!el || filteredEvents.length === 0) {
+    if (!el || displayedEvents.length === 0) {
       setActiveIndex(0);
       return;
     }
 
     setActiveIndex((prev) =>
-      Math.min(prev, Math.max(0, filteredEvents.length - 1))
+      Math.min(prev, Math.max(0, displayedEvents.length - 1))
     );
 
     /**
@@ -112,7 +124,7 @@ export default function Events() {
       el.removeEventListener("scroll", onScroll);
       ro?.disconnect();
     };
-  }, [filteredEvents]);
+  }, [displayedEvents]);
 
   useEffect(() => {
     const el = timelineRef.current;
@@ -199,15 +211,27 @@ export default function Events() {
 
       <div className="events-timeline-wrapper">
         <div className="events-timeline-shell">
+          <div className="events-timeline-shell__upcoming" aria-hidden>
+            Upcoming
+          </div>
           <div
             className="events-timeline"
             role="list"
             aria-label="Lowell events timeline"
             ref={timelineRef}
           >
-            {filteredEvents.map((event) => (
-              <article className="events-item" key={event.id} role="listitem">
+            {timelineEvents.map((event) => (
+              <article
+                className={`events-item events-item--year-${event.year || "unknown"}`}
+                key={event.id}
+                role="listitem"
+              >
                 <div className="events-item__marker" aria-hidden>
+                  {event.isYearStart && (
+                    <span className="events-item__year-label">
+                      {event.year}
+                    </span>
+                  )}
                   <span className="events-item__date">{event.date}</span>
                   <span className="events-item__dot" />
                 </div>
@@ -222,7 +246,7 @@ export default function Events() {
                 </div>
               </article>
             ))}
-            {filteredEvents.length === 0 && (
+            {displayedEvents.length === 0 && (
               <article className="events-empty" role="status" aria-live="polite">
                 <h2>No events found</h2>
                 <p>Try a different search query or category filter.</p>
@@ -231,25 +255,34 @@ export default function Events() {
           </div>
         </div>
 
-        {filteredEvents.length > 0 && (
+        {displayedEvents.length > 0 && (
           <div className="events-dot-scrollbar-wrap">
             <div
               className="events-dot-scrollbar"
               style={dotBarStyles}
               aria-label="Timeline position"
-              data-dot-count={Math.min(DOT_MAX, filteredEvents.length)}
-              data-overflow={filteredEvents.length > DOT_MAX ? "true" : "false"}
             >
-              {visibleDots.map(({ event, index }) => (
+              {Array.from({ length: dotCount }, (_, dotIndex) => {
+                const total = displayedEvents.length;
+                const startIndex =
+                  dotCount === 1
+                    ? 0
+                    : dotIndex === dotCount - 1
+                      ? total - 1
+                      : Math.floor((dotIndex * total) / dotCount);
+                const event = displayedEvents[startIndex];
+
+                return (
                 <button
-                  key={`${event.id}-dot-${index}`}
+                  key={`${event?.id ?? "event"}-dot-${dotIndex}`}
                   type="button"
-                  className={`events-dot-scrollbar__dot ${activeIndex === index ? "events-dot-scrollbar__dot--active" : ""}`}
-                  onClick={() => scrollToIndex(index)}
-                  aria-label={`Go to ${event.title}`}
-                  aria-current={activeIndex === index ? "true" : undefined}
+                  className={`events-dot-scrollbar__dot ${activeDotIndex === dotIndex ? "events-dot-scrollbar__dot--active" : ""}`}
+                  onClick={() => scrollToIndex(startIndex)}
+                  aria-label={`Go to ${event?.title ?? "event"}`}
+                  aria-current={activeDotIndex === dotIndex ? "true" : undefined}
                 />
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
