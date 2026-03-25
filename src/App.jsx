@@ -32,6 +32,7 @@ import Fundraising from './pages/Clubs/club_resources/Fundraising'
 import MockTrial from './pages/Organizations/MockTrial'
 import ShieldAndScroll from './pages/Organizations/ShieldAndScroll'
 import Archives from './pages/More/Archives'
+import More from './pages/More/More'
 import Forensic from './pages/Organizations/Forensic'
 import Cardinalympics from './pages/Cardinalympics'
 import { site } from './config/site.config.js'
@@ -279,6 +280,7 @@ function App() {
             <Route path="AboutSite" element={<Site />} />
             <Route path="Archives" element={<Archives />} />
             <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} />} />  
+            <Route path="More" element={<More />} />
           </Route>
         </Routes>
       </BrowserRouter>

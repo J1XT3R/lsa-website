@@ -523,6 +523,109 @@
     min-height: 70vh;
 }
 
+.dsa-page {
+  width: 100%;
+  padding: 3.25rem 1rem 4rem;
+}
+
+.dsa-card {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  padding: 2.75rem 2rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.08);
+}
+
+.dsa-photo-wrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // Fallback glow color (Lowell red) overwritten via inline style from DSA.jsx.
+  --dsa-glow: 134 18 18;
+}
+
+.dsa-photo-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -42px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgba(var(--dsa-glow) / 0.55) 0%,
+    rgba(var(--dsa-glow) / 0.26) 30%,
+    rgba(255, 255, 255, 0.08) 48%,
+    transparent 68%
+  );
+  filter: blur(18px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dsa-photo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(var(--dsa-glow) / 0.25) 0%,
+    transparent 60%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dsa-image {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 18px 60px rgba(var(--dsa-glow) / 0.16);
+}
+
+.dsa-info {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.dsa-name {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.1vw, 2.2rem);
+  font-weight: 700;
+  color: var(--title-color);
+  letter-spacing: -0.02em;
+}
+
+.dsa-description {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #444;
+  font-family: var(--primary-font);
+}
+
+@media (max-width: 900px) {
+  .dsa-card {
+    flex-direction: column;
+    padding: 2.25rem 1.25rem;
+    gap: 1.75rem;
+  }
+}
+
 .committees {
     display: flex;
     justify-content: center;

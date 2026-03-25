@@ -209,13 +209,13 @@ export function buildNavLinks(clubData) {
     {
       id: 8,
       name: "MORE",
-      to: "",
+      to: "/More",
       hasDropDown: true,
       subLinks: [
-        { name: "Events", to: "Events" },
-        { name: "Announcements", to: "Announcements" },
-        { name: "Archives", to: "Archives" },
-        { name: "Freshmen Corner", to: "FreshmenCorner" },
+        { name: "Events", to: "/Events", directLink: true },
+        { name: "Announcements", to: "/Announcements", directLink: true },
+        { name: "Archives", to: "/Archives", directLink: true },
+        { name: "Freshmen Corner", to: "/FreshmenCorner", directLink: true },
       ],
     },
   ];
