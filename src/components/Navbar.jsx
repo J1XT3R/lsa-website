@@ -16,637 +16,488 @@ import {
   faThumbTack,
   faCaretRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { buildNavLinks } from "../config/navLinks.js";
 
-// TODO: Redo this entire file
-// navbar kinda scuffed code icl
+const ICON_FALLBACK = {
+  HOME: faHouse,
+  "ABOUT LSA": faBook,
+  ORGANIZATIONS: faUser,
+  CLUBS: faUsers,
+  ELECTIONS: faCheckToSlot,
+  RESOURCES: faThumbTack,
+};
+
+function subLinkHref(parentPath, subLink) {
+  if (subLink.directLink) return subLink.to;
+  if (subLink.hasDropDown && subLink.to == null) return "#";
+  return `${parentPath}/${subLink.to}`;
+}
+
+function nestedHref(parentPath, subLink2) {
+  return `${parentPath}/${subLink2.to}`;
+}
+
+function NavLogo() {
+  return (
+    <Link className="logo" to="/">
+      <img src={Logo} alt="Lowell Student Association" />
+    </Link>
+  );
+}
+
+function HamburgerSubRow({
+  parentTo,
+  parentId,
+  index,
+  subLink,
+  nestedOpen,
+  onToggleNested,
+}) {
+  const nestedList =
+    subLink.hasDropDown && nestedOpen && subLink.subLinks2 ? (
+      <ul className="ham-second-dropdowns">
+        {subLink.subLinks2.map((subLink2, idx) => (
+          <Link
+            key={`${parentId}-h-${index}-n-${idx}`}
+            to={nestedHref(parentTo, subLink2)}
+            className="link"
+          >
+            {subLink2.name}
+          </Link>
+        ))}
+      </ul>
+    ) : null;
+
+  return (
+    <li
+      className="dropdown relative"
+      style={{
+        marginBottom:
+          nestedOpen && subLink.subLinks2
+            ? `${subLink.subLinks2.length * 31 + 10}px`
+            : "0px",
+      }}
+    >
+      <Link
+        className="link flex-between"
+        to={subLinkHref(parentTo, subLink)}
+      >
+        {subLink.name}
+      </Link>
+      {subLink.hasDropDown && (
+        <FontAwesomeIcon
+          icon={nestedOpen ? faMinus : faPlus}
+          className="second-dropdown-icon"
+          onClick={onToggleNested}
+        />
+      )}
+      {nestedList}
+    </li>
+  );
+}
+
+HamburgerSubRow.propTypes = {
+  parentTo: PropTypes.string.isRequired,
+  parentId: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired,
+  nestedOpen: PropTypes.bool.isRequired,
+  onToggleNested: PropTypes.func.isRequired,
+  subLink: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    to: PropTypes.string,
+    hasDropDown: PropTypes.bool,
+    directLink: PropTypes.bool,
+    subLinks2: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        to: PropTypes.string.isRequired,
+      })
+    ),
+  }).isRequired,
+};
+
+const subLinkPropType = HamburgerSubRow.propTypes.subLink;
+
+function DesktopBigSubRow({
+  parentTo,
+  parentId,
+  index,
+  subLink,
+  rowOpen,
+  onToggleRow,
+}) {
+  const linkTo = subLink.directLink
+    ? subLink.to
+    : subLink.hasDropDown
+      ? "#"
+      : `${parentTo}/${subLink.to}`;
+
+  const nestedList = subLink.subLinks2 ? (
+    <ul
+      className="big-second-dropdowns"
+      style={{ display: rowOpen ? "flex" : "none" }}
+    >
+      {subLink.subLinks2.map((subLink2, idx) => (
+        <Link
+          key={`${parentId}-b-${index}-n-${idx}`}
+          to={nestedHref(parentTo, subLink2)}
+          className="link"
+        >
+          {subLink2.name}
+        </Link>
+      ))}
+    </ul>
+  ) : null;
+
+  return (
+    <li
+      className="big-dropdown relative"
+      onClick={onToggleRow}
+    >
+      <Link className="link" to={linkTo}>
+        {subLink.name}{" "}
+        {subLink.hasDropDown ? (
+          <FontAwesomeIcon
+            icon={faCaretDown}
+            className="big-dropdown-icon right-caret"
+          />
+        ) : null}
+      </Link>
+      {nestedList}
+    </li>
+  );
+}
+
+DesktopBigSubRow.propTypes = {
+  parentTo: PropTypes.string.isRequired,
+  parentId: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired,
+  rowOpen: PropTypes.bool.isRequired,
+  onToggleRow: PropTypes.func.isRequired,
+  subLink: subLinkPropType,
+};
+
+function DesktopSmallSubRow({ parentTo, parentId, index, subLink }) {
+  const nestedList = subLink.subLinks2 ? (
+    <ul className="second-dropdowns">
+      {subLink.subLinks2.map((subLink2, idx) => (
+        <Link
+          key={`${parentId}-s-${index}-n-${idx}`}
+          to={nestedHref(parentTo, subLink2)}
+          className="link"
+        >
+          {subLink2.name}
+        </Link>
+      ))}
+    </ul>
+  ) : null;
+
+  return (
+    <li className="dropdown relative">
+      <Link className="link" to={subLinkHref(parentTo, subLink)}>
+        {subLink.name}{" "}
+        {subLink.hasDropDown ? (
+          <FontAwesomeIcon
+            icon={faCaretRight}
+            className="dropdown-icon right-caret"
+          />
+        ) : null}
+      </Link>
+      {nestedList}
+    </li>
+  );
+}
+
+DesktopSmallSubRow.propTypes = {
+  parentTo: PropTypes.string.isRequired,
+  parentId: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired,
+  subLink: subLinkPropType,
+};
+
+function HamburgerSection({
+  link,
+  sectionOpen,
+  mobileNestedOpen,
+  onToggleSection,
+  onToggleNested,
+}) {
+  const {
+    name,
+    subLinks = [],
+    hasDropDown,
+    id,
+    to,
+    icon = ICON_FALLBACK[name],
+  } = link;
+
+  const additionalMargin = subLinks.reduce((acc, subLink, index) => {
+    const nestedKey = `${id}-${index}`;
+    const nestedOn =
+      !!mobileNestedOpen[nestedKey] && subLink.subLinks2?.length;
+    return nestedOn
+      ? acc + subLink.subLinks2.length * 31 + 10
+      : acc;
+  }, 0);
+
+  return (
+    <div
+      className="relative ham-first-dropdowns"
+      style={{
+        marginBottom: sectionOpen
+          ? `${subLinks.length * 42 + additionalMargin}px`
+          : "0px",
+      }}
+    >
+      <Link to={to} className="link flex-between">
+        <div>
+          {icon && <FontAwesomeIcon icon={icon} className="icon" />} {name}
+        </div>
+      </Link>
+      {hasDropDown && (
+        <FontAwesomeIcon
+          icon={sectionOpen ? faMinus : faPlus}
+          className="dropdown-icon"
+          onClick={onToggleSection}
+        />
+      )}
+
+      {hasDropDown && sectionOpen && (
+        <ul className="ham-dropdowns">
+          {subLinks.map((subLink, index) => (
+            <HamburgerSubRow
+              key={`${id}-h-${index}`}
+              parentTo={to}
+              parentId={id}
+              index={index}
+              subLink={subLink}
+              nestedOpen={!!mobileNestedOpen[`${id}-${index}`]}
+              onToggleNested={() => onToggleNested(index)}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+HamburgerSection.propTypes = {
+  link: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    hasDropDown: PropTypes.bool,
+    icon: PropTypes.object,
+    subLinks: PropTypes.arrayOf(subLinkPropType),
+  }).isRequired,
+  sectionOpen: PropTypes.bool.isRequired,
+  mobileNestedOpen: PropTypes.objectOf(PropTypes.bool).isRequired,
+  onToggleSection: PropTypes.func.isRequired,
+  onToggleNested: PropTypes.func.isRequired,
+};
+
 export default function Navbar({ clubData, electionsEnabled = true }) {
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [hamburger, setHamburger] = useState(false);
-  const [clickedDropdown, setClickedDropdown] = useState(false);
   const location = useLocation();
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [hamburgerOpen, setHamburgerOpen] = useState(false);
+  const [mobileSectionOpen, setMobileSectionOpen] = useState({});
+  const [mobileNestedOpen, setMobileNestedOpen] = useState({});
+  const [bigSubIndexByParent, setBigSubIndexByParent] = useState({});
 
-  function toggleBigSecondDropdown(index) {
-    setClickedDropdown((prev) => (prev === index ? false : index));
-  }
-    
-    const [hasDropped, setHasDropped] = useState([
-        {
-            id: 1,
-            dropped: false,
-        },
-        {
-            id: 2,
-            dropped: false, 
-        },
-        {
-            id: 3,
-            dropped: false,
-        },
-        {
-            id: 4,
-            dropped: false,
-        },
-        {
-            id: 5,
-            dropped: false,
-        },
-        {
-            id: 6,
-            dropped: false,
-        },
-        {
-            id: 7,
-            dropped: false,
-        },
-        {
-            id: 8,
-            dropped: false,
-        },
-    ]);
-    const [childDropdown, setChildDropdown] = useState({});
+  const navLinks = useMemo(() => buildNavLinks(clubData), [clubData]);
 
-    useEffect(() => {
-        const handleScroll = () => {
-          if (window.scrollY > 50) {
-            setHasScrolled(true); 
-          } else {
-            setHasScrolled(false); 
-          }
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-      }, []);
+  const navLinksFiltered = useMemo(
+    () =>
+      electionsEnabled
+        ? navLinks
+        : navLinks.filter((link) => link.name !== "ELECTIONS"),
+    [navLinks, electionsEnabled]
+  );
+
+  const toggleMobileSection = useCallback((id) => {
+    setMobileSectionOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const toggleMobileNested = useCallback((parentId, childIndex) => {
+    const key = `${parentId}-${childIndex}`;
+    setMobileNestedOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const toggleBigSubRow = useCallback((parentId, rowIndex) => {
+    setBigSubIndexByParent((prev) => ({
+      ...prev,
+      [parentId]: prev[parentId] === rowIndex ? null : rowIndex,
+    }));
+  }, []);
 
   useEffect(() => {
-    setHamburger(false);
+    const handleScroll = () => setHasScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setHamburgerOpen(false);
   }, [location]);
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
-    if (hamburger) document.body.style.overflow = "hidden";
+    if (hamburgerOpen) document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prevOverflow;
     };
-  }, [hamburger]);
+  }, [hamburgerOpen]);
 
   useEffect(() => {
-    if (!hamburger) return;
+    if (!hamburgerOpen) return;
     const onKeyDown = (e) => {
-      if (e.key === "Escape") setHamburger(false);
+      if (e.key === "Escape") setHamburgerOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [hamburger]);
+  }, [hamburgerOpen]);
 
-    const scrolledStyle = {
-        background: hasScrolled ? "white" : "transparent",
-        opacity: hasScrolled ? 1 : 0.5,
-        transition: "all 0.3s ease-in-out", 
-    };
-    
+  const scrolledStyle = {
+    background: hasScrolled ? "white" : "transparent",
+    opacity: hasScrolled ? 1 : 0.5,
+    transition: "all 0.3s ease-in-out",
+  };
 
-    function toggleHamburger(){
-        setHamburger(prevState=> !prevState);
-    }
+  const desktopItems = useMemo(
+    () =>
+      navLinksFiltered.map((link) => {
+        const {
+          name,
+          subLinks = [],
+          hasDropDown,
+          icon = ICON_FALLBACK[name],
+          id,
+          to,
+          bigSubLink,
+        } = link;
 
-
-    function toggleDropDown(id) {
-        setHasDropped(prevState =>
-            prevState.map(dropdown =>
-                dropdown.id === id 
-                    ? { ...dropdown, dropped: !dropdown.dropped }
-                    : dropdown
-            )
-        );
-    }
-
-  const navLinks = [
-        {
-            name: "HOME",
-            hasDropDown: false,
-            icon: faHouse,
-            to: "/",
-            id: 1,
-        },
-        {
-            name: "ABOUT LSA",
-            hasDropDown: true,
-            icon: faBook,
-            subLinks: [
-                {
-                    name: "2025-26 Student Body Council",
-                    to: "SBC",
-                },
-                {
-                    name: "2026 Senior Board",
-                    to: "Senior Board",
-                },
-                {
-                    name: "2027 Junior Board",
-                    to: "Junior Board",
-                },
-                {
-                    name: "2028 Sophomore Board",
-                    to: "Sophomore Board",
-                },
-                {
-                    name: "2029 Freshman Board",
-                    to: "Freshman Board",
-                },
-                {
-                    name: "Committees",
-                    hasDropDown: true,
-                    to: "Commitees",
-                    subLinks2: [
-                        {
-                            name: "Spirit Committees",
-                            to: "Spirit Committee",
-                        },
-                        {
-                            name: "2026 Senior Prom Committee",
-                            to: "2026 Senior Prom Committee"
-                        },
-                        {
-                            name: "2027 Junior Prom Committee",
-                            to: "2027 Junior Prom Committee",
-                        },
-                        {
-                            name: "2026 Senior Boat Committee",
-                            to: "2026 Senior Boat Committee",
-                        },
-                        {
-                            name: "2027 Junior Escape Committee",
-                            to: "2027 Junior Escape Committee",
-                        },
-                    ]
-                },
-                {
-                    name: "Charter of the LSA",
-                    to: "Charter",
-                },
-                {
-                    name: "Director of Student Activities",
-                    to: "DSA"
-                }
-            ],
-            to: "/LSA",
-            id: 2,
-        },
-        {
-            name: "ORGANIZATIONS",
-            hasDropDown: true,
-            icon: faUser,
-            bigSubLink: true,
-            subLinks: [
-                {
-                    name: "The Lowell (Journalism)",
-                    to: "https://thelowell.org/",
-                    directLink: "true",
-                },
-                {
-                    name: "VIDEO LOWELL",
-                    to: "https://www.youtube.com/channel/UCQHQSnxqQIfYs8AjS8FXfvw",
-                    directLink: "true",
-                },
-                {
-                    name: "CSF Tutoring",
-                    to: "https://lowellcsf.weebly.com/",
-                    directLink: "true",
-                },
-                {
-                    name: "JROTC",
-                    to: "https://www.sfbrigade.org/home-of-the-cardinals.html",
-                    directLink: "true",
-                },
-                {
-                    name: "Peer Resources",
-                    to: "https://lhspeermentoring.weebly.com/",
-                    directLink: "true",
-                },
-                {
-                    name: "Mock Trial",
-                    to: "MockTrial",
-                },
-                {
-                    name: "Forensic Society (Speech & Debate)",
-                    to: "https://www.lowellspeechanddebate.org/",
-                    directLink: "true",
-                },
-                {
-                    name: "Science Research Program",
-                    to: "https://sites.google.com/view/lowellscienceresearch/home?authuser=0",
-                    directLink: "true",
-                },
-                {
-                    name: "CardinalBotics",
-                    to: "https://www.team4159.org/",
-                    directLink: "true",
-                },
-                {
-                    name: "Shield and Scroll",
-                    to: "ShieldAndScroll",
-                },
-                {
-                    name: "Song",
-                    to: "http://www.lowellstudentassociation.org/song.html",
-                    directLink: "true",
-                },
-                {
-                    name: "Student Advisory Council",
-                    to: "http://www.lowellstudentassociation.org/student-advisory-council.html",
-                    directLink: "true",
-                }
-
-            ],
-            to: "/Organizations",
-            id: 3,
-        },
-        {
-            name: "CLUBS",
-            hasDropDown: true,
-            bigSubLink: true,
-            icon: faUsers,
-            subLinks: [
-                {
-                    name: "Club Resources",
-                    to: "ClubResources"
-                },
-                {
-                    name: "Sports",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Sports"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    }),
-                },
-                {
-                    name: "Volunteer and Public Service Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Volunteer and Public Service"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "STEM Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "STEM"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Culture and Religion Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Culture/Religion"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Entrepreneurship & Finance Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Business"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Food and Crafts Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Food and Crafts"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Game and Fantasy Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Game and Fantasy"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Literature and Media Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Literature and Media Clubs"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Politics and Public Speaking Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Politics"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Visual and Performing Arts Club",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "VPA"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-                {
-                    name: "Health and Environment Clubs",
-                    hasDropDown: true,
-                    subLinks2: clubData.filter(club =>{
-                        return(
-                           club.Category === "Health & Environment"
-                        )
-                    }).map(object =>{
-                        return {name: object.Name, to: object.Name}
-                    })
-                },
-            ],
-            to: "/Clubs",
-            id: 4,
-        },
-        {
-            name: "ELECTIONS",
-            hasDropDown: true,
-            icon: faCheckToSlot,
-            to: "/Elections",
-            subLinks: [
-                { name: "SBC", to: "SBC" },
-                { name: "LSA 2027", to: "LSA-2027" },
-                { name: "LSA 2028", to: "LSA-2028" },
-                { name: "LSA 2029", to: "LSA-2029" },
-                { name: "LSA 2030", to: "LSA-2030" },
-            ],
-            id: 5,
-        },
-        {
-            name: "RESOURCES",
-            hasDropDown: true,
-            icon: faThumbTack,
-            subLinks: [
-                {
-                    name: "Applications open",
-                    to: "/ApplicationsOpen",
-                    directLink: true,
-                },
-                {
-                    name: "Lowell Wellness Center",
-                    to: "Wellness"
-                },
-                {
-                    name: "Title IX Support",
-                    to: "TitleIX"
-                },
-            ],
-            id: 6,
-            to: "/Resources",
-        },
-        {
-            name: "CARDINALYMPICS",
-            id: 7,
-            to: "Cardinalympics",
-        },
-        {
-            name: "MORE",
-            hasDropDown: true,
-            subLinks: [
-                {
-                    name: "Events",
-                    to: "Events",
-                },
-                {
-                    name: "Announcements",
-                    to: "Announcements",
-                },
-                {
-                    name: "Archives",
-                    to: "Archives",
-                },
-                {
-                    name: "Freshmen Corner",
-                    to: "FreshmenCorner",
-                },
-            ],
-            id: 8,
-            to: "",
-        },
-    ];
-
-    const navLinksFiltered = electionsEnabled
-        ? navLinks
-        : navLinks.filter((link) => link.name !== "ELECTIONS");
-
-    function toggleChildDropdown(parentId, childId) {
-        setChildDropdown(prev => ({
-            ...prev,
-            [`${parentId}-${childId}`]: !prev[`${parentId}-${childId}`],
-        }));
-    }
-    const navbar = navLinksFiltered.map(link=>{
-        const {name, subLinks, hasDropDown, icon, id, to, bigSubLink} = link
-        return(
-            <div className="relative first-dropdowns" key={id}>
-                    <Link to={to} className="link" >
-                        {icon && <FontAwesomeIcon icon={icon} className="icon" />} {name} {hasDropDown ? 
-                            <FontAwesomeIcon icon={faCaretDown} className="dropdown-icon icon"/> : ""}
-                    </Link>
-                {hasDropDown && !bigSubLink &&
-                    <ul className="dropdowns" key={id + 1}>
-                        {subLinks.map((subLink, index) =>{
-                            return(
-                                <li className="dropdown relative" key={index}>
-                                    <Link className="link" to={subLink.directLink ? `${subLink.to}` : `${to}/${subLink.to}`}>{subLink.name} {subLink.hasDropDown ? 
-                                    <FontAwesomeIcon icon={faCaretRight} className="dropdown-icon right-caret" /> : ""}</Link>
-                                    {hasDropDown && subLink.subLinks2 && (
-                                        <ul className="second-dropdowns">
-                                            {subLink.subLinks2.map((subLink2, idx) => (
-                                                    <Link to={`${to}/${subLink2.to}`} className="link" key={idx}>{subLink2.name}</Link>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </li>
-                                
-                            )
-                        })}
-                    </ul>}
-                {hasDropDown && bigSubLink &&
-                    <ul className="big-dropdowns" key={id + 1}>
-                        {subLinks.map((subLink, index) =>{
-                            return(
-                                <li className="big-dropdown relative" key={index}
-                                    onClick={(event) => toggleBigSecondDropdown(index, event)}
-                                >
-                                    <Link className="link" to={subLink.directLink ? `${subLink.to}` : subLink.hasDropDown ? `#` : `${to}/${subLink.to}`}>{subLink.name} {subLink.hasDropDown ? 
-                                    <FontAwesomeIcon icon={faCaretDown} className= "big-dropdown-icon right-caret" /> : ""}</Link>
-                                    {hasDropDown && subLink.subLinks2 && (
-                                        <ul className="big-second-dropdowns"
-                                            style={{
-                                                display: clickedDropdown === index ? "flex" : "none"
-                                            }}    
-                                        >
-                                            {subLink.subLinks2.map((subLink2, idx) => (
-                                                    <Link to={`${to}/${subLink2.name}`} className="link" key={idx}>{subLink2.name}</Link>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </li>
-                                
-                            )
-                        })}
-                    </ul>}
-            </div>
-        )
-    });
-    const hamburgerNav = navLinksFiltered.map(link => {
-        const { name, subLinks = [], hasDropDown, icon, id, to } = link;  // default to [] so we don't crash when subLinks is missing
-        const isDropped = hasDropped.find(drop => drop.id === id)?.dropped;
-    
-        // figure out how much space the nested dropdowns need (this logic is kinda gross but it works)
-        const additionalMargin = subLinks.reduce((acc, subLink, index) => {
-            const isChildDropped = childDropdown[`${id}-${index}`];
-            return isChildDropped && subLink.subLinks2 
-                ? acc + subLink.subLinks2.length * 31 + 10 
-                : acc;
-        }, 0);
-    
         return (
-            <div
-                className="relative ham-first-dropdowns"
-                key={id}
-                style={{ marginBottom: isDropped ? `${subLinks.length * 42 + additionalMargin}px` : "0px" }}
-            >
-                <Link to={to} className="link flex-between">
-                    <div>{icon && <FontAwesomeIcon icon={icon} className="icon" />} {name}</div>
-                </Link>
-                {hasDropDown && (
-                    <FontAwesomeIcon
-                        icon={isDropped ? faMinus : faPlus}
-                        className="dropdown-icon"
-                        onClick={() => toggleDropDown(id)}
-                    />
-                )}
-    
-                {hasDropDown && isDropped && (
-                    <ul className="ham-dropdowns">
-                        {subLinks.map((subLink, index) => {
-                            
-                            const isChildDropped = childDropdown[`${id}-${index}`];
-                            return (
-                                <li
-                                    className="dropdown relative"
-                                    key={index}
-                                    style={{
-                                        marginBottom: isChildDropped && subLink.subLinks2
-                                            ? `${subLink.subLinks2.length * 31 + 10}px`
-                                            : "0px"
-                                    }}
-                                >
-                                    <Link
-                                        className="link flex-between"
-                                        to={subLink.directLink ? `${subLink.to}` : `${to}/${subLink.to}`}
-                                    >
-                                        {subLink.name}
-                                    </Link>
-                                    {subLink.hasDropDown && (
-                                            <FontAwesomeIcon
-                                                icon={isChildDropped ? faMinus : faPlus}
-                                                className="second-dropdown-icon"
-                                                onClick={() => toggleChildDropdown(id, index)}
-                                            />
-                                        )}
-    
-                                    {subLink.hasDropDown && isChildDropped && subLink.subLinks2 && (
-                                        <ul className="ham-second-dropdowns">
-                                            {subLink.subLinks2.map((subLink2, idx) => {
-                                                return (
-                                                <Link
-                                                    to={`${to}/${subLink2.to}`}
-                                                    className="link"
-                                                    key={idx}
-                                                >
-                                                    {subLink2.name}
-                                                </Link>
-                                            )})}
-                                        </ul>
-                                    )}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
-            </div>
-        );
-    });
-    return(
-        <>
-            <div
-              className={
-                location.pathname === "/" ? "ham-offset" : "off-set ham-offset"
-              }
-            ></div>
-            <div className="navbar">
-                <ul className="nav-links" style={hasScrolled ? scrolledStyle : {}}>
-                    <Link className="logo" to="/"><img src={Logo} alt="Lowell Student Association" /></Link>
-                    {navbar}
-                </ul>
-            </div>
-            
-            <div className="hamburger-menu">
-                <Link className="logo" to="/"><img src={Logo} alt="Lowell Student Association" /></Link>
-                <FontAwesomeIcon icon={hamburger ? faXmark : faBars} className="hamburger-button"
-                    onClick = {toggleHamburger}
-                    style={{display: hamburger ? "none" : "block"}}
+          <div className="relative first-dropdowns" key={id}>
+            <Link to={to} className="link">
+              {icon && <FontAwesomeIcon icon={icon} className="icon" />}{" "}
+              {name}{" "}
+              {hasDropDown ? (
+                <FontAwesomeIcon
+                  icon={faCaretDown}
+                  className="dropdown-icon icon"
                 />
-            </div>
-            {hamburger && (
-              <div
-                className="navbar-drawer-backdrop"
-                onClick={() => setHamburger(false)}
-                role="button"
-                tabIndex={-1}
-                aria-label="Close menu"
-              />
+              ) : null}
+            </Link>
+
+            {hasDropDown && !bigSubLink && (
+              <ul className="dropdowns">
+                {subLinks.map((subLink, index) => (
+                  <DesktopSmallSubRow
+                    key={`${id}-s-${index}`}
+                    parentTo={to}
+                    parentId={id}
+                    index={index}
+                    subLink={subLink}
+                  />
+                ))}
+              </ul>
             )}
-            <div className={hamburger ? "hamburger-nav left" : "hamburger-nav right hamburger-nav--closed"}>
-                <FontAwesomeIcon icon={hamburger ? faXmark : faBars} className="hamburger-button2"
-                    onClick = {toggleHamburger}
-                />
-                {hamburgerNav}    
-            </div>
-        </>
-    );
+
+            {hasDropDown && bigSubLink && (
+              <ul className="big-dropdowns">
+                {subLinks.map((subLink, index) => (
+                  <DesktopBigSubRow
+                    key={`${id}-b-${index}`}
+                    parentTo={to}
+                    parentId={id}
+                    index={index}
+                    subLink={subLink}
+                    rowOpen={bigSubIndexByParent[id] === index}
+                    onToggleRow={() => toggleBigSubRow(id, index)}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      }),
+    [navLinksFiltered, bigSubIndexByParent, toggleBigSubRow]
+  );
+
+  const hamburgerItems = useMemo(
+    () =>
+      navLinksFiltered.map((link) => (
+        <HamburgerSection
+          key={link.id}
+          link={link}
+          sectionOpen={!!mobileSectionOpen[link.id]}
+          mobileNestedOpen={mobileNestedOpen}
+          onToggleSection={() => toggleMobileSection(link.id)}
+          onToggleNested={(index) => toggleMobileNested(link.id, index)}
+        />
+      )),
+    [
+      navLinksFiltered,
+      mobileSectionOpen,
+      mobileNestedOpen,
+      toggleMobileSection,
+      toggleMobileNested,
+    ]
+  );
+
+  return (
+    <>
+      <div
+        className={
+          location.pathname === "/" ? "ham-offset" : "off-set ham-offset"
+        }
+      />
+      <div className="navbar">
+        <ul
+          className="nav-links"
+          style={hasScrolled ? scrolledStyle : {}}
+        >
+          <NavLogo />
+          {desktopItems}
+        </ul>
+      </div>
+
+      <div className="hamburger-menu">
+        <NavLogo />
+        <FontAwesomeIcon
+          icon={hamburgerOpen ? faXmark : faBars}
+          className="hamburger-button"
+          onClick={() => setHamburgerOpen((o) => !o)}
+          style={{ display: hamburgerOpen ? "none" : "block" }}
+        />
+      </div>
+      {hamburgerOpen && (
+        <div
+          className="navbar-drawer-backdrop"
+          onClick={() => setHamburgerOpen(false)}
+          role="button"
+          tabIndex={-1}
+          aria-label="Close menu"
+        />
+      )}
+      <div
+        className={
+          hamburgerOpen
+            ? "hamburger-nav left"
+            : "hamburger-nav right hamburger-nav--closed"
+        }
+      >
+        <FontAwesomeIcon
+          icon={hamburgerOpen ? faXmark : faBars}
+          className="hamburger-button2"
+          onClick={() => setHamburgerOpen((o) => !o)}
+        />
+        {hamburgerItems}
+      </div>
+    </>
+  );
 }
 
 Navbar.propTypes = {

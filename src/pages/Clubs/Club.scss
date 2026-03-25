@@ -1,16 +1,3 @@
-@mixin info-page {
-  max-width: 912px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 3rem;
-}
-
-.club-resources {
-  @include info-page;
-}
-
 .club-buttons {
   display: flex;
   flex-wrap: wrap;

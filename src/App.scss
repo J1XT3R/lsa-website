@@ -981,9 +981,13 @@
   width: 300px;
 }
 
-.big-dropdown>.link {
+.big-dropdown > .link {
   justify-content: space-between;
-  border-bottom: 1px solid orange;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.big-dropdown:hover > .link {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
 }
 
 .big-second-dropdowns {

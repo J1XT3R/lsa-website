@@ -1,4 +1,3 @@
-// orgs that get their own pages - link is either a route name (e.g. "MockTrial") or a full URL
 export default [
   {
     name: "The Lowell (Journalism)",
