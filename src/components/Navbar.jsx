@@ -303,7 +303,7 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
   const [hamburgerOpen, setHamburgerOpen] = useState(false);
   const [mobileSectionOpen, setMobileSectionOpen] = useState({});
   const [mobileNestedOpen, setMobileNestedOpen] = useState({});
-  const [bigSubIndexByParent, setBigSubIndexByParent] = useState({});
+  const [openBigSubRow, setOpenBigSubRow] = useState(null);
 
   const navLinks = useMemo(() => buildNavLinks(clubData), [clubData]);
 
@@ -325,10 +325,8 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
   }, []);
 
   const toggleBigSubRow = useCallback((parentId, rowIndex) => {
-    setBigSubIndexByParent((prev) => ({
-      ...prev,
-      [parentId]: prev[parentId] === rowIndex ? null : rowIndex,
-    }));
+    const nextKey = `${parentId}-${rowIndex}`;
+    setOpenBigSubRow((prev) => (prev === nextKey ? null : nextKey));
   }, []);
 
   useEffect(() => {
@@ -414,7 +412,7 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
                     parentId={id}
                     index={index}
                     subLink={subLink}
-                    rowOpen={bigSubIndexByParent[id] === index}
+                    rowOpen={openBigSubRow === `${id}-${index}`}
                     onToggleRow={() => toggleBigSubRow(id, index)}
                   />
                 ))}
@@ -423,7 +421,7 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
           </div>
         );
       }),
-    [navLinksFiltered, bigSubIndexByParent, toggleBigSubRow]
+    [navLinksFiltered, openBigSubRow, toggleBigSubRow]
   );
 
   const hamburgerItems = useMemo(
