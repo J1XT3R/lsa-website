@@ -25,7 +25,7 @@ const LONG_DESC = {
 
 export default {
   // "pending" | "polling" | "results" - only matters when elections are on
-  state: "polling",
+  state: "pending",
 
   // big banner when elections are happening (polling)
   banner: {

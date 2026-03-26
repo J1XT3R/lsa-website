@@ -5,7 +5,7 @@ import Counter from "../components/Counter";
 import "./Cardinalympics.scss";
 
 
-//TODO: AUTOMATE THE EVENTS LISTINGS WHY IS THIS FILE 1K LINES OF CODE NOT NECESSARY 
+//TODO: AUTOMATE THE EVENTS LISTINGS WHY IS THIS FILE 1K LINES OF CODE NOT NECESSARY (URGENT!)
 
 const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
 const CLASS_SLUGS = ["freshman", "sophomore", "junior", "senior"];
