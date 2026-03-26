@@ -110,7 +110,7 @@ export default function Fundraising() {
           <p className="club-guide-page__section-intro">
             Work with your advisor and the treasurer in the order your handbook
             describes. If something is not linked here yet, check the Activities
-            Google Classroom first (join code above)—that is where forms are
+            Google Classroom first (join code above)-that is where forms are
             usually posted.
           </p>
           <GuideResourceGrid items={FUNDRAISING_RESOURCES} />
@@ -121,7 +121,7 @@ export default function Fundraising() {
             After your fundraiser is approved
           </h2>
           <p className="club-guide-page__next-body">
-            Promote according to the fundraising handbook—some kinds of
+            Promote according to the fundraising handbook some kinds of
             advertising are restricted. For printed fliers at school, use the
             flier request form.
           </p>

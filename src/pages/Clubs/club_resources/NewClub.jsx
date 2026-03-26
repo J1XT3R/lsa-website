@@ -80,7 +80,7 @@ export default function NewClub() {
         <h1>How to start a club</h1>
         <p className="new-club-page__tagline">
           From joining the Activities Classroom to approved forms and your
-          bulletin board—follow these steps to register a new club at Lowell.
+          bulletin board follow these steps to register a new club at Lowell.
         </p>
       </header>
 
@@ -95,7 +95,7 @@ export default function NewClub() {
           logistics or fundraisers, use the{" "}
           <Link to="/Clubs/EventPlanning">event planning</Link> and{" "}
           <Link to="/Clubs/Fundraising">fundraising</Link> pages. Extra
-          announcements and forms also live in the Activities Google Classroom—you
+          announcements and forms also live in the Activities Google Classroom you
           must join it to submit documents and get updates.
         </p>
 
@@ -112,7 +112,7 @@ export default function NewClub() {
         </div>
 
         <div className="new-club-page__steps">
-          <Step number={1} title="Join the 2025–26 Activities Google Classroom">
+          <Step number={1} title="Join the 2025-26 Activities Google Classroom">
             <p className="new-club-page__step-body">
               You’ll find deadlines, forms, and school-wide club announcements
               here. Materials may be linked elsewhere, but submission and key

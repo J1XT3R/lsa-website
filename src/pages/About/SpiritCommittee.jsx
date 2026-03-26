@@ -36,7 +36,7 @@ const SECTIONS = [
     icon: faBrush,
     body: (
       <p>
-        Cover the halls with posters that match your theme. Open to everyone—you can
+        Cover the halls with posters that match your theme. Open to everyone you can
         paint, sketch, and help your class come together.
       </p>
     ),
@@ -48,7 +48,7 @@ const SECTIONS = [
     body: (
       <p>
         Choreograph and perform a routine for Spirit Rally. Dance scores are a big part
-        of the overall spirit score—so bring your best moves.
+        of the overall spirit score so bring your best moves.
       </p>
     ),
   },
@@ -82,7 +82,7 @@ const SECTIONS = [
     icon: faHandshake,
     body: (
       <p>
-        Show up when you can—Spirit Committee needs lots of people. Attendance can be
+        Show up when you can Spirit Committee needs lots of people. Attendance can be
         signed off for extracurricular credit. You can join more than one subcommittee.
       </p>
     ),
@@ -95,7 +95,7 @@ export default function SpiritCommittee() {
       <header className="spirit-committee-page__hero">
         <h1>Spirit Committee</h1>
         <p>
-          Hall art, rally games, and the spirit dance—each class builds a team for
+          Hall art, rally games, and the spirit dance each class builds a team for
           Spirit Week.
         </p>
       </header>

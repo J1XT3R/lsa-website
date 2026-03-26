@@ -34,7 +34,7 @@ export default function ClubResources() {
         <h1>Club resources</h1>
         <p className="club-resources-page__tagline">
           Materials and contacts for current club leaders and students starting
-          a new club—everything in one place.
+          a new club everything in one place.
         </p>
       </header>
 
@@ -60,7 +60,7 @@ export default function ClubResources() {
             </div>
             <p className="club-resources-page__card-body">
               Announcements, co-curricular sign-ups, and important forms. You
-              must join the Classroom to submit documents and get updates—this
+              must join the Classroom to submit documents and get updates this
               site only mirrors some of what is posted there.
             </p>
             <div className="club-resources-page__code-row">

@@ -28,7 +28,7 @@ export default function Committees() {
           </h2>
           <p>
             Dance committees (prom, escape, boat) are chosen by class boards. They
-            plan themes, logistics, and fundraising—usually for about a year and a half.
+            plan themes, logistics, and fundraising usually for about a year and a half.
           </p>
         </div>
         <div className="committees-landing__card committees-landing__card--accent">
@@ -69,7 +69,7 @@ export default function Committees() {
         <div className="committees-landing__spirit-inner">
           <h2 id="spirit-heading">Spirit Committee</h2>
           <p>
-            Hall art, rally games, and the spirit dance—each class builds a team for
+            Hall art, rally games, and the spirit dance each class builds a team for
             Spirit Week. Learn how each subcommittee works and how to join.
           </p>
           <Link to="/LSA/Spirit Committee" className="committees-landing__spirit-btn">

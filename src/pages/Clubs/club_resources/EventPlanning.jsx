@@ -38,7 +38,7 @@ export default function EventPlanning() {
         <h1>Event planning resources</h1>
         <p className="club-guide-page__tagline">
           Forms and contacts for club events. Fundraisers use a separate
-          process—see fundraising resources.
+          process see fundraising resources.
         </p>
       </header>
 
@@ -75,7 +75,7 @@ export default function EventPlanning() {
           <h2 className="club-guide-page__section-title">Planning forms</h2>
           <p className="club-guide-page__section-intro">
             Use these in order when your advisor and SBC expect them. If a link
-            is not listed here yet, open the Activities Classroom below—the
+            is not listed here yet, open the Activities Classroom below the
             live file usually lives there first.
           </p>
           <GuideResourceGrid items={EVENT_FORMS} />
