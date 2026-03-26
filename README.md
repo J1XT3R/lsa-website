@@ -1,13 +1,25 @@
-<p>Note to self, create a jsx file containing all the arrays that will be altered in the following years and export them!</p>
+# LSA Website
 
-## Work in Progress
+LSA Website is a Vite + React project.
 
-<p> Project is built with vite React. </p>
-<p> React for Frontend, Google Sheet for Backend</p>
+## Notes
 
-## Want to contribute?
+Ensure to create a jsx file containing all the arrays that will be altered in the following years and export them!
 
-<p>Fork the project on vsCode, Node.js to install packages.</p>
-<p>To contribute, you must demonstrate foundational knowledge for HTML, CSS, JavaScript, and some knowledge for React. </p>
-<p>Contact me @shengj12345@gmail.com or Mr. Barkemeyer barkemeyerj@sfusd.edu</p>
+## Getting Started
 
+1. Install dependencies:
+   - `npm install`
+2. Start the development server:
+   - `npm run dev`
+
+## Available Scripts
+
+- `npm run dev` - run the app locally
+- `npm run build` - create a production build
+- `npm run preview` - preview the production build
+- `npm run lint` - run lint checks
+
+## Contributing
+
+Please read [`CONTRIBUTING.md`](./CONTRIBUTING.md) for full contribution guidelines.
