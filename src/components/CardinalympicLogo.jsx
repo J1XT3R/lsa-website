@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import style from "./components.module.scss";
 
 export default function CardinalympicLogo({ variant = "default" }) {
@@ -29,3 +30,7 @@ export default function CardinalympicLogo({ variant = "default" }) {
     </>
   );
 }
+
+CardinalympicLogo.propTypes = {
+  variant: PropTypes.oneOf(["default", "homeBackdrop"]),
+};
