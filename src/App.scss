@@ -739,6 +739,272 @@
   }
 }
 
+// Home page — Spirit Week totals (same sheet data as /Cardinalympics)
+// Global `section` in index.scss uses min-height: 80vh — opt out so this band stays content-sized
+.home-cardinalympics {
+  min-height: unset;
+  overflow: visible;
+  background: linear-gradient(180deg, #faf7f7 0%, #f0f0f0 100%);
+  border-top: 1px solid rgba(134, 18, 18, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 2.25rem 1.25rem 2.5rem;
+}
+
+.home-cardinalympics__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+  overflow: visible;
+}
+
+.home-cardinalympics__head-wrap {
+  position: relative;
+  margin-bottom: 0.5rem;
+  padding: 1rem min(1.25rem, 4vw) 0.5rem;
+  min-height: 11.5rem;
+  overflow: visible;
+}
+
+// Olympic-style rings (CardinalympicLogo) as a soft watermark behind the title
+.home-cardinalympics__rings-bg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  width: min(440px, calc(100vw - 2rem));
+  min-height: 11rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  box-sizing: border-box;
+
+  > div {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+  }
+}
+
+.home-cardinalympics__head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.65rem, 3.5vw, 2.15rem);
+    font-weight: 800;
+    line-height: 1.08;
+    color: var(--title-color, #1a1a1a);
+    letter-spacing: -0.03em;
+  }
+}
+
+.home-cardinalympics__title-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  margin-bottom: 0.2rem;
+}
+
+.home-cardinalympics__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--lowell-red, #861212);
+  background: rgba(134, 18, 18, 0.08);
+  border: 1px solid rgba(134, 18, 18, 0.22);
+}
+
+.home-cardinalympics__live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #e53935;
+  flex-shrink: 0;
+  animation: home-cardinalympics-live-blink 1.1s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.55);
+}
+
+@keyframes home-cardinalympics-live-blink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.5);
+  }
+
+  45% {
+    opacity: 0.35;
+    transform: scale(0.88);
+    box-shadow: 0 0 0 5px rgba(229, 57, 53, 0);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cardinalympics__live-dot {
+    animation: none;
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+.home-cardinalympics__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: #555;
+  font-weight: 500;
+}
+
+.home-cardinalympics__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  margin: 0 0 0.85rem;
+  text-align: center;
+}
+
+.home-cardinalympics__class {
+  position: relative;
+  border-radius: 14px;
+  padding: 1rem 0.65rem 0.75rem;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--freshman {
+    background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-color: rgba(76, 175, 80, 0.35);
+  }
+
+  &--sophomore {
+    background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%);
+    border-color: rgba(156, 39, 176, 0.35);
+  }
+
+  &--junior {
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+    border-color: rgba(33, 150, 243, 0.35);
+  }
+
+  &--senior {
+    background: linear-gradient(145deg, #ffebee 0%, #ffcdd2 100%);
+    border-color: rgba(183, 28, 28, 0.35);
+  }
+
+  &--leader {
+    border-width: 3px;
+    box-shadow: 0 4px 18px rgba(134, 18, 18, 0.18);
+  }
+}
+
+.home-cardinalympics__leader-badge {
+  position: absolute;
+  top: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--lowell-red, #861212);
+  color: #fff;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.home-cardinalympics__class-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.home-cardinalympics__points {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin: 0;
+  line-height: 1;
+}
+
+// Counter renders an <h2> — strip default heading margins / extra line box
+.home-cardinalympics__counter,
+.home-cardinalympics__points h2 {
+  margin: 0;
+  padding: 0;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.home-cardinalympics__pts-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.home-cardinalympics__link {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--lowell-red, #861212);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    border-bottom-color: var(--lowell-red, #861212);
+    color: #5a0d0d;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-cardinalympics__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .home-cardinalympics__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .cardinalympics-scores {
   display: flex;
   justify-content: space-evenly;

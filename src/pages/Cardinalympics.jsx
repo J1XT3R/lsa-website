@@ -9,6 +9,7 @@ import "./Cardinalympics.scss";
 
 const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
 const CLASS_SLUGS = ["freshman", "sophomore", "junior", "senior"];
+const COUNTER_COLORS = ["#2e7d32", "#6a1b9a", "#1565c0", "#9c1919"];
 const POINTS_POSSIBLE = 9750;
 
 // turn a cell value into a number or bail with empty string (sheet data is messy)
@@ -189,9 +190,14 @@ function ScoreboardTable({ rows }) {
 }
 
 export default function Cardinalympics({ cardinalympicsData, scoreboardRows = [] }) {
-  const leaderIndex = cardinalympicsData.length === 4
-    ? cardinalympicsData.indexOf(Math.max(...cardinalympicsData))
-    : -1;
+  const spiritTotals = [0, 1, 2, 3].map((i) => {
+    const n = Number(cardinalympicsData?.[i]);
+    return Number.isFinite(n) ? n : 0;
+  });
+  const leaderIndex =
+    spiritTotals.length === 4
+      ? spiritTotals.indexOf(Math.max(...spiritTotals))
+      : -1;
 
   return (
     <div className="cardinalympics-page">
@@ -203,36 +209,49 @@ export default function Cardinalympics({ cardinalympicsData, scoreboardRows = []
           <CardinalympicLogo />
         </div>
       </header>
-      <div className="cardinalympics-scores-section">
-        <div className="cardinalympics-intro-container">
-          <h1>Spirit Week Total</h1>
-          <p className="spirit-week-subtitle">
-            {POINTS_POSSIBLE.toLocaleString()} points possible
-          </p>
-          <div className="cardinalympics-scores">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`cardinalympics-score ${CLASS_SLUGS[i]}${leaderIndex === i ? " leader" : ""}`}
-              >
-                <h2>{CLASS_NAMES[i]}</h2>
-                <Counter
-                  start={0}
-                  end={cardinalympicsData[i] ?? 0}
-                  duration={2000}
-                  className="cardinalympics-counter"
-                  color={i === 0 ? "green" : i === 1 ? "purple" : i === 2 ? "#5353f6" : "#9c1919"}
+      <section
+        className="home-cardinalympics cardinalympics-spirit-scores-only"
+        aria-labelledby="cardinalympics-points-cap"
+      >
+        <div className="home-cardinalympics__inner">
+          <div className="cardinalympics-spirit-card">
+            <div className="cardinalympics-spirit-card__cap" id="cardinalympics-points-cap">
+              <span className="cardinalympics-spirit-card__cap-number">
+                {POINTS_POSSIBLE.toLocaleString()}
+              </span>
+              <span className="cardinalympics-spirit-card__cap-label">points possible</span>
+            </div>
+            <div className="home-cardinalympics__grid" role="list">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={CLASS_SLUGS[i]}
+                  className={`home-cardinalympics__class home-cardinalympics__class--${CLASS_SLUGS[i]}${
+                    leaderIndex === i ? " home-cardinalympics__class--leader" : ""
+                  }`}
+                  role="listitem"
                 >
-                  {" "}
-                  pts
-                </Counter>
-              </div>
-            ))}
+                  {leaderIndex === i && (
+                    <span className="home-cardinalympics__leader-badge">Leading</span>
+                  )}
+                  <span className="home-cardinalympics__class-name">{CLASS_NAMES[i]}</span>
+                  <div className="home-cardinalympics__points">
+                    <Counter
+                      start={0}
+                      end={spiritTotals[i]}
+                      duration={2000}
+                      className="home-cardinalympics__counter"
+                      color={COUNTER_COLORS[i]}
+                    />
+                    <span className="home-cardinalympics__pts-label">pts</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
       {scoreboardRows.length > 0 && (
-        <div className="cardinalympics-scoreboard">
+        <div className="cardinalympics-scoreboard" id="detailed-scoreboard">
           <h2>Detailed scoreboard</h2>
           <div className="cardinalympics-scoreboard-table-wrap">
             <ScoreboardTable rows={scoreboardRows} />

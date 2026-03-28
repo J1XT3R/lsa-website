@@ -1,6 +1,18 @@
 import style from "./components.module.scss";
 
-export default function CardinalympicLogo() {
+export default function CardinalympicLogo({ variant = "default" }) {
+  if (variant === "homeBackdrop") {
+    return (
+      <div className={style.logoContainerHome}>
+        <div className={style.topLeftLogo} />
+        <div className={style.topMiddleLogo} />
+        <div className={style.topRightLogo} />
+        <div className={style.bottomLeftLogo} />
+        <div className={style.bottomRightLogo} />
+      </div>
+    );
+  }
+
   return (
     <>
       <div className={style.logoContainer}>

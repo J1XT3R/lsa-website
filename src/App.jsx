@@ -100,25 +100,33 @@ function App() {
     },[])
 
 
-    useEffect(()=>{
+    const CARDINALYMPICS_POLL_MS = 30_000;
+
+    useEffect(() => {
+      // Refreshes class totals (home + Cardinalympics & detailed scoreboard)
       async function fetchCardinalympicsData() {
         try {
-            const range = encodeURIComponent(SHEET_NAME3);
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID2}/values/${range}?key=${KEY}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.values && data.values.length > 0) {
-              const totals = arrayCleanUp(data.values[0]);
-              const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
-              setCardinalympicsData(classTotals);
-              setScoreboardRows(data.values);
-            }
+          const range = encodeURIComponent(SHEET_NAME3);
+          const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID2}/values/${range}?key=${KEY}`;
+          const res = await fetch(url, { cache: "no-store" });
+          const data = await res.json();
+          if (data.values && data.values.length > 0) {
+            const totals = arrayCleanUp(data.values[0]);
+            const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
+            setCardinalympicsData(classTotals);
+            
+            // Clone rows so React always sees a new reference when the sheet updates (table re-renders every poll).
+            setScoreboardRows(data.values.map((row) => (Array.isArray(row) ? [...row] : row)));
+          }
         } catch (error) {
-            console.log(error);
+          console.log(error);
         }
-    }
+      }
+
       fetchCardinalympicsData();
-    },[]);
+      const pollId = setInterval(fetchCardinalympicsData, CARDINALYMPICS_POLL_MS);
+      return () => clearInterval(pollId);
+    }, []);
 
     useEffect(() => {
       async function fetchApplicationsData() {
