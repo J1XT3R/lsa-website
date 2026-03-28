@@ -77,3 +77,82 @@
         border: 8px solid green;
     }
 }
+
+// Home hero watermark: Olympic-style interlock (5-ring DOM see CardinalympicLogo.jsx)
+// Geometry: top row 3 centers spaced 52px; bottom centers sit under top pairs; vertical step ~46px
+$home-ring: 72px;
+$home-ring-r: 36px;
+$home-mid: 84px;
+$home-mid-r: 42px;
+$home-step: 52px;
+$home-cx0: 38px;
+$home-cy-top: 38px;
+$home-cy-bot: 84px;
+
+.logoContainerHome {
+    position: relative;
+    width: 186px;
+    height: 124px;
+    overflow: visible;
+    margin: 0 !important;
+    flex-shrink: 0;
+    box-sizing: content-box;
+
+    >div {
+        position: absolute;
+        box-sizing: border-box;
+        border-radius: 50%;
+        margin: 0 !important;
+    }
+
+    .topLeftLogo {
+        left: $home-cx0 - $home-ring-r;
+        top: $home-cy-top - $home-ring-r;
+        width: $home-ring;
+        height: $home-ring;
+        border: 4px solid var(--title-color);
+        z-index: 2;
+    }
+
+    .topMiddleLogo {
+        left: $home-cx0 + $home-step - $home-mid-r;
+        top: $home-cy-top - $home-mid-r;
+        width: $home-mid;
+        height: $home-mid;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.92);
+        background-image: url('/src/assets/LSA-Logo.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        z-index: 5;
+    }
+
+    .topRightLogo {
+        left: $home-cx0 + 2 * $home-step - $home-ring-r;
+        top: $home-cy-top - $home-ring-r;
+        width: $home-ring;
+        height: $home-ring;
+        border: 4px solid rgb(83, 83, 246);
+        z-index: 3;
+    }
+
+    // Bottom ring centers: midpoints between adjacent top centers (classic Olympic offset)
+    .bottomLeftLogo {
+        left: $home-cx0 + 0.5 * $home-step - $home-ring-r;
+        top: $home-cy-bot - $home-ring-r;
+        width: $home-ring;
+        height: $home-ring;
+        border: 4px solid purple;
+        z-index: 4;
+    }
+
+    .bottomRightLogo {
+        left: $home-cx0 + 1.5 * $home-step - $home-ring-r;
+        top: $home-cy-bot - $home-ring-r;
+        width: $home-ring;
+        height: $home-ring;
+        border: 4px solid green;
+        z-index: 1;
+    }
+}

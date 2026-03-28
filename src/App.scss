@@ -684,58 +684,364 @@
   }
 }
 
-.intro-container {
+// Home hero card (hidden at max-width 1000px; see media query below)
+.home-hero-card {
   position: absolute;
-  background: linear-gradient(135deg, rgba(134, 18, 18, 0.95), rgba(200, 50, 50, 0.85));
-  width: 30vw;
-  min-width: 280px;
-  height: auto;
-  padding: 2.5rem;
-  bottom: 8%;
-  left: 5%;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  bottom: max(7%, 1.75rem);
+  left: max(4%, 1rem);
+  width: min(94vw, 32rem);
+  max-width: 100%;
+  padding: 1.5rem 1.65rem 1.45rem;
+  border-radius: 16px;
+  background: rgba(14, 14, 18, 0.58);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: #fff;
-  backdrop-filter: blur(10px);
 
   &::before {
-    position: absolute;
     content: "";
-    width: 60px;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.8);
-    top: -8px;
-    left: 25px;
-    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    left: 1.25rem;
+    right: 1.25rem;
+    height: 3px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, transparent, var(--lowell-red, #861212), transparent);
+    opacity: 0.85;
   }
+}
+
+.home-hero-card__eyebrow {
+  margin: 0.35rem 0 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.home-hero-card__title {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.home-hero-card__lede {
+  margin: 0 0 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.home-hero-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.62rem 1.15rem 0.62rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: var(--lowell-red, #861212);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px rgba(134, 18, 18, 0.45);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #9e1a1a;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(134, 18, 18, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+}
+
+.home-hero-card__cta-icon {
+  font-size: 0.85em;
+  opacity: 0.95;
+  transition: transform 0.2s ease;
+}
+
+.home-hero-card__cta:hover .home-hero-card__cta-icon {
+  transform: translateX(3px);
+}
+
+// Home page — Spirit Week totals (same sheet data as /Cardinalympics)
+// Global `section` in index.scss uses min-height: 80vh — opt out so this band stays content-sized
+.home-cardinalympics {
+  min-height: unset;
+  overflow: visible;
+  background: linear-gradient(180deg, #faf7f7 0%, #f0f0f0 100%);
+  border-top: 1px solid rgba(134, 18, 18, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 2.25rem 1.25rem 2.5rem;
+}
+
+.home-cardinalympics__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+  overflow: visible;
+}
+
+.home-cardinalympics__head-wrap {
+  position: relative;
+  margin-bottom: 0.5rem;
+  padding: 1rem min(1.25rem, 4vw) 0.5rem;
+  min-height: 11.5rem;
+  overflow: visible;
+}
+
+// Olympic-style rings (CardinalympicLogo) as a soft watermark behind the title
+.home-cardinalympics__rings-bg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  width: min(440px, calc(100vw - 2rem));
+  min-height: 11rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  box-sizing: border-box;
+
+  > div {
+    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+  }
+}
+
+.home-cardinalympics__head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
 
   h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1.2rem;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
+    margin: 0;
+    font-size: clamp(1.65rem, 3.5vw, 2.15rem);
+    font-weight: 800;
+    line-height: 1.08;
+    color: var(--title-color, #1a1a1a);
+    letter-spacing: -0.03em;
+  }
+}
+
+.home-cardinalympics__title-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  margin-bottom: 0.2rem;
+}
+
+.home-cardinalympics__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--lowell-red, #861212);
+  background: rgba(134, 18, 18, 0.08);
+  border: 1px solid rgba(134, 18, 18, 0.22);
+}
+
+.home-cardinalympics__live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #e53935;
+  flex-shrink: 0;
+  animation: home-cardinalympics-live-blink 1.1s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.55);
+}
+
+@keyframes home-cardinalympics-live-blink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.5);
   }
 
-  a {
-    display: inline-block;
-    margin-top: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: white;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.25);
-    padding: 0.7rem 1.8rem;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  45% {
+    opacity: 0.35;
+    transform: scale(0.88);
+    box-shadow: 0 0 0 5px rgba(229, 57, 53, 0);
+  }
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.95);
-      color: #861212;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
+  55% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cardinalympics__live-dot {
+    animation: none;
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+.home-cardinalympics__subtitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: #555;
+  font-weight: 500;
+}
+
+.home-cardinalympics__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+  margin: 0 0 0.85rem;
+  text-align: center;
+}
+
+.home-cardinalympics__class {
+  position: relative;
+  border-radius: 14px;
+  padding: 1rem 0.65rem 0.75rem;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--freshman {
+    background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-color: rgba(76, 175, 80, 0.35);
+  }
+
+  &--sophomore {
+    background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%);
+    border-color: rgba(156, 39, 176, 0.35);
+  }
+
+  &--junior {
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+    border-color: rgba(33, 150, 243, 0.35);
+  }
+
+  &--senior {
+    background: linear-gradient(145deg, #ffebee 0%, #ffcdd2 100%);
+    border-color: rgba(183, 28, 28, 0.35);
+  }
+
+  &--leader {
+    border-width: 3px;
+    box-shadow: 0 4px 18px rgba(134, 18, 18, 0.18);
+  }
+}
+
+.home-cardinalympics__leader-badge {
+  position: absolute;
+  top: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--lowell-red, #861212);
+  color: #fff;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.home-cardinalympics__class-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.home-cardinalympics__points {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin: 0;
+  line-height: 1;
+}
+
+// Counter renders an <h2> — strip default heading margins / extra line box
+.home-cardinalympics__counter,
+.home-cardinalympics__points h2 {
+  margin: 0;
+  padding: 0;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.home-cardinalympics__pts-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.home-cardinalympics__link {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--lowell-red, #861212);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    border-bottom-color: var(--lowell-red, #861212);
+    color: #5a0d0d;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-cardinalympics__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .home-cardinalympics__grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1709,7 +2015,51 @@
   }
 }
 
-@media (max-width: 1300px) {
+// Shrink top nav on narrower desktop (nav hidden <1000px)
+@media (max-width: 1350px) {
+  .nav-links {
+    height: 92px;
+    padding: 0 2.5%;
+    font-size: 0.88rem;
+  }
+
+  .off-set {
+    height: 92px;
+  }
+
+  .nav-links .logo {
+    margin: 0.45rem 0;
+  }
+
+  .nav-links .logo img {
+    width: 54px;
+    height: auto;
+  }
+
+  .nav-links .first-dropdowns > a .icon {
+    font-size: 1.05rem;
+  }
+
+  .nav-links .dropdown-icon,
+  .nav-links .big-dropdown-icon {
+    font-size: 1.05rem;
+  }
+
+  .first-dropdowns > a {
+    gap: 4px;
+  }
+
+  .first-dropdowns > a::after {
+    bottom: 24px;
+    height: 4px;
+  }
+
+  .big-dropdowns {
+    top: 92px;
+  }
+}
+
+@media (max-width: 1000px) {
   .icon {
     display: none;
   }
@@ -1732,12 +2082,11 @@
     display: none;
   }
 
-  .intro-container {
+  .home-hero-card {
     display: none;
   }
-}
 
-@media (max-width: 1024px) {
+  // Top bar becomes hamburger + side drawer
   .off-set {
     height: 0;
   }
@@ -1750,14 +2099,6 @@
     display: none;
   }
 
-  .hero-video-wrapper {
-    height: 66vh;
-  }
-
-  .video-credit {
-    bottom: 11vh;
-  }
-
   .hamburger-menu {
     display: flex !important;
     align-items: center;
@@ -1765,10 +2106,23 @@
     padding: 1rem;
     position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
   }
 
   .hamburger-nav {
     display: flex !important;
+  }
+
+  .hero-video-wrapper {
+    height: 66vh;
+  }
+
+  .video-credit {
+    bottom: 11vh;
   }
 
   .lsa-boards {
