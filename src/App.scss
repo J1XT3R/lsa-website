@@ -792,9 +792,8 @@
 .home-cardinalympics {
   min-height: unset;
   overflow: visible;
-  background: linear-gradient(180deg, #faf7f7 0%, #f0f0f0 100%);
-  border-top: 1px solid rgba(134, 18, 18, 0.12);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+  border: none;
   padding: 2.25rem 1.25rem 2.5rem;
 }
 
@@ -805,26 +804,35 @@
   overflow: visible;
 }
 
-.home-cardinalympics__head-wrap {
+// Title + score grid + link
+.home-cardinalympics__content-wrap {
   position: relative;
-  margin-bottom: 0.5rem;
-  padding: 1rem min(1.25rem, 4vw) 0.5rem;
-  min-height: 11.5rem;
   overflow: visible;
 }
 
-// Olympic-style rings (CardinalympicLogo) as a soft watermark behind the title
+// Rings align to the score cards
+.home-cardinalympics__scores-wrap {
+  position: relative;
+  overflow: visible;
+  container-type: inline-size;
+  container-name: cardinalympics-scores;
+}
+
+.home-cardinalympics__head-wrap {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.65rem;
+  padding: 0.5rem min(1.25rem, 4vw) 0.25rem;
+  overflow: visible;
+}
+
+// Olympic rings: centered on the score card grid only
 .home-cardinalympics__rings-bg {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   opacity: 0.42;
-  width: min(440px, calc(100vw - 2rem));
-  min-height: 11rem;
-  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -836,6 +844,12 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     flex-shrink: 0;
+    transform: scale(3.45);
+    transform-origin: center center;
+
+    @supports (container-type: inline-size) {
+      transform: scale(min(4.35, max(2.35, calc(100cqi / 248px))));
+    }
   }
 }
 
@@ -843,49 +857,72 @@
   position: relative;
   z-index: 1;
   margin-bottom: 0;
+}
 
-  h2 {
-    margin: 0;
-    font-size: clamp(1.65rem, 3.5vw, 2.15rem);
-    font-weight: 800;
-    line-height: 1.08;
-    color: var(--title-color, #1a1a1a);
-    letter-spacing: -0.03em;
+// Framed intro so title + subtitle read clearly on white
+.home-cardinalympics__intro {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 1.15rem 1.35rem 1.2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 1px rgba(255, 255, 255, 0.95) inset,
+    0 8px 32px rgba(0, 0, 0, 0.06);
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background: linear-gradient(165deg, #ffffff 0%, #f3f4f6 100%);
   }
+}
+
+.home-cardinalympics__title {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.2vw, 2.55rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: #0a0a0a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .home-cardinalympics__title-line {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.15rem;
-  margin-bottom: 0.2rem;
+  gap: 0.65rem 0.85rem;
+  margin-bottom: 0.55rem;
 }
 
 .home-cardinalympics__live {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem 0.35rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--lowell-red, #861212);
-  background: rgba(134, 18, 18, 0.08);
-  border: 1px solid rgba(134, 18, 18, 0.22);
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: var(--lowell-red, #861212);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(134, 18, 18, 0.35);
 }
 
 .home-cardinalympics__live-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.45rem;
+  height: 0.45rem;
   border-radius: 50%;
-  background: #e53935;
+  background: #fff;
   flex-shrink: 0;
   animation: home-cardinalympics-live-blink 1.1s ease-in-out infinite;
-  box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.55);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.65);
 }
 
 @keyframes home-cardinalympics-live-blink {
@@ -893,19 +930,19 @@
   100% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.5);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55);
   }
 
   45% {
-    opacity: 0.35;
+    opacity: 0.45;
     transform: scale(0.88);
-    box-shadow: 0 0 0 5px rgba(229, 57, 53, 0);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0);
   }
 
   55% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.35);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
   }
 }
 
@@ -919,13 +956,27 @@
 
 .home-cardinalympics__subtitle {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.35;
-  color: #555;
-  font-weight: 500;
+  padding: 0.15rem 0.75rem 0;
+  font-size: clamp(1.02rem, 2.1vw, 1.15rem);
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
+}
+
+.home-cardinalympics__subtitle::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 3px;
+  margin: 0 auto 0.65rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--lowell-red, #861212), transparent);
 }
 
 .home-cardinalympics__grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.85rem;
@@ -1027,6 +1078,8 @@
 }
 
 .home-cardinalympics__link {
+  position: relative;
+  z-index: 1;
   display: inline-block;
   font-weight: 700;
   font-size: 1.05rem;
