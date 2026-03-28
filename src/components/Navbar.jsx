@@ -341,6 +341,15 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
   }, [location]);
 
   useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1000px)");
+    const onBreakpoint = () => {
+      if (!mq.matches) setHamburgerOpen(false);
+    };
+    mq.addEventListener("change", onBreakpoint);
+    return () => mq.removeEventListener("change", onBreakpoint);
+  }, []);
+
+  useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     if (hamburgerOpen) document.body.style.overflow = "hidden";
     return () => {
@@ -483,8 +492,8 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
       <div
         className={
           hamburgerOpen
-            ? "hamburger-nav left"
-            : "hamburger-nav right hamburger-nav--closed"
+            ? "hamburger-nav hamburger-nav--open"
+            : "hamburger-nav hamburger-nav--closed"
         }
       >
         <FontAwesomeIcon
