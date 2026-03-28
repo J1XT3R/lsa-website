@@ -85,8 +85,8 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
           className="hero-video"
           allow="accelerometer; autoplay; muted; encrypted-media"
         />
+        <div className="video-credit">Video by Video Lowell</div>
       </div>
-      <div className="video-credit">Video by Video Lowell</div>
       <div className="home-hero-card">
         <p className="home-hero-card__eyebrow">Lowell High School</p>
         <h2 className="home-hero-card__title">Lowell Student Association</h2>
