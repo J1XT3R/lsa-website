@@ -1,7 +1,7 @@
 import Counter from "../components/Counter";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAnglesDown } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesDown, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import News from "./News";
 import { clubSpotlights } from "../config/clubs/index.js";
 import { site } from "../config/site.config.js";
@@ -87,9 +87,16 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
         />
       </div>
       <div className="video-credit">Video by Video Lowell</div>
-      <div className="intro-container">
-        <h2>Lowell Student Association</h2>
-        <Link to="LSA">Learn more</Link>
+      <div className="home-hero-card">
+        <p className="home-hero-card__eyebrow">Lowell High School</p>
+        <h2 className="home-hero-card__title">Lowell Student Association</h2>
+        <p className="home-hero-card__lede">
+          Student government for every class — leadership, events, and voice for the Lowell community.
+        </p>
+        <Link to="/LSA" className="home-hero-card__cta">
+          About LSA
+          <FontAwesomeIcon icon={faArrowRight} className="home-hero-card__cta-icon" aria-hidden />
+        </Link>
       </div>
       {showElectionBanner && (
         <ElectionBanner config={site.elections} />
