@@ -39,6 +39,7 @@ import { site } from './config/site.config.js'
 import applicationsSheetConfig from './config/applications.config.js'
 import ApplicationsOpen from './pages/ApplicationsOpen'
 import Announcements from './pages/Announcements'
+import NotFound from './pages/NotFound'
 
 function App() {
     // main site data from Google Sheets (yes the key is here, we're not doing auth for a read-only sheet)
@@ -289,6 +290,7 @@ function App() {
             <Route path="Archives" element={<Archives />} />
             <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} />} />  
             <Route path="More" element={<More />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </BrowserRouter>
