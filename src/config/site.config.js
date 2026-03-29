@@ -1,6 +1,6 @@
 // main site config - turn stuff on/off and wire up elections, clubs, etc.
 import electionsConfig from "./elections.config.js";
-import { clubCategories, clubSpotlights } from "./clubs/index.js";
+import { clubCategories } from "./clubs/index.js";
 
 export const site = {
   electionsEnabled: true,
@@ -9,11 +9,10 @@ export const site = {
 
 export const clubs = {
   categories: clubCategories,
-  spotlights: clubSpotlights,
 };
 
 export { default as organizationsConfig } from "./organizations.config.js";
 export { default as electionsConfig } from "./elections.config.js";
-export { clubCategories, clubSpotlights } from "./clubs/index.js";
+export { clubCategories } from "./clubs/index.js";
 
 export default site;

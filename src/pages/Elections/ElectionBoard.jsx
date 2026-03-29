@@ -1,9 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
+import { areElectionBoardsPublic } from "../../utils/electionAccess.js";
 import "./ElectionBoard.scss";
 
 // one candidate: photo (hover = video), name, bio, vote button
@@ -113,6 +114,10 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
       nextSlug: index >= 0 && index < list.length - 1 ? list[index + 1].slug : null,
     };
   }, [config, boardSlug]);
+
+  if (!areElectionBoardsPublic(config)) {
+    return <Navigate to="/Elections" replace />;
+  }
 
   if (!board) {
     return <LoadingTruck />;

@@ -18,6 +18,21 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { buildNavLinks } from "../config/navLinks.js";
+import { areElectionBoardsPublic } from "../utils/electionAccess.js";
+
+function filterElectionSubNav(links, electionsConfig) {
+  if (!electionsConfig || areElectionBoardsPublic(electionsConfig)) {
+    return links;
+  }
+  return links.map((link) => {
+    if (link.name !== "ELECTIONS") return link;
+    return {
+      ...link,
+      hasDropDown: false,
+      subLinks: [],
+    };
+  });
+}
 
 const ICON_FALLBACK = {
   HOME: faHouse,
@@ -297,7 +312,7 @@ HamburgerSection.propTypes = {
   onToggleNested: PropTypes.func.isRequired,
 };
 
-export default function Navbar({ clubData, electionsEnabled = true }) {
+export default function Navbar({ clubData, electionsEnabled = true, electionsConfig = null }) {
   const location = useLocation();
   const [hasScrolled, setHasScrolled] = useState(false);
   const [hamburgerOpen, setHamburgerOpen] = useState(false);
@@ -307,13 +322,12 @@ export default function Navbar({ clubData, electionsEnabled = true }) {
 
   const navLinks = useMemo(() => buildNavLinks(clubData), [clubData]);
 
-  const navLinksFiltered = useMemo(
-    () =>
-      electionsEnabled
-        ? navLinks
-        : navLinks.filter((link) => link.name !== "ELECTIONS"),
-    [navLinks, electionsEnabled]
-  );
+  const navLinksFiltered = useMemo(() => {
+    const base = electionsEnabled
+      ? navLinks
+      : navLinks.filter((link) => link.name !== "ELECTIONS");
+    return filterElectionSubNav(base, electionsConfig);
+  }, [navLinks, electionsEnabled, electionsConfig]);
 
   const toggleMobileSection = useCallback((id) => {
     setMobileSectionOpen((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -515,4 +529,5 @@ Navbar.propTypes = {
     })
   ),
   electionsEnabled: PropTypes.bool,
+  electionsConfig: PropTypes.object,
 };

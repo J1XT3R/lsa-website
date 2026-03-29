@@ -24,8 +24,8 @@ const LONG_DESC = {
 };
 
 export default {
-  // "pending" | "polling" | "results" - only matters when elections are on
-  state: "pending",
+  // "pending" | "polling" | "results" — see src/utils/electionAccess.js for URL rules
+  state: "polling",
 
   // big banner when elections are happening (polling)
   banner: {
@@ -47,19 +47,15 @@ export default {
   // when elections are off site-wide - message on the Elections page
   notHappeningMessage: "Elections are not currently happening. Check back later for updates.",
 
-  // contesting = before voting opens. title + subtitle on Elections page
-  contestingTitle: "Meet the candidates",
-  contestingSubtitle: "Voting will open soon. Get to know the contenders.",
-
   // pending = before the election/campaign phase starts
   pendingTitle: "Elections are coming soon",
   pendingSubtitle: "Please stay tuned for updates.",
 
-  // polling = vote now! title + subtitle
+  // polling = candidate boards + voting; title + subtitle on /Elections
   pollingTitle: "Elections - vote now",
   pollingSubtitle: "Polls are open. Cast your vote below.",
 
-  // when state is contesting we show these boards. slug = URL (e.g. /Elections/SBC). each candidate: name, description, pfp, video
+  // when state is polling we show these boards. slug = URL (e.g. /Elections/SBC). each candidate: name, description, pfp, video
   contenders: [
     {
       slug: "SBC",

@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnglesDown, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import News from "./News";
-import { clubSpotlights } from "../config/clubs/index.js";
 import { site } from "../config/site.config.js";
+import { getClubsInSheetOrder } from "../utils/clubSpotlight.js";
 import ElectionBanner from "../components/ElectionBanner";
 import CardinalympicLogo from "../components/CardinalympicLogo";
 import PropTypes from "prop-types";
@@ -36,12 +36,10 @@ function extractFileId(url) {
 }
 
 export default function Home({ cardinalympicsData, newsData, clubData = [], applicationsData = [] }) {
-  const spotlights = clubSpotlights || [];
   const weekIndex = getWeekIndex();
-  const spotlight = spotlights[weekIndex % spotlights.length];
-  const spotlightClub = spotlight && clubData.find(
-    (c) => c.Name && c.Name.trim().toLowerCase() === spotlight.clubName.trim().toLowerCase()
-  );
+  const spotlightPool = getClubsInSheetOrder(clubData);
+  const spotlightClub =
+    spotlightPool.length > 0 ? spotlightPool[weekIndex % spotlightPool.length] : null;
 
   const applicationsOpenForNews = (applicationsData || [])
     .map(normalizeApplicationRow)
@@ -52,13 +50,12 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
   const showElectionBanner =
     site.electionsEnabled &&
     site.elections?.banner?.enabled &&
-    (site.elections?.state === "contesting" || site.elections?.state === "polling");
+    site.elections?.state === "polling";
 
-  const spotlightDisplayName = spotlightClub
-    ? spotlightClub.Name
-    : spotlight?.clubName || "";
-  const spotlightDisplayBlurb =
-    spotlight?.blurb || spotlightClub?.ClubDescription || "";
+  const spotlightDisplayName = spotlightClub ? spotlightClub.Name : "";
+  const spotlightDisplayBlurb = spotlightClub
+    ? String(spotlightClub.ClubDescription || "").trim()
+    : "";
   const spotlightHref = spotlightClub
     ? `/Clubs/${encodeURIComponent(spotlightClub.Name)}`
     : "/Clubs";
@@ -227,29 +224,33 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
           </div>
         </div>
       </div>
-      {spotlight && (
+      {spotlightClub && (
         <div className="club-spotlight-section center">
           <h2>Club spotlight</h2>
           <div className="club-spotlight">
-            <div className="club-spotlight__media" aria-hidden="true">
-              {spotlightClub?.Picture ? (
-                <SafeImage
-                  src={`https://drive.google.com/thumbnail?id=${extractFileId(spotlightClub.Picture)}&sz=w300`}
-                  alt={spotlightDisplayName}
-                  className="club-spotlight__img"
-                  variant="club"
-                />
-              ) : (
-                <div className="club-spotlight__placeholder">{spotlightInitial}</div>
-              )}
+            <h3 className="club-spotlight__title">{spotlightDisplayName}</h3>
+            <div className="club-spotlight__row">
+              <div className="club-spotlight__media" aria-hidden="true">
+                {spotlightClub?.Picture ? (
+                  <SafeImage
+                    src={`https://drive.google.com/thumbnail?id=${extractFileId(spotlightClub.Picture)}&sz=w300`}
+                    alt={spotlightDisplayName}
+                    className="club-spotlight__img"
+                    variant="club"
+                  />
+                ) : (
+                  <div className="club-spotlight__placeholder">{spotlightInitial}</div>
+                )}
+              </div>
+              {spotlightDisplayBlurb ? (
+                <div className="club-spotlight__content">
+                  <p className="club-spotlight__excerpt">{spotlightDisplayBlurb}</p>
+                </div>
+              ) : null}
             </div>
-            <div className="club-spotlight__content">
-              <h3>{spotlightDisplayName}</h3>
-              <p>{spotlightDisplayBlurb}</p>
-              <Link to={spotlightHref} className="club-spotlight-link">
-                {spotlightCtaText}
-              </Link>
-            </div>
+            <Link to={spotlightHref} className="club-spotlight-link">
+              {spotlightCtaText}
+            </Link>
           </div>
         </div>
       )}

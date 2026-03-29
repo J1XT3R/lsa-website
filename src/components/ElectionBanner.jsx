@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-// big elections banner when we're in contesting or polling - "vote now!" etc.
+// big elections banner when state is polling
 export default function ElectionBanner({ config }) {
   if (!config?.banner?.enabled) return null;
 
