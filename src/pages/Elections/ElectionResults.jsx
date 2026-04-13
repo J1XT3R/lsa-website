@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
+import { areElectionResultsPublic } from "../../utils/electionAccess.js";
 import "../Elections.scss";
 
 // Normalize sheet rows (same mapping as `Elections.jsx` so results cards render consistently).
@@ -153,6 +154,27 @@ export default function ElectionResults({
             <p style={{ marginTop: "0.75rem", fontStyle: "italic", color: "#666" }}>
               Check back when elections are closed.
             </p>
+          </div>
+        </section>
+        <div className="center" style={{ marginTop: "1rem" }}>
+          <Link to="/Elections">Back to elections</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!areElectionResultsPublic(config)) {
+    return (
+      <div className="elections-page">
+        <header className="elections-hero">
+          <h1 className="elections-hero-title">LSA Board</h1>
+          <p className="elections-hero-subtitle">Election Results</p>
+          <span className="elections-hero-badge">Coming soon</span>
+        </header>
+        <section className="election-section">
+          <div className="elections-message-box">
+            <h2>Results not posted yet</h2>
+            <p>{config?.pendingSubtitle ?? "Please stay tuned for updates."}</p>
           </div>
         </section>
         <div className="center" style={{ marginTop: "1rem" }}>

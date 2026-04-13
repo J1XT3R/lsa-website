@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
+import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
 import "./About.scss";
 
 const CLASS_BOARD_ORDER = [
@@ -21,11 +22,6 @@ export default function ClassBoard({ officerData: officerDataProp }) {
     }
     return officerDataProp.filter((officer) => officer.Team === params);
   }, [officerDataProp, params]);
-
-  function extractFileId(driveUrl) {
-    const match = driveUrl?.match(/[?&]id=([^&]+)/);
-    return match ? match[1] : null;
-  }
 
   if (!officerDataProp || !params) {
     return <LoadingTruck />;
@@ -81,7 +77,7 @@ export default function ClassBoard({ officerData: officerDataProp }) {
             <article key={index} className="board-officer-card">
               <div className="board-officer-card-photo-wrap">
                 <SafeImage
-                  src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+                  src={driveThumbnailCandidates(officer.Photo, "w600")}
                   alt={officer.Name}
                   className="board-officer-card-photo"
                   variant="user"

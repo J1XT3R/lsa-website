@@ -131,7 +131,7 @@ export default function Elections({
     );
   }
 
-  // campaign season - show the candidates (polls open soon / are in progress)
+  // Polling — candidate boards (URLs and nav; see electionAccess.js)
   if (state === "polling") {
     const contenders = config?.contenders ?? [];
     return (
@@ -142,8 +142,8 @@ export default function Elections({
         </header>
         <section className="election-section">
           <div className="elections-state-header">
-            <h1>{config?.contestingTitle ?? "Meet the candidates"}</h1>
-            <p>{config?.contestingSubtitle ?? "Voting will open soon. Get to know the contenders."}</p>
+            <h1>{config?.pollingTitle ?? "Elections - vote now"}</h1>
+            <p>{config?.pollingSubtitle ?? "Polls are open. Cast your vote below."}</p>
           </div>
           {contenders.length === 0 ? (
             <div className="elections-message-box">
@@ -181,8 +181,24 @@ export default function Elections({
     );
   }
 
-  // the good stuff - final results (or placeholder if sheet is empty)
-  // (for any unexpected state, fall back to results view)
+  if (state !== "results") {
+    return (
+      <div className="elections-page">
+        <header className="elections-hero">
+          <h1 className="elections-hero-title">LSA Board</h1>
+          <p className="elections-hero-subtitle">Elections</p>
+          <span className="elections-hero-badge">Coming soon</span>
+        </header>
+        <section className="election-section election-state-off">
+          <div className="elections-message-box">
+            <h2>{config?.pendingTitle ?? "Elections are coming soon"}</h2>
+            <p>{config?.pendingSubtitle ?? "Please stay tuned for updates."}</p>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   const displayResults = ElectionResults.length > 0 ? ElectionResults : [
     {
       board: "LSA 2029 Election Results",
@@ -239,8 +255,6 @@ Elections.propTypes = {
   electionsConfig: PropTypes.shape({
     state: PropTypes.oneOf(["pending", "polling", "results"]),
     notHappeningMessage: PropTypes.string,
-    contestingTitle: PropTypes.string,
-    contestingSubtitle: PropTypes.string,
     pendingTitle: PropTypes.string,
     pendingSubtitle: PropTypes.string,
     pollingTitle: PropTypes.string,
@@ -252,7 +266,17 @@ Elections.propTypes = {
         roles: PropTypes.arrayOf(
           PropTypes.shape({
             role: PropTypes.string,
-            candidates: PropTypes.arrayOf(PropTypes.string),
+            candidates: PropTypes.arrayOf(
+              PropTypes.oneOfType([
+                PropTypes.string,
+                PropTypes.shape({
+                  name: PropTypes.string,
+                  description: PropTypes.string,
+                  pfp: PropTypes.string,
+                  video: PropTypes.string,
+                }),
+              ])
+            ),
           })
         ),
       })

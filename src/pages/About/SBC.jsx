@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
+import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
 import "./About.scss";
 
 export default function SBC({ officerData: officerDataProp }) {
@@ -12,11 +13,6 @@ export default function SBC({ officerData: officerDataProp }) {
     }
     return officerDataProp.filter((officer) => officer.Team === "SBC");
   }, [officerDataProp]);
-
-  function extractFileId(driveUrl) {
-    const match = driveUrl?.match(/[?&]id=([^&]+)/);
-    return match ? match[1] : null;
-  }
 
   if (!officerDataProp) {
     return <LoadingTruck />;
@@ -62,7 +58,7 @@ export default function SBC({ officerData: officerDataProp }) {
             <article key={index} className="board-officer-card">
               <div className="board-officer-card-photo-wrap">
                 <SafeImage
-                  src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+                  src={driveThumbnailCandidates(officer.Photo, "w600")}
                   alt={officer.Name}
                   className="board-officer-card-photo"
                   variant="user"

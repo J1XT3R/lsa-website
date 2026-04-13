@@ -24,7 +24,7 @@ export default function Layout(props) {
 
   return (
     <>
-      <Navbar clubData={clubData} electionsEnabled={electionsEnabled} />
+      <Navbar clubData={clubData} electionsEnabled={electionsEnabled} electionsConfig={electionsConfig} />
       {showElectionBanner && !isHomePage && <ElectionBanner config={electionsConfig} />}
       {showElectionsBar && <ElectionsBar config={electionsConfig} />}
       <Outlet />

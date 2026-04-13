@@ -48,12 +48,27 @@ export default function SafeImage({
   }, [variant, fallbackVariant]);
 
   const [currentSrc, setCurrentSrc] = useState(src);
+  const [sourceIndex, setSourceIndex] = useState(0);
 
-  useEffect(() => {
-    setCurrentSrc(src);
+  const sourceList = useMemo(() => {
+    if (Array.isArray(src)) {
+      return src.filter((s) => typeof s === "string" && s.trim() !== "");
+    }
+    return typeof src === "string" && src.trim() !== "" ? [src] : [];
   }, [src]);
 
+  useEffect(() => {
+    setSourceIndex(0);
+    setCurrentSrc(sourceList[0] || src);
+  }, [src, sourceList]);
+
   const handleError = () => {
+    if (sourceIndex < sourceList.length - 1) {
+      const nextIndex = sourceIndex + 1;
+      setSourceIndex(nextIndex);
+      setCurrentSrc(sourceList[nextIndex]);
+      return;
+    }
     // Avoid infinite loops if the fallback data URI ever fails.
     setCurrentSrc((prev) => (prev === fallbackSrc ? prev : fallbackSrc));
   };
@@ -70,7 +85,7 @@ export default function SafeImage({
 }
 
 SafeImage.propTypes = {
-  src: PropTypes.string,
+  src: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   alt: PropTypes.string,
   className: PropTypes.string,
   variant: PropTypes.oneOf(["user", "club"]),

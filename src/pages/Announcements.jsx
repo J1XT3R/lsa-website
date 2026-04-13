@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
-import announcements from "../config/announcements.config.js";
+import { useEffect, useMemo, useState } from "react";
 
 const INITIAL_VISIBLE = 9;
 const LOAD_MORE_STEP = 9;
 const PREVIEW_LENGTH = 120;
+const GOOGLE_API_KEY = "AIzaSyAgshc5Aqd8B149h5RpsenMh_SQAeb4AXc";
+const ANNOUNCEMENTS_SPREADSHEET_ID = "1Kk7Bs58DAWZ9pHvqD-RFvoV1ePeThQ1Yr9c5RsDeAq4";
+const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archive", "Announcements"];
 
 function toSortableDate(input) {
   if (!input) return null;
@@ -30,16 +32,69 @@ function trimPreview(text) {
   return `${text.slice(0, PREVIEW_LENGTH).trimEnd()}...`;
 }
 
+function parseSheetAnnouncements(values) {
+  if (!Array.isArray(values) || values.length < 2) return [];
+  const headers = values[0].map((h) => String(h || "").trim().toLowerCase());
+  const titleIndex = headers.findIndex((h) => h === "name" || h === "title");
+  const dateIndex = headers.findIndex((h) => h === "year" || h === "date");
+  const contentIndex = headers.findIndex((h) => h === "description" || h === "content");
+  if (titleIndex < 0 || contentIndex < 0) return [];
+
+  return values
+    .slice(1)
+    .map((row) => ({
+      title: String(row?.[titleIndex] ?? "").trim(),
+      date: String(row?.[dateIndex] ?? "").trim() || "Unknown",
+      content: String(row?.[contentIndex] ?? "").trim(),
+    }))
+    .filter((item) => item.title && item.content);
+}
+
 export default function Announcements() {
+  const [sheetAnnouncements, setSheetAnnouncements] = useState([]);
+  const [loadingSheet, setLoadingSheet] = useState(true);
   const [query, setQuery] = useState("");
   const [fromMonth, setFromMonth] = useState("");
   const [toMonth, setToMonth] = useState("");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [openId, setOpenId] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchAnnouncementsFromSheet() {
+      setLoadingSheet(true);
+      try {
+        for (const sheetName of ANNOUNCEMENTS_SHEET_NAMES) {
+          const range = encodeURIComponent(sheetName);
+          const url = `https://sheets.googleapis.com/v4/spreadsheets/${ANNOUNCEMENTS_SPREADSHEET_ID}/values/${range}?key=${GOOGLE_API_KEY}`;
+          const res = await fetch(url);
+          const json = await res.json();
+          if (json?.error) continue;
+          const parsed = parseSheetAnnouncements(json.values);
+          if (parsed.length > 0) {
+            if (!cancelled) setSheetAnnouncements(parsed);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn("Announcements sheet fetch failed:", error);
+      } finally {
+        if (!cancelled) setLoadingSheet(false);
+      }
+    }
+
+    fetchAnnouncementsFromSheet();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const sourceAnnouncements = sheetAnnouncements;
+
   const normalized = useMemo(
     () =>
-      announcements
+      sourceAnnouncements
         .map((item, index) => ({
           ...item,
           id: `${item.title}-${index}`,
@@ -52,7 +107,7 @@ export default function Announcements() {
           if (!b.sortDate) return -1;
           return b.sortDate.getTime() - a.sortDate.getTime();
         }),
-    []
+    [sourceAnnouncements]
   );
 
   const filteredAnnouncements = useMemo(() => {
@@ -77,7 +132,11 @@ export default function Announcements() {
     <section className="announcements-page info-page">
       <div className="announcements-page__header">
         <h1>All Announcements</h1>
-        <p>Search and filter updates by month, then click a card for full details.</p>
+        <p>
+          {loadingSheet
+            ? "Loading annoucements"
+            : "Search and filter updates by month, then click a card for full details."}
+        </p>
       </div>
 
       <div className="announcements-toolbar">
@@ -127,6 +186,9 @@ export default function Announcements() {
       </p>
 
       <div className="announcements-grid">
+        {!loadingSheet && visibleAnnouncements.length === 0 && (
+          <p className="announcements-count">You&apos;re up to date!</p>
+        )}
         {visibleAnnouncements.map((item) => {
           const isOpen = openId === item.id;
           return (
