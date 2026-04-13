@@ -266,7 +266,17 @@ Elections.propTypes = {
         roles: PropTypes.arrayOf(
           PropTypes.shape({
             role: PropTypes.string,
-            candidates: PropTypes.arrayOf(PropTypes.string),
+            candidates: PropTypes.arrayOf(
+              PropTypes.oneOfType([
+                PropTypes.string,
+                PropTypes.shape({
+                  name: PropTypes.string,
+                  description: PropTypes.string,
+                  pfp: PropTypes.string,
+                  video: PropTypes.string,
+                }),
+              ])
+            ),
           })
         ),
       })

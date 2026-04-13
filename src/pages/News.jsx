@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import announcements from "../config/announcements.config.js";
 
 const INITIAL_VISIBLE_COUNT = 2;
 const PREVIEW_LENGTH = 110;
@@ -13,11 +12,7 @@ function getPreview(text) {
 }
 
 export default function News({ newsData, previewMode = true }) {
-  // use whatever we're passed or fall back to defaults so the page doesn't get angry
-  const newsItems = useMemo(
-    () => (newsData && newsData.length ? newsData : announcements),
-    [newsData]
-  );
+  const newsItems = useMemo(() => (newsData && newsData.length ? newsData : []), [newsData]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const visibleNews = previewMode
     ? newsItems.slice(0, INITIAL_VISIBLE_COUNT)
@@ -28,6 +23,9 @@ export default function News({ newsData, previewMode = true }) {
     <div className="news-section center">
       <h2>News & Announcements</h2>
       <div className="news-container">
+        {visibleNews.length === 0 && (
+          <p className="news-empty">No announcements posted yet.</p>
+        )}
         {visibleNews.map((news, index) => {
           const globalIndex = index;
           const isExpanded = expandedIndex === globalIndex;

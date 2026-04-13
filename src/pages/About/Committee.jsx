@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
+import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
 import "./About.scss";
 
 export default function Committee({ officerData: allOfficers }) {
@@ -14,11 +15,6 @@ export default function Committee({ officerData: allOfficers }) {
     }
     return allOfficers.filter((officer) => officer.Team === committeeKey);
   }, [allOfficers, committeeKey]);
-
-  function extractFileId(driveUrl) {
-    const match = driveUrl?.match(/[?&]id=([^&]+)/);
-    return match ? match[1] : null;
-  }
 
   if (!allOfficers) {
     return <LoadingTruck />;
@@ -47,7 +43,7 @@ export default function Committee({ officerData: allOfficers }) {
     <article key={`${officer.Name}-${index}`} className="committee-member-card">
       <div className="committee-member-card__media">
         <SafeImage
-          src={`https://drive.google.com/thumbnail?id=${extractFileId(officer.Photo)}`}
+          src={driveThumbnailCandidates(officer.Photo, "w600")}
           alt={officer.Name}
           className="committee-member-card__photo"
           variant="user"

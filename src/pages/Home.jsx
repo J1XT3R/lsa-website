@@ -15,6 +15,7 @@ import {
   isLikelyDataRow,
   parseDateAdded,
 } from "../utils/applicationsSheet.js";
+import { driveThumbnailCandidates } from "../utils/driveMedia.js";
 
 const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/5TKdIrdcyJ4";
 
@@ -27,12 +28,6 @@ function getWeekIndex() {
   const start = new Date(now.getFullYear(), 0, 0);
   const oneWeek = 7 * 24 * 60 * 60 * 1000;
   return Math.floor((now - start) / oneWeek);
-}
-
-function extractFileId(url) {
-  if (!url || typeof url !== "string") return null;
-  const match = url.match(/[?&]id=([^&]+)/);
-  return match ? match[1] : null;
 }
 
 export default function Home({ cardinalympicsData, newsData, clubData = [], applicationsData = [] }) {
@@ -233,7 +228,7 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
               <div className="club-spotlight__media" aria-hidden="true">
                 {spotlightClub?.Picture ? (
                   <SafeImage
-                    src={`https://drive.google.com/thumbnail?id=${extractFileId(spotlightClub.Picture)}&sz=w300`}
+                    src={driveThumbnailCandidates(spotlightClub.Picture, "w300")}
                     alt={spotlightDisplayName}
                     className="club-spotlight__img"
                     variant="club"

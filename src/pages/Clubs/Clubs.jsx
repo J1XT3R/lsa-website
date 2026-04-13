@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { getCategoryColorMap } from "../../config/clubs/index.js";
 import SafeImage from "../../components/SafeImage";
+import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
 
 export default function Clubs({ clubData }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,12 +14,6 @@ export default function Clubs({ clubData }) {
 
   function loadMore() {
     setVisibleClubs((prev) => prev + 9);
-  }
-
-  function extractFileId(url) {
-    const regex = /[?&]id=([^&]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
   }
 
   function getCategoryColor(category, useBackground = true) {
@@ -38,9 +33,7 @@ export default function Clubs({ clubData }) {
           {Picture ? (
             <SafeImage
               className="club-card__image"
-              src={`https://drive.google.com/thumbnail?id=${extractFileId(
-                Picture
-              )}&sz=w300`}
+              src={driveThumbnailCandidates(Picture, "w300")}
               alt={Name}
               variant="club"
             />
