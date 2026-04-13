@@ -187,7 +187,7 @@ export default function Announcements() {
 
       <div className="announcements-grid">
         {!loadingSheet && visibleAnnouncements.length === 0 && (
-          <p className="announcements-count">You're up to date!</p>
+          <p className="announcements-count">You&apos;re up to date!</p>
         )}
         {visibleAnnouncements.map((item) => {
           const isOpen = openId === item.id;
