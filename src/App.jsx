@@ -149,7 +149,7 @@ function App() {
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
     const [scoreboardRows, setScoreboardRows] = useState([]);
 
-    const SHEET_NAME4 = "Elections";
+    const SHEET_NAME4 = "Copy of Elections";
     const [electionSheetValues, setElectionSheetValues] = useState(null);
 
     // which clubs/orgs have applications open right now
