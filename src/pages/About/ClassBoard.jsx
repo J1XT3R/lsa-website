@@ -63,10 +63,10 @@ export default function ClassBoard({ officerData: officerDataProp }) {
         </Link>
         {nextBoard ? (
           <Link to={nextBoard.path} className="board-nav__btn">
-            Next board →
+            Next board ->
           </Link>
         ) : (
-          <span className="board-nav__btn board-nav__btn--disabled">Next board →</span>
+          <span className="board-nav__btn board-nav__btn--disabled">Next board -></span>
         )}
       </nav>
 
@@ -111,10 +111,10 @@ export default function ClassBoard({ officerData: officerDataProp }) {
         </Link>
         {nextBoard ? (
           <Link to={nextBoard.path} className="board-nav__btn">
-            Next board →
+            Next board ->
           </Link>
         ) : (
-          <span className="board-nav__btn board-nav__btn--disabled">Next board →</span>
+          <span className="board-nav__btn board-nav__btn--disabled">Next board -></span>
         )}
       </nav>
     </>

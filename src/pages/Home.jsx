@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Counter from "../components/Counter";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,7 +31,15 @@ function getWeekIndex() {
   return Math.floor((now - start) / oneWeek);
 }
 
-export default function Home({ cardinalympicsData, newsData, clubData = [], applicationsData = [] }) {
+export default function Home({
+  cardinalympicsData,
+  cardinalympicsEvents = [],
+  newsData,
+  clubData = [],
+  applicationsData = [],
+  showCardinalympicsScores = true,
+  showCardinalympicsSignupNow = false,
+}) {
   const weekIndex = getWeekIndex();
   const spotlightPool = getClubsInSheetOrder(clubData);
   const spotlightClub =
@@ -67,6 +76,16 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
     cardinalympicsScores.length === 4
       ? cardinalympicsScores.indexOf(Math.max(...cardinalympicsScores))
       : -1;
+  const homeSignupEvents = (cardinalympicsEvents || [])
+    .filter((ev) => ev && (ev.signUpLink || ev.signUpClosed))
+    .slice(0, 6);
+  const signupEventNamesTicker = useMemo(() => {
+    const names = homeSignupEvents
+      .map((ev) => String(ev?.heading || "").trim())
+      .filter(Boolean);
+    if (!names.length) return "";
+    return `${names.join("  •  ")}  •  ${names.join("  •  ")}`;
+  }, [homeSignupEvents]);
 
   return (
     <>
@@ -96,74 +115,76 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
 
 
 
-      {/* Cardinalympics section */}
-      <section
-        className="home-cardinalympics"
-        aria-labelledby="home-cardinalympics-heading"
-      >
-        <div className="home-cardinalympics__inner">
-          <div className="home-cardinalympics__content-wrap">
-            <div className="home-cardinalympics__head-wrap">
-              <div className="home-cardinalympics__head">
-                <div className="home-cardinalympics__intro">
-                  <div className="home-cardinalympics__title-line">
-                    <h2 id="home-cardinalympics-heading" className="home-cardinalympics__title">
-                      Cardinalympics
-                    </h2>
-                    <span
-                      className="home-cardinalympics__live"
-                      role="status"
-                      aria-label="Scores from the live scoreboard"
-                    >
-                      <span className="home-cardinalympics__live-dot" aria-hidden="true" />
-                      Live
-                    </span>
+      {/* Cardinalympics section (toggle in src/config/cardinalympics.config.js) */}
+      {showCardinalympicsScores && (
+        <section
+          className="home-cardinalympics"
+          aria-labelledby="home-cardinalympics-heading"
+        >
+          <div className="home-cardinalympics__inner">
+            <div className="home-cardinalympics__content-wrap">
+              <div className="home-cardinalympics__head-wrap">
+                <div className="home-cardinalympics__head">
+                  <div className="home-cardinalympics__intro">
+                    <div className="home-cardinalympics__title-line">
+                      <h2 id="home-cardinalympics-heading" className="home-cardinalympics__title">
+                        Cardinalympics
+                      </h2>
+                      <span
+                        className="home-cardinalympics__live"
+                        role="status"
+                        aria-label="Scores from the live scoreboard"
+                      >
+                        <span className="home-cardinalympics__live-dot" aria-hidden="true" />
+                        Live
+                      </span>
+                    </div>
+                    <p className="home-cardinalympics__subtitle">
+                      Spirit Week class totals!
+                    </p>
                   </div>
-                  <p className="home-cardinalympics__subtitle">
-                    Spirit Week class totals!
-                  </p>
                 </div>
               </div>
-            </div>
-            <div className="home-cardinalympics__scores-wrap">
-              <div className="home-cardinalympics__rings-bg" aria-hidden="true">
-                <CardinalympicLogo variant="homeBackdrop" />
-              </div>
-              <div className="home-cardinalympics__grid" role="list">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={CARDINALYMPICS_CLASS_SLUGS[i]}
-                    className={`home-cardinalympics__class home-cardinalympics__class--${CARDINALYMPICS_CLASS_SLUGS[i]}${
-                      cardinalympicsLeaderIndex === i ? " home-cardinalympics__class--leader" : ""
-                    }`}
-                    role="listitem"
-                  >
-                    {cardinalympicsLeaderIndex === i && (
-                      <span className="home-cardinalympics__leader-badge">Leading</span>
-                    )}
-                    <span className="home-cardinalympics__class-name">
-                      {CARDINALYMPICS_CLASS_NAMES[i]}
-                    </span>
-                    <div className="home-cardinalympics__points">
-                      <Counter
-                        start={0}
-                        end={cardinalympicsScores[i]}
-                        duration={2000}
-                        className="home-cardinalympics__counter"
-                        color={CARDINALYMPICS_COUNTER_COLORS[i]}
-                      />
-                      <span className="home-cardinalympics__pts-label">pts</span>
+              <div className="home-cardinalympics__scores-wrap">
+                <div className="home-cardinalympics__rings-bg" aria-hidden="true">
+                  <CardinalympicLogo variant="homeBackdrop" />
+                </div>
+                <div className="home-cardinalympics__grid" role="list">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={CARDINALYMPICS_CLASS_SLUGS[i]}
+                      className={`home-cardinalympics__class home-cardinalympics__class--${CARDINALYMPICS_CLASS_SLUGS[i]}${
+                        cardinalympicsLeaderIndex === i ? " home-cardinalympics__class--leader" : ""
+                      }`}
+                      role="listitem"
+                    >
+                      {cardinalympicsLeaderIndex === i && (
+                        <span className="home-cardinalympics__leader-badge">Leading</span>
+                      )}
+                      <span className="home-cardinalympics__class-name">
+                        {CARDINALYMPICS_CLASS_NAMES[i]}
+                      </span>
+                      <div className="home-cardinalympics__points">
+                        <Counter
+                          start={0}
+                          end={cardinalympicsScores[i]}
+                          duration={2000}
+                          className="home-cardinalympics__counter"
+                          color={CARDINALYMPICS_COUNTER_COLORS[i]}
+                        />
+                        <span className="home-cardinalympics__pts-label">pts</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+              <Link to="/Cardinalympics" className="home-cardinalympics__link">
+                Full scoreboard &amp; events →
+              </Link>
             </div>
-            <Link to="/Cardinalympics" className="home-cardinalympics__link">
-              Full scoreboard &amp; events →
-            </Link>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
 
 
@@ -273,6 +294,31 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
           </p>
         </div>
       )}
+      {showCardinalympicsSignupNow && homeSignupEvents.length > 0 && (
+        <section className="home-cardinalympics-signup" aria-labelledby="home-cardinalympics-signup-heading">
+          <div className="home-cardinalympics-signup__inner">
+            <div className="home-cardinalympics-signup__rings" aria-hidden="true">
+              <CardinalympicLogo variant="homeBackdrop" />
+            </div>
+            <div className="home-cardinalympics-signup__content">
+              <h2 id="home-cardinalympics-signup-heading">Cardinalympics events sign up now</h2>
+              {signupEventNamesTicker ? (
+                <div className="home-cardinalympics-signup__ticker-wrap" aria-hidden="true">
+                  <div className="home-cardinalympics-signup__ticker-track">
+                    <p className="home-cardinalympics-signup__ticker">{signupEventNamesTicker}</p>
+                  </div>
+                </div>
+              ) : null}
+              <p className="home-cardinalympics-signup__subtitle">
+                Spots are limited for many events. Check openings and sign up before they close.
+              </p>
+              <Link to="/Cardinalympics" className="home-cardinalympics-signup__button">
+                View events
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
       <News newsData={newsData} />
       <div className="life-at-lowell">
         <h2>WATCH: Student Life at Lowell High School</h2>
@@ -306,6 +352,9 @@ export default function Home({ cardinalympicsData, newsData, clubData = [], appl
 }
 
 Home.propTypes = {
+  cardinalympicsEvents: PropTypes.arrayOf(PropTypes.object),
+  showCardinalympicsSignupNow: PropTypes.bool,
+  showCardinalympicsScores: PropTypes.bool,
   cardinalympicsData: PropTypes.arrayOf(PropTypes.number),
   newsData: PropTypes.arrayOf(
     PropTypes.shape({

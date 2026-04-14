@@ -35,7 +35,7 @@ export default function AboutLSA() {
                 Coordinator, Events Coordinator, Dance Coordinator, Public
                 Relations, Co-Public Relations.
               </p>
-              <Link to="SBC" className="about-lsa-card-link">Meet the SBC →</Link>
+              <Link to="SBC" className="about-lsa-card-link">Meet the SBC -></Link>
             </div>
             <div className="about-lsa-card">
               <h3>Class Boards</h3>
