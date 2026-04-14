@@ -40,7 +40,9 @@ import {
   mergeElectionConfigWithSheet,
   isElectionCandidateSheetFormat,
 } from './utils/electionCandidatesFromSheet.js'
+import { parseCardinalympicsEventsSheet } from './utils/cardinalympicsEventsFromSheet.js'
 import applicationsSheetConfig from './config/applications.config.js'
+import cardinalympicsConfig from './config/cardinalympics.config.js'
 import ApplicationsOpen from './pages/ApplicationsOpen'
 import Announcements from './pages/Announcements'
 import NotFound from './pages/NotFound'
@@ -106,19 +108,37 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchSheetValuesWithRetry(url, options = {}) {
+/**
+ * Google Sheets A1 ranges: tab names with spaces, commas, etc. must be wrapped in single quotes
+ * (e.g. 'Sp, 25', 'Cardinalympics Events'). Otherwise the API parses commas as range separators -> 400.
+ */
+function quoteSheetTabForApi(tabName) {
+  const s = String(tabName ?? "").trim();
+  if (!s) return s;
+  if (/^[A-Za-z0-9_]+$/.test(s)) return s;
+  return `'${s.replace(/'/g, "''")}'`;
+}
+
+/** One HTTP request for multiple tabs on the same spreadsheet (saves quota vs. separate values.get calls). */
+async function fetchSheetBatchGetWithRetry(spreadsheetId, rangeNames, apiKey, options = {}) {
   const attempts = options.attempts ?? SHEETS_RETRY_ATTEMPTS;
   const delayMs = options.delayMs ?? SHEETS_RETRY_DELAY_MS;
   let lastError = null;
 
   for (let i = 0; i < attempts; i++) {
     try {
+      const params = new URLSearchParams();
+      params.set("key", apiKey);
+      for (const r of rangeNames) {
+        params.append("ranges", quoteSheetTabForApi(r));
+      }
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${params.toString()}`;
       const res = await fetch(url, options.fetchOptions);
       const json = await res.json();
       if (json?.error) {
         lastError = json.error.message || "Unknown API error";
-      } else if (Array.isArray(json?.values) && json.values.length > 0) {
-        return { values: json.values, error: null };
+      } else if (Array.isArray(json?.valueRanges)) {
+        return { valueRanges: json.valueRanges, error: null };
       } else {
         lastError = "No data returned";
       }
@@ -131,7 +151,7 @@ async function fetchSheetValuesWithRetry(url, options = {}) {
     }
   }
 
-  return { values: null, error: lastError || "Failed to fetch sheet data" };
+  return { valueRanges: null, error: lastError || "Failed to fetch sheet data" };
 }
 
 function App() {
@@ -143,11 +163,13 @@ function App() {
     const [clubData, setClubData] = useState([]);
     const [officerData, setOfficerData] = useState([]);
 
-    // Cardinalympics points and scoreboard
+    // Cardinalympics: class totals + scoreboard live in SPREADSHEET_ID2; "Cardinalympics Events" tab is on SPREADSHEET_ID (same file as Website Info).
     const SPREADSHEET_ID2 = "1YoyeAEx3rFD2ctbrz3R0a0todgsNes76r_JH6MkYUO4";
     const SHEET_NAME3 = "Sp, 25";
+    const SHEET_CARDINALYMPICS_EVENTS = "Cardinalympics Events";
     const [cardinalympicsData, setCardinalympicsData] = useState([0, 0, 0, 0]);
     const [scoreboardRows, setScoreboardRows] = useState([]);
+    const [cardinalympicsEvents, setCardinalympicsEvents] = useState([]);
 
     const SHEET_NAME4 = "Copy of Elections";
     const [electionSheetValues, setElectionSheetValues] = useState(null);
@@ -158,13 +180,15 @@ function App() {
     const [applicationsError, setApplicationsError] = useState(null);
     const shouldCheckSheetsNow = useMemo(() => reserveSheetsRefreshWindow(), []);
 
-    // okay so we have like 4 useEffects for 4 sheets - not pretty but it works
+    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs → 1 API call)
     useEffect(() => {
-      async function fetchData() {
+      async function fetchCoreSheets() {
         const clubCookieKey = "lsa_sheet_website_info_v1";
         const officerCookieKey = "lsa_sheet_officers_v1";
+        const electionCookieKey = "lsa_sheet_elections_v1";
         const cachedClubValues = readJsonCookie(clubCookieKey);
         const cachedOfficerValues = readJsonCookie(officerCookieKey);
+        const cachedElectionValues = readJsonCookie(electionCookieKey);
 
         if (cachedClubValues?.length) {
           setClubData(processSheetData(cachedClubValues));
@@ -172,58 +196,55 @@ function App() {
         if (cachedOfficerValues?.length) {
           setOfficerData(processSheetData(cachedOfficerValues));
         }
-        const hasCachedCoreData = Boolean(cachedClubValues?.length) && Boolean(cachedOfficerValues?.length);
-        if (!shouldCheckSheetsNow && hasCachedCoreData) return;
-
-        try {
-          // clubs + officers (first two sheets)
-          const url1 = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(SHEET_NAME)}?key=${KEY}`;
-          const clubFetch = await fetchSheetValuesWithRetry(url1);
-          if (clubFetch.values?.length) {
-            setClubData(processSheetData(clubFetch.values));
-            writeJsonCookie(clubCookieKey, clubFetch.values);
-          } else {
-            console.warn("Website Info sheet:", clubFetch.error);
-          }
-
-          const url2 = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(SHEET_NAME2)}?key=${KEY}`;
-          const officerFetch = await fetchSheetValuesWithRetry(url2);
-          if (officerFetch.values?.length) {
-            setOfficerData(processSheetData(officerFetch.values));
-            writeJsonCookie(officerCookieKey, officerFetch.values);
-          } else {
-            console.warn("Officers sheet:", officerFetch.error);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      fetchData();
-    }, [shouldCheckSheetsNow]);
-
-    useEffect(() => {
-      async function fetchElectionData() {
-        const electionCookieKey = "lsa_sheet_elections_v1";
-        const cachedElectionValues = readJsonCookie(electionCookieKey);
         if (cachedElectionValues?.length) {
           setElectionSheetValues(cachedElectionValues);
         }
-        if (!shouldCheckSheetsNow && cachedElectionValues?.length) return;
+
+        const skipNetwork =
+          !shouldCheckSheetsNow &&
+          cachedClubValues?.length &&
+          cachedOfficerValues?.length &&
+          cachedElectionValues?.length;
+        if (skipNetwork) return;
+
         try {
-          const range = encodeURIComponent(SHEET_NAME4);
-          const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${KEY}`;
-          const electionFetch = await fetchSheetValuesWithRetry(url);
-          if (electionFetch.values?.length) {
-            setElectionSheetValues(electionFetch.values);
-            writeJsonCookie(electionCookieKey, electionFetch.values);
+          const batch = await fetchSheetBatchGetWithRetry(
+            SPREADSHEET_ID,
+            [SHEET_NAME, SHEET_NAME2, SHEET_NAME4],
+            KEY
+          );
+          if (batch.error || !batch.valueRanges?.length) {
+            console.warn("Main spreadsheet batch:", batch.error);
+            return;
+          }
+          const vr = batch.valueRanges;
+          const clubVals = vr[0]?.values;
+          const officerVals = vr[1]?.values;
+          const electionVals = vr[2]?.values;
+
+          if (clubVals?.length) {
+            setClubData(processSheetData(clubVals));
+            writeJsonCookie(clubCookieKey, clubVals);
           } else {
-            console.warn("Elections sheet:", electionFetch.error);
+            console.warn("Website Info sheet: empty or missing");
+          }
+          if (officerVals?.length) {
+            setOfficerData(processSheetData(officerVals));
+            writeJsonCookie(officerCookieKey, officerVals);
+          } else {
+            console.warn("Officers sheet: empty or missing");
+          }
+          if (electionVals?.length) {
+            setElectionSheetValues(electionVals);
+            writeJsonCookie(electionCookieKey, electionVals);
+          } else {
+            console.warn("Elections sheet: empty or missing");
           }
         } catch (error) {
           console.log(error);
         }
       }
-      fetchElectionData();
+      fetchCoreSheets();
     }, [shouldCheckSheetsNow]);
 
     const electionData = useMemo(() => {
@@ -239,38 +260,95 @@ function App() {
 
 
     const CARDINALYMPICS_POLL_MS = 30_000;
+    const { showScoresAndScoreboard, showEvents } = cardinalympicsConfig;
 
     useEffect(() => {
-      // Refreshes class totals (home + Cardinalympics & detailed scoreboard)
+      if (!showScoresAndScoreboard) {
+        setCardinalympicsData([0, 0, 0, 0]);
+        setScoreboardRows([]);
+      }
+      if (!showEvents) {
+        setCardinalympicsEvents([]);
+      }
+
+      if (!showScoresAndScoreboard && !showEvents) {
+        return undefined;
+      }
+
       function applyCardinalympicsValues(values) {
         if (!Array.isArray(values) || values.length === 0) return;
         const totals = arrayCleanUp(values[0]);
         const classTotals = totals.length >= 5 ? totals.slice(-4) : totals.slice(0, 4);
         setCardinalympicsData(classTotals);
-        // Clone rows so React always sees a new reference when the sheet updates.
         setScoreboardRows(values.map((row) => (Array.isArray(row) ? [...row] : row)));
+      }
+
+      function applyCardinalympicsEventsValues(values) {
+        if (!Array.isArray(values) || values.length === 0) return;
+        setCardinalympicsEvents(parseCardinalympicsEventsSheet(values));
       }
 
       async function fetchCardinalympicsData() {
         const cardinalympicsCookieKey = "lsa_sheet_cardinalympics_v1";
+        const eventsCookieKey = "lsa_sheet_cardinalympics_events_v1";
         const cachedValues = readJsonCookie(cardinalympicsCookieKey);
-        if (cachedValues?.length) {
+        const cachedEventsValues = readJsonCookie(eventsCookieKey);
+
+        if (showScoresAndScoreboard && cachedValues?.length) {
           applyCardinalympicsValues(cachedValues);
         }
-        if (!reserveSheetsRefreshWindow() && cachedValues?.length) {
-          return;
+        if (showEvents && cachedEventsValues?.length) {
+          applyCardinalympicsEventsValues(cachedEventsValues);
         }
+
+        const skipNetwork =
+          !reserveSheetsRefreshWindow() &&
+          (!showScoresAndScoreboard || cachedValues?.length) &&
+          (!showEvents || cachedEventsValues?.length);
+        if (skipNetwork) return;
+
         try {
-          const range = encodeURIComponent(SHEET_NAME3);
-          const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID2}/values/${range}?key=${KEY}`;
-          const cardinalympicsFetch = await fetchSheetValuesWithRetry(url, {
-            fetchOptions: { cache: "no-store" },
-          });
-          if (cardinalympicsFetch.values?.length) {
-            applyCardinalympicsValues(cardinalympicsFetch.values);
-            writeJsonCookie(cardinalympicsCookieKey, cardinalympicsFetch.values);
-          } else {
-            console.warn("Cardinalympics sheet:", cardinalympicsFetch.error);
+          const fetchOpts = { fetchOptions: { cache: "no-store" } };
+          const tasks = [];
+          if (showScoresAndScoreboard) {
+            tasks.push(
+              fetchSheetBatchGetWithRetry(SPREADSHEET_ID2, [SHEET_NAME3], KEY, fetchOpts).then(
+                (batch) => ({ kind: "scores", batch })
+              )
+            );
+          }
+          if (showEvents) {
+            tasks.push(
+              fetchSheetBatchGetWithRetry(SPREADSHEET_ID, [SHEET_CARDINALYMPICS_EVENTS], KEY, fetchOpts).then(
+                (batch) => ({ kind: "events", batch })
+              )
+            );
+          }
+          const results = await Promise.all(tasks);
+          for (const { kind, batch } of results) {
+            if (kind === "scores") {
+              const scoreVals = batch.valueRanges?.[0]?.values;
+              if (scoreVals?.length) {
+                applyCardinalympicsValues(scoreVals);
+                writeJsonCookie(cardinalympicsCookieKey, scoreVals);
+              } else {
+                console.warn(
+                  "Cardinalympics scoreboard sheet:",
+                  batch.error || "empty or missing"
+                );
+              }
+            } else {
+              const eventVals = batch.valueRanges?.[0]?.values;
+              if (eventVals?.length) {
+                applyCardinalympicsEventsValues(eventVals);
+                writeJsonCookie(eventsCookieKey, eventVals);
+              } else {
+                console.warn(
+                  "Cardinalympics Events sheet:",
+                  batch.error || "empty or missing"
+                );
+              }
+            }
           }
         } catch (error) {
           console.log(error);
@@ -278,15 +356,24 @@ function App() {
       }
 
       const hasCachedCardinalympics = Boolean(readJsonCookie("lsa_sheet_cardinalympics_v1")?.length);
-      if (shouldCheckSheetsNow || !hasCachedCardinalympics) {
+      const hasCachedEvents = Boolean(readJsonCookie("lsa_sheet_cardinalympics_events_v1")?.length);
+      const shouldInitialFetch =
+        shouldCheckSheetsNow ||
+        (showScoresAndScoreboard && !hasCachedCardinalympics) ||
+        (showEvents && !hasCachedEvents);
+
+      if (shouldInitialFetch) {
         fetchCardinalympicsData();
       } else {
         const cachedValues = readJsonCookie("lsa_sheet_cardinalympics_v1");
-        if (cachedValues?.length) applyCardinalympicsValues(cachedValues);
+        const cachedEventsValues = readJsonCookie("lsa_sheet_cardinalympics_events_v1");
+        if (showScoresAndScoreboard && cachedValues?.length) applyCardinalympicsValues(cachedValues);
+        if (showEvents && cachedEventsValues?.length) applyCardinalympicsEventsValues(cachedEventsValues);
       }
+
       const pollId = setInterval(fetchCardinalympicsData, CARDINALYMPICS_POLL_MS);
       return () => clearInterval(pollId);
-    }, [shouldCheckSheetsNow]);
+    }, [shouldCheckSheetsNow, showScoresAndScoreboard, showEvents]);
 
     useEffect(() => {
       async function fetchApplicationsData() {
@@ -309,18 +396,21 @@ function App() {
             : [sheetName].filter(Boolean);
 
           let lastError = null;
-          for (const name of names) {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(name)}?key=${KEY}`;
-            const fetchResult = await fetchSheetValuesWithRetry(url);
-            if (!fetchResult.values?.length) {
-              lastError = fetchResult.error || "Unknown API error";
-              console.warn("Applications sheet fetch:", name, lastError);
-              continue;
+          const batch = await fetchSheetBatchGetWithRetry(spreadsheetId, names, KEY);
+          if (!batch.error && batch.valueRanges?.length) {
+            for (let i = 0; i < names.length; i++) {
+              const vals = batch.valueRanges[i]?.values;
+              if (!vals?.length) continue;
+              setApplicationsData(processApplicationsSheetData(vals));
+              writeJsonCookie(appsCookieKey, vals);
+              return;
             }
-            setApplicationsData(processApplicationsSheetData(fetchResult.values));
-            writeJsonCookie(appsCookieKey, fetchResult.values);
-            return;
+            lastError = "No non-empty applications tab";
+          } else {
+            lastError = batch.error || "Unknown API error";
+            console.warn("Applications sheet batch:", lastError);
           }
+
           if (cachedApplicationsValues?.length) {
             setApplicationsError(
               `Live applications data unavailable (${lastError || "Could not load applications tab"}). Showing last saved data.`
@@ -406,7 +496,7 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route element={<Layout clubData={clubData} electionsEnabled={site.electionsEnabled} electionsConfig={electionsConfigResolved} />}>
-            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} clubData={clubData} applicationsData={applicationsData} />} />
+            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} clubData={clubData} applicationsData={applicationsData} showCardinalympicsScores={cardinalympicsConfig.showScoresAndScoreboard} />} />
             <Route path="Elections" element={<Outlet />}>
               <Route index element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={electionsConfigResolved} />} />
               <Route path=":boardSlug" element={<ElectionBoard electionsConfig={electionsConfigResolved} />} />
@@ -469,7 +559,7 @@ function App() {
             <Route path="Events" element={<Events />} />
             <Route path="AboutSite" element={<Site />} />
             <Route path="Archives" element={<Archives />} />
-            <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} />} />  
+            <Route path="Cardinalympics" element={<Cardinalympics cardinalympicsData={cardinalympicsData} scoreboardRows={scoreboardRows} cardinalympicsEvents={cardinalympicsEvents} showScoresAndScoreboard={cardinalympicsConfig.showScoresAndScoreboard} showEvents={cardinalympicsConfig.showEvents} />} />  
             <Route path="More" element={<More />} />
             <Route path="*" element={<NotFound />} />
           </Route>
