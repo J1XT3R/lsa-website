@@ -189,6 +189,8 @@
 }
 
 .cardinalympics-event {
+  width: 100%;
+  box-sizing: border-box;
   background: #f8f9fa;
   border-radius: 10px;
   padding: 1.1rem 1.25rem 1.25rem;
@@ -520,13 +522,12 @@
   }
 
   .cardinalympics-day__events {
-    width: min(100%, 560px);
+    width: 100%;
     margin: 0 auto;
   }
 
   .cardinalympics-event {
     width: 100%;
-    max-width: none;
     margin-left: auto;
     margin-right: auto;
     padding: 1rem 1rem 1.1rem;
