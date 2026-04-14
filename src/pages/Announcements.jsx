@@ -48,7 +48,18 @@ function trimPreview(text) {
 function parseSheetAnnouncements(values) {
   if (!Array.isArray(values) || values.length < 2) return [];
   const headers = values[0].map((h) => String(h || "").trim().toLowerCase());
-  const titleIndex = headers.findIndex((h) => h === "name" || h === "title");
+  const normalizedHeaders = headers.map((h) =>
+    h
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, "")
+      .replace(/[^a-z0-9]/g, "")
+  );
+  let titleIndex = headers.findIndex(
+    (h) => h === "name" || h === "title" || h === "event name"
+  );
+  if (titleIndex < 0) {
+    titleIndex = normalizedHeaders.findIndex((h) => h === "eventname");
+  }
   // Prefer "Date (MM/DD/YY)" column; fall back to Year / Date
   let dateIndex = headers.findIndex(
     (h) => h === "date (mm/dd/yy)" || h.includes("mm/dd/yy")
@@ -57,7 +68,11 @@ function parseSheetAnnouncements(values) {
     dateIndex = headers.findIndex((h) => h === "year" || h === "date");
   }
   const contentIndex = headers.findIndex((h) => h === "description" || h === "content");
-  if (titleIndex < 0 || contentIndex < 0) return [];
+  if (contentIndex < 0) return [];
+  if (titleIndex < 0) {
+    // Some tabs use Event Name in col A with custom formatting; fallback safely.
+    titleIndex = 0;
+  }
 
   return values
     .slice(1)

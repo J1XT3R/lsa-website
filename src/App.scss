@@ -333,6 +333,128 @@
   }
 }
 
+.home-cardinalympics-signup {
+  min-height: unset;
+  overflow: hidden;
+  background: #fff;
+  border: none;
+  padding: 1.5rem 1.25rem 2.2rem;
+}
+
+.home-cardinalympics-signup__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 1.5rem 1.25rem 1.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(160deg, #ffffff 0%, #f5f7fa 100%);
+}
+
+.home-cardinalympics-signup__rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.28;
+  pointer-events: none;
+
+  > div {
+    margin: 0 !important;
+    transform: scale(4);
+    transform-origin: center;
+  }
+}
+
+.home-cardinalympics-signup__content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 0.7rem;
+    font-size: clamp(1.55rem, 3.2vw, 2.1rem);
+    font-weight: 800;
+    color: #121212;
+    letter-spacing: -0.02em;
+  }
+}
+
+.home-cardinalympics-signup__ticker-wrap {
+  overflow: hidden;
+  margin: 0.15rem auto 0.8rem;
+  max-width: min(100%, 900px);
+}
+
+.home-cardinalympics-signup__ticker-track {
+  display: flex;
+  width: max-content;
+  animation: home-cardinalympics-signup-marquee 28s linear infinite;
+}
+
+.home-cardinalympics-signup__ticker {
+  margin: 0;
+  white-space: nowrap;
+  display: inline-block;
+  padding-right: 2.5rem;
+  font-size: clamp(1rem, 2.5vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(134, 18, 18, 0.6);
+  text-transform: uppercase;
+}
+
+.home-cardinalympics-signup__subtitle {
+  margin: 0 auto 1rem;
+  max-width: 44rem;
+  color: #333;
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.home-cardinalympics-signup__button {
+  display: inline-block;
+  padding: 0.62rem 1.15rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--lowell-red, #861212);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    background: #6f0f0f;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes home-cardinalympics-signup-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cardinalympics-signup__ticker-track {
+    animation: none;
+  }
+
+  .home-cardinalympics-signup__ticker {
+    padding-right: 0;
+    white-space: normal;
+  }
+}
+
 .news-section {
   max-width: 900px;
   margin: 1.75rem auto 1.25rem;

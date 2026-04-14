@@ -52,6 +52,7 @@ const SHEETS_CHECK_WINDOW_MS = 60 * 1000;
 const SHEETS_LAST_CHECK_COOKIE = "lsa_sheets_last_check_ms_v1";
 const SHEETS_RETRY_ATTEMPTS = 3;
 const SHEETS_RETRY_DELAY_MS = 700;
+const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archive", "Announcements"];
 
 function readCookie(name) {
   if (typeof document === "undefined") return null;
@@ -154,6 +155,93 @@ async function fetchSheetBatchGetWithRetry(spreadsheetId, rangeNames, apiKey, op
   return { valueRanges: null, error: lastError || "Failed to fetch sheet data" };
 }
 
+async function fetchSingleSheetValuesWithRetry(spreadsheetId, rangeName, apiKey, options = {}) {
+  const attempts = options.attempts ?? SHEETS_RETRY_ATTEMPTS;
+  const delayMs = options.delayMs ?? SHEETS_RETRY_DELAY_MS;
+  let lastError = null;
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const range = encodeURIComponent(rangeName);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
+      const res = await fetch(url, options.fetchOptions);
+      const json = await res.json();
+      if (json?.error) {
+        lastError = json.error.message || "Unknown API error";
+      } else if (Array.isArray(json?.values)) {
+        return { values: json.values, error: null };
+      } else {
+        lastError = "No data returned";
+      }
+    } catch (error) {
+      lastError = error?.message || "Network error";
+    }
+
+    if (i < attempts - 1) {
+      await delay(delayMs);
+    }
+  }
+
+  return { values: null, error: lastError || "Failed to fetch sheet data" };
+}
+
+function parseAnnouncementDate(input) {
+  if (!input) return null;
+  const s = String(input).trim();
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+  if (mdy) {
+    const month = parseInt(mdy[1], 10) - 1;
+    const day = parseInt(mdy[2], 10);
+    let year = parseInt(mdy[3], 10);
+    if (year < 100) year += 2000;
+    const d = new Date(year, month, day);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  const parsed = Date.parse(s);
+  return Number.isNaN(parsed) ? null : new Date(parsed);
+}
+
+function processAnnouncementsSheetData(values) {
+  if (!Array.isArray(values) || values.length < 2) return [];
+  const headers = values[0].map((h) => String(h || "").trim().toLowerCase());
+  const normalizedHeaders = headers.map((h) =>
+    h
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, "")
+      .replace(/[^a-z0-9]/g, "")
+  );
+  let titleIndex = headers.findIndex(
+    (h) => h === "name" || h === "title" || h === "event name"
+  );
+  if (titleIndex < 0) {
+    titleIndex = normalizedHeaders.findIndex((h) => h === "eventname");
+  }
+  let dateIndex = headers.findIndex((h) => h === "date (mm/dd/yy)" || h.includes("mm/dd/yy"));
+  if (dateIndex < 0) {
+    dateIndex = headers.findIndex((h) => h === "year" || h === "date");
+  }
+  const contentIndex = headers.findIndex((h) => h === "description" || h === "content");
+  if (contentIndex < 0) return [];
+  if (titleIndex < 0) titleIndex = 0;
+
+  return values
+    .slice(1)
+    .map((row) => ({
+      title: String(row?.[titleIndex] ?? "").trim(),
+      date: String(row?.[dateIndex] ?? "").trim() || "Unknown",
+      content: String(row?.[contentIndex] ?? "").trim(),
+    }))
+    .filter((item) => item.title && item.content)
+    .sort((a, b) => {
+      const ad = parseAnnouncementDate(a.date);
+      const bd = parseAnnouncementDate(b.date);
+      if (!ad && !bd) return 0;
+      if (!ad) return 1;
+      if (!bd) return -1;
+      return bd.getTime() - ad.getTime();
+    });
+}
+
 function App() {
     // main site data from Google Sheets (yes the key is here, we're not doing auth for a read-only sheet)
     const KEY = "AIzaSyAgshc5Aqd8B149h5RpsenMh_SQAeb4AXc";
@@ -173,6 +261,7 @@ function App() {
 
     const SHEET_NAME4 = "Copy of Elections";
     const [electionSheetValues, setElectionSheetValues] = useState(null);
+    const [newsData, setNewsData] = useState([]);
 
     // which clubs/orgs have applications open right now
     const [applicationsData, setApplicationsData] = useState([]);
@@ -180,7 +269,7 @@ function App() {
     const [applicationsError, setApplicationsError] = useState(null);
     const shouldCheckSheetsNow = useMemo(() => reserveSheetsRefreshWindow(), []);
 
-    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs → 1 API call)
+    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs -> 1 API call)
     useEffect(() => {
       async function fetchCoreSheets() {
         const clubCookieKey = "lsa_sheet_website_info_v1";
@@ -258,20 +347,55 @@ function App() {
       [electionSheetValues]
     );
 
+    useEffect(() => {
+      async function fetchHomeAnnouncementsData() {
+        const announcementsCookieKey = "lsa_sheet_home_announcements_v1";
+        const cachedAnnouncementsValues = readJsonCookie(announcementsCookieKey);
+        if (cachedAnnouncementsValues?.length) {
+          setNewsData(processAnnouncementsSheetData(cachedAnnouncementsValues));
+        }
+        if (!shouldCheckSheetsNow && cachedAnnouncementsValues?.length) return;
+
+        try {
+          for (const sheetName of ANNOUNCEMENTS_SHEET_NAMES) {
+            const result = await fetchSingleSheetValuesWithRetry(
+              SPREADSHEET_ID,
+              sheetName,
+              KEY
+            );
+            if (!result.values?.length) {
+              console.warn("Announcements sheet fetch:", sheetName, result.error || "No values");
+              continue;
+            }
+            const parsed = processAnnouncementsSheetData(result.values);
+            if (!parsed.length) continue;
+            setNewsData(parsed);
+            writeJsonCookie(announcementsCookieKey, result.values);
+            return;
+          }
+          console.warn("Announcements sheet fetch: no non-empty tab found");
+        } catch (error) {
+          console.warn("Announcements sheet fetch failed:", error);
+        }
+      }
+      fetchHomeAnnouncementsData();
+    }, [shouldCheckSheetsNow]);
+
 
     const CARDINALYMPICS_POLL_MS = 30_000;
-    const { showScoresAndScoreboard, showEvents } = cardinalympicsConfig;
+    const { showScoresAndScoreboard, showEvents, showHomeEventsSignupNow } = cardinalympicsConfig;
+    const needsCardinalympicsEventsData = showEvents || showHomeEventsSignupNow;
 
     useEffect(() => {
       if (!showScoresAndScoreboard) {
         setCardinalympicsData([0, 0, 0, 0]);
         setScoreboardRows([]);
       }
-      if (!showEvents) {
+      if (!needsCardinalympicsEventsData) {
         setCardinalympicsEvents([]);
       }
 
-      if (!showScoresAndScoreboard && !showEvents) {
+      if (!showScoresAndScoreboard && !needsCardinalympicsEventsData) {
         return undefined;
       }
 
@@ -297,14 +421,14 @@ function App() {
         if (showScoresAndScoreboard && cachedValues?.length) {
           applyCardinalympicsValues(cachedValues);
         }
-        if (showEvents && cachedEventsValues?.length) {
+        if (needsCardinalympicsEventsData && cachedEventsValues?.length) {
           applyCardinalympicsEventsValues(cachedEventsValues);
         }
 
         const skipNetwork =
           !reserveSheetsRefreshWindow() &&
           (!showScoresAndScoreboard || cachedValues?.length) &&
-          (!showEvents || cachedEventsValues?.length);
+          (!needsCardinalympicsEventsData || cachedEventsValues?.length);
         if (skipNetwork) return;
 
         try {
@@ -317,7 +441,7 @@ function App() {
               )
             );
           }
-          if (showEvents) {
+          if (needsCardinalympicsEventsData) {
             tasks.push(
               fetchSheetBatchGetWithRetry(SPREADSHEET_ID, [SHEET_CARDINALYMPICS_EVENTS], KEY, fetchOpts).then(
                 (batch) => ({ kind: "events", batch })
@@ -360,7 +484,7 @@ function App() {
       const shouldInitialFetch =
         shouldCheckSheetsNow ||
         (showScoresAndScoreboard && !hasCachedCardinalympics) ||
-        (showEvents && !hasCachedEvents);
+        (needsCardinalympicsEventsData && !hasCachedEvents);
 
       if (shouldInitialFetch) {
         fetchCardinalympicsData();
@@ -368,12 +492,12 @@ function App() {
         const cachedValues = readJsonCookie("lsa_sheet_cardinalympics_v1");
         const cachedEventsValues = readJsonCookie("lsa_sheet_cardinalympics_events_v1");
         if (showScoresAndScoreboard && cachedValues?.length) applyCardinalympicsValues(cachedValues);
-        if (showEvents && cachedEventsValues?.length) applyCardinalympicsEventsValues(cachedEventsValues);
+        if (needsCardinalympicsEventsData && cachedEventsValues?.length) applyCardinalympicsEventsValues(cachedEventsValues);
       }
 
       const pollId = setInterval(fetchCardinalympicsData, CARDINALYMPICS_POLL_MS);
       return () => clearInterval(pollId);
-    }, [shouldCheckSheetsNow, showScoresAndScoreboard, showEvents]);
+    }, [shouldCheckSheetsNow, showScoresAndScoreboard, showEvents, showHomeEventsSignupNow, needsCardinalympicsEventsData]);
 
     useEffect(() => {
       async function fetchApplicationsData() {
@@ -496,7 +620,7 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route element={<Layout clubData={clubData} electionsEnabled={site.electionsEnabled} electionsConfig={electionsConfigResolved} />}>
-            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} clubData={clubData} applicationsData={applicationsData} showCardinalympicsScores={cardinalympicsConfig.showScoresAndScoreboard} />} />
+            <Route path="/" element={<Home cardinalympicsData={cardinalympicsData} cardinalympicsEvents={cardinalympicsEvents} newsData={newsData} clubData={clubData} applicationsData={applicationsData} showCardinalympicsScores={cardinalympicsConfig.showScoresAndScoreboard} showCardinalympicsSignupNow={cardinalympicsConfig.showHomeEventsSignupNow} />} />
             <Route path="Elections" element={<Outlet />}>
               <Route index element={<Elections electionData={electionData} electionsEnabled={site.electionsEnabled} electionsConfig={electionsConfigResolved} />} />
               <Route path=":boardSlug" element={<ElectionBoard electionsConfig={electionsConfigResolved} />} />
