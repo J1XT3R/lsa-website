@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef } from "react";
 import PropTypes from "prop-types";
 import electionsConfig from "../config/elections.config.js";
 import "./Elections.scss";
@@ -102,81 +101,6 @@ ElectionBoardCard.propTypes = {
   interactive: PropTypes.bool,
 };
 
-function ElectionBoardsCarousel({ items, renderItem }) {
-  const trackRef = useRef(null);
-  const startedRef = useRef(false);
-
-  const startIndex = useMemo(() => {
-    const idx = items.findIndex((item) => String(item.board || "").trim().toLowerCase() === "sbc");
-    return idx >= 0 ? idx : 0;
-  }, [items]);
-
-  const loopItems = useMemo(
-    () => [...items, ...items, ...items].map((item, index) => ({ ...item, __loopKey: `${item.__key || item.board || "board"}-${index}` })),
-    [items]
-  );
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || items.length === 0) return undefined;
-
-    let rafId = null;
-
-    const placeAtStartCard = () => {
-      const segmentWidth = track.scrollWidth / 3;
-      if (!Number.isFinite(segmentWidth) || segmentWidth <= 0) return;
-      const cards = track.querySelectorAll(".elections-carousel-item");
-      const target = cards[items.length + startIndex];
-      if (!target) return;
-      const targetCenter = target.offsetLeft + target.offsetWidth / 2;
-      const centeredScrollLeft = targetCenter - track.clientWidth / 2;
-      track.scrollLeft = centeredScrollLeft;
-      startedRef.current = true;
-    };
-
-    const maybeLoop = () => {
-      const segmentWidth = track.scrollWidth / 3;
-      if (!Number.isFinite(segmentWidth) || segmentWidth <= 0) return;
-      if (track.scrollLeft < segmentWidth * 0.5) {
-        track.scrollLeft += segmentWidth;
-      } else if (track.scrollLeft > segmentWidth * 1.5) {
-        track.scrollLeft -= segmentWidth;
-      }
-    };
-
-    const onScroll = () => {
-      if (!startedRef.current) return;
-      if (rafId != null) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(maybeLoop);
-    };
-
-    placeAtStartCard();
-    track.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", placeAtStartCard);
-
-    return () => {
-      if (rafId != null) cancelAnimationFrame(rafId);
-      track.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", placeAtStartCard);
-    };
-  }, [items, startIndex]);
-
-  return (
-    <div className="elections-carousel" ref={trackRef}>
-      {loopItems.map((item, index) => (
-        <div key={item.__loopKey || index} className="elections-carousel-item">
-          {renderItem(item, index)}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-ElectionBoardsCarousel.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  renderItem: PropTypes.func.isRequired,
-};
-
 export default function Elections({
   electionData,
   electionsEnabled = true,
@@ -228,7 +152,7 @@ export default function Elections({
 
   // Polling — candidate boards (URLs and nav; see electionAccess.js)
   if (state === "polling") {
-    const contenders = (config?.contenders ?? []).map((group, index) => ({ ...group, __key: `${group.slug || group.board || "board"}-${index}` }));
+    const contenders = config?.contenders ?? [];
     return (
       <div className="elections-page">
         <header className="elections-hero">
@@ -247,9 +171,8 @@ export default function Elections({
           ) : (
             <>
               <p className="elections-scroll-hint">Swipe left/right to see all boards</p>
-              <ElectionBoardsCarousel
-                items={contenders}
-                renderItem={(group, index) => {
+              <div className="elections-board-cards">
+                {contenders.map((group, index) => {
                   const rows = (group.roles ?? []).map((r) => {
                     const cands = Array.isArray(r.candidates) ? r.candidates : [];
                     const names = cands.map((c) => (typeof c === "string" ? c : c?.name ?? "")).filter(Boolean);
@@ -272,8 +195,8 @@ export default function Elections({
                   ) : (
                     <div key={index}>{card}</div>
                   );
-                }}
-              />
+                })}
+              </div>
             </>
           )}
         </section>
@@ -311,7 +234,6 @@ export default function Elections({
       historian: "Ashley Zhao",
     },
   ];
-  const resultCards = displayResults.map((element, index) => ({ ...element, __key: `${element.board || "result"}-${index}` }));
 
   return (
     <div className="elections-page">
@@ -322,9 +244,8 @@ export default function Elections({
       </header>
       <section className="election-section">
         <p className="elections-scroll-hint">Swipe left/right to see all boards</p>
-        <ElectionBoardsCarousel
-          items={resultCards}
-          renderItem={(element, index) => (
+        <div className="elections-board-cards">
+          {displayResults.map((element, index) => (
             <ElectionBoardCard
               key={index}
               board={element.board}
@@ -332,8 +253,8 @@ export default function Elections({
               rows={getResultRows(element)}
               interactive={false}
             />
-          )}
-        />
+          ))}
+        </div>
       </section>
     </div>
   );
