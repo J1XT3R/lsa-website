@@ -57,6 +57,7 @@
 }
 
 // flexbox so when we have 2 cards on the last row they're centered instead of sad and left-aligned
+.elections-carousel,
 .elections-board-cards {
   max-width: 1400px;
   margin: 0 auto;
@@ -68,14 +69,16 @@
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 12vw;
 }
 
+.elections-carousel-item,
 .elections-board-cards > * {
-  flex: 1 1 0;
-  min-width: 300px;
+  flex: 0 0 min(76vw, 420px);
+  min-width: min(76vw, 420px);
   max-width: none;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
 }
 
 .elections-scroll-hint {
@@ -268,18 +271,22 @@
     }
   }
 
+  .elections-carousel,
   .elections-board-cards {
     padding: 1rem 0.75rem 1.25rem;
     gap: 0.75rem;
     justify-content: flex-start;
+    scroll-padding-inline: 10vw;
   }
 
   .elections-scroll-hint {
     display: block;
   }
 
+  .elections-carousel-item,
   .elections-board-cards > * {
-    min-width: min(88vw, 340px);
+    flex-basis: min(82vw, 340px);
+    min-width: min(82vw, 340px);
   }
 
   .election-board-card-header {
