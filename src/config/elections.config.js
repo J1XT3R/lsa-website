@@ -61,6 +61,8 @@ export default {
   // polling = candidate boards + voting; title + subtitle on /Elections
   pollingTitle: "Elections - vote now",
   pollingSubtitle: "Polls are open. Cast your vote below.",
+  // toggle "VOTE NOW" button on candidate cards (/Elections/:slug)
+  showVoteNowButtons: false,
 
   // Used only when `enabledElectionBoards` is empty. Each group: slug, board (title), color, roles[{ role, candidates[{ name, description, pfp, video }] }].
   contenders: [],

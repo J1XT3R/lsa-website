@@ -100,7 +100,7 @@ async function getAverageColorWithFallback(url) {
 }
 
 // one candidate: photo (hover = video), name, bio, vote button
-function ElectionCandidateCard({ candidate, accentColor, onOpenMedia }) {
+function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteButton = true }) {
   const { name, description, pfp, video } = candidate;
   const isDriveVideo = typeof video === "string" && video.includes("drive.google.com");
   const flyerSources = useMemo(() => imageSourceCandidates(pfp), [pfp]);
@@ -242,9 +242,11 @@ function ElectionCandidateCard({ candidate, accentColor, onOpenMedia }) {
         {description && (
           <p className="election-candidate-card-description">{description}</p>
         )}
-        <button type="button" className="election-candidate-card-vote-btn">
-          VOTE NOW
-        </button>
+        {showVoteButton && (
+          <button type="button" className="election-candidate-card-vote-btn">
+            VOTE NOW
+          </button>
+        )}
       </div>
     </article>
   );
@@ -259,6 +261,7 @@ ElectionCandidateCard.propTypes = {
   }).isRequired,
   accentColor: PropTypes.string,
   onOpenMedia: PropTypes.func.isRequired,
+  showVoteButton: PropTypes.bool,
 };
 
 // config sometimes gives us just a name string - turn it into a proper candidate object so we arent cooked
@@ -423,6 +426,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
   }
 
   const accentColor = board.color || "var(--title-color)";
+  const showVoteNowButtons = config?.showVoteNowButtons !== false;
 
   return (
     <div className="election-board-page" style={{ "--board-accent": accentColor }}>
@@ -447,6 +451,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
                     candidate={c}
                     accentColor={accentColor}
                     onOpenMedia={(candidate) => setActiveMedia(candidate)}
+                    showVoteButton={showVoteNowButtons}
                   />
                 ))}
               </div>
@@ -481,6 +486,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
 
 ElectionBoard.propTypes = {
   electionsConfig: PropTypes.shape({
+    showVoteNowButtons: PropTypes.bool,
     contenders: PropTypes.arrayOf(
       PropTypes.shape({
         slug: PropTypes.string,
