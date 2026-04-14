@@ -214,7 +214,16 @@ function CardinalympicsEventsSchedule({ events }) {
               {ev.bodyText ? (
                 <div className="event-description cardinalympics-event__body">{ev.bodyText}</div>
               ) : null}
-              {ev.signUpLink ? (
+              {ev.signUpClosed ? (
+                <button
+                  type="button"
+                  className="event-description cardinalympics-event-closed"
+                  disabled
+                  aria-label={`${ev.heading} sign up is closed`}
+                >
+                  <strong>Closed</strong>
+                </button>
+              ) : ev.signUpLink ? (
                 <a
                   className="event-description"
                   href={ev.signUpLink}

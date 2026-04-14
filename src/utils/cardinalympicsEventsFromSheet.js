@@ -29,12 +29,13 @@ function isGenericName(name) {
   return !n || n === "cardinalympics";
 }
 
-function normalizeSignUpLink(raw) {
-  if (raw == null) return "";
+function parseSignUpCell(raw) {
+  if (raw == null) return { signUpLink: "", signUpClosed: false };
   const s = String(raw).trim();
-  if (!s || /^n\/?a$/i.test(s)) return "";
-  if (/^https?:\/\//i.test(s)) return s;
-  return "";
+  if (!s || /^n\/?a$/i.test(s)) return { signUpLink: "", signUpClosed: false };
+  if (/^closed$/i.test(s)) return { signUpLink: "", signUpClosed: true };
+  if (/^https?:\/\//i.test(s)) return { signUpLink: s, signUpClosed: false };
+  return { signUpLink: "", signUpClosed: false };
 }
 
 export function parseCardinalympicsEventsSheet(values) {
@@ -75,8 +76,8 @@ export function parseCardinalympicsEventsSheet(values) {
     const category =
       categoryIdx >= 0 ? String(row?.[categoryIdx] ?? "").trim() : "";
     const dateRaw = dateIdx >= 0 ? String(row?.[dateIdx] ?? "").trim() : "";
-    const signUpLink =
-      signIdx >= 0 ? normalizeSignUpLink(row?.[signIdx]) : "";
+    const { signUpLink, signUpClosed } =
+      signIdx >= 0 ? parseSignUpCell(row?.[signIdx]) : { signUpLink: "", signUpClosed: false };
 
     const sortDate = parseMMDDYY(dateRaw);
     const { headline, body } = splitDescription(description);
@@ -94,6 +95,7 @@ export function parseCardinalympicsEventsSheet(values) {
       bodyText,
       descriptionFull: description,
       signUpLink,
+      signUpClosed,
     });
   }
 
