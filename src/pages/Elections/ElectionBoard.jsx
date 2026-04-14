@@ -185,6 +185,11 @@ function ElectionCandidateCard({ candidate, accentColor, onOpenMedia }) {
         onClick={handleMediaClick}
         style={{ "--card-accent": accentColor || "var(--title-color)" }}
       >
+        {hasVideo && (
+          <span className="election-candidate-card-video-tag" aria-label="Has campaign video">
+            VIDEO
+          </span>
+        )}
         <SafeImage
           src={flyerSources}
           alt={name}
@@ -463,10 +468,10 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
         </Link>
         {nextSlug ? (
           <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
-            Next board ->
+            Next board →
           </Link>
         ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board -></span>
+          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board →</span>
         )}
       </nav>
       <ElectionMediaModal media={activeMedia} onClose={() => setActiveMedia(null)} />

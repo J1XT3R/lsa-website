@@ -147,6 +147,22 @@
   border-radius: 14px 0 0 0;
 }
 
+.election-candidate-card-video-tag {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 3;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
 .election-candidate-card-pfp {
   position: absolute;
   top: 0;
