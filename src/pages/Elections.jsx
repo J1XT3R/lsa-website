@@ -54,13 +54,17 @@ function getResultRows(element) {
 }
 
 // one little card per board - title, accent color, list of roles/names
-function ElectionBoardCard({ board, color, rows }) {
+function ElectionBoardCard({ board, color, rows, interactive = false }) {
   const accent = color || "var(--title-color)";
 
   return (
     <article className="election-board-card" style={{ "--board-accent": accent }}>
+      <span className="election-board-card-accent-dot" aria-hidden="true" />
       <div className="election-board-card-header">
         <h3 className="election-board-card-title">{board}</h3>
+        <p className="election-board-card-meta">
+          {rows.length} {rows.length === 1 ? "position" : "positions"}
+        </p>
       </div>
       <div className="election-board-card-body">
         {rows.map(({ role, value }, i) => (
@@ -70,6 +74,20 @@ function ElectionBoardCard({ board, color, rows }) {
           </div>
         ))}
       </div>
+      {interactive ? (
+        <div className="election-board-card-footer">
+          <span className="election-board-card-cta">View board</span>
+        </div>
+      ) : (
+        <div className="election-board-card-footer">
+          <span className="election-board-card-cta election-board-card-cta--static">Election results</span>
+        </div>
+      )}
+      {!rows.length ? (
+        <div className="election-board-card-body">
+          <p className="election-board-card-more">No positions listed yet.</p>
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -80,6 +98,7 @@ ElectionBoardCard.propTypes = {
   rows: PropTypes.arrayOf(
     PropTypes.shape({ role: PropTypes.string.isRequired, value: PropTypes.string.isRequired })
   ).isRequired,
+  interactive: PropTypes.bool,
 };
 
 export default function Elections({
@@ -164,6 +183,7 @@ export default function Elections({
                     board={group.board}
                     color={group.color}
                     rows={rows}
+                    interactive={Boolean(slug)}
                   />
                 );
                 return slug ? (
@@ -227,6 +247,7 @@ export default function Elections({
               board={element.board}
               color={element.color}
               rows={getResultRows(element)}
+              interactive={false}
             />
           ))}
         </div>

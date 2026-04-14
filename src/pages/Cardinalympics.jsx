@@ -55,7 +55,7 @@ function isEventRow(row) {
   return [row[IDX_FR], row[IDX_SO], row[IDX_JR], row[IDX_SR]].some((c) => parseScore(c) !== "");
 }
 
-// winner text might be in col 8 or 9 depending on who edited the sheet last
+// winner text might be in col 8 or 9 depending on who edited the sheet last 
 function getWinner(row) {
   for (let c = IDX_WINNER; c <= IDX_WINNER + 2; c++) {
     const val = row[c] != null ? String(row[c]).trim() : "";
@@ -268,47 +268,47 @@ export default function Cardinalympics({
         </div>
       </header>
       {showScoresAndScoreboard && (
-        <section
-          className="home-cardinalympics cardinalympics-spirit-scores-only"
-          aria-labelledby="cardinalympics-points-cap"
-        >
-          <div className="home-cardinalympics__inner">
-            <div className="cardinalympics-spirit-card">
-              <div className="cardinalympics-spirit-card__cap" id="cardinalympics-points-cap">
-                <span className="cardinalympics-spirit-card__cap-number">
-                  {POINTS_POSSIBLE.toLocaleString()}
-                </span>
-                <span className="cardinalympics-spirit-card__cap-label">points possible</span>
-              </div>
-              <div className="home-cardinalympics__grid" role="list">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={CLASS_SLUGS[i]}
-                    className={`home-cardinalympics__class home-cardinalympics__class--${CLASS_SLUGS[i]}${
-                      leaderIndex === i ? " home-cardinalympics__class--leader" : ""
-                    }`}
-                    role="listitem"
-                  >
-                    {leaderIndex === i && (
-                      <span className="home-cardinalympics__leader-badge">Leading</span>
-                    )}
-                    <span className="home-cardinalympics__class-name">{CLASS_NAMES[i]}</span>
-                    <div className="home-cardinalympics__points">
-                      <Counter
-                        start={0}
-                        end={spiritTotals[i]}
-                        duration={2000}
-                        className="home-cardinalympics__counter"
-                        color={COUNTER_COLORS[i]}
-                      />
-                      <span className="home-cardinalympics__pts-label">pts</span>
-                    </div>
+      <section
+        className="home-cardinalympics cardinalympics-spirit-scores-only"
+        aria-labelledby="cardinalympics-points-cap"
+      >
+        <div className="home-cardinalympics__inner">
+          <div className="cardinalympics-spirit-card">
+            <div className="cardinalympics-spirit-card__cap" id="cardinalympics-points-cap">
+              <span className="cardinalympics-spirit-card__cap-number">
+                {POINTS_POSSIBLE.toLocaleString()}
+              </span>
+              <span className="cardinalympics-spirit-card__cap-label">points possible</span>
+            </div>
+            <div className="home-cardinalympics__grid" role="list">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={CLASS_SLUGS[i]}
+                  className={`home-cardinalympics__class home-cardinalympics__class--${CLASS_SLUGS[i]}${
+                    leaderIndex === i ? " home-cardinalympics__class--leader" : ""
+                  }`}
+                  role="listitem"
+                >
+                  {leaderIndex === i && (
+                    <span className="home-cardinalympics__leader-badge">Leading</span>
+                  )}
+                  <span className="home-cardinalympics__class-name">{CLASS_NAMES[i]}</span>
+                  <div className="home-cardinalympics__points">
+                    <Counter
+                      start={0}
+                      end={spiritTotals[i]}
+                      duration={2000}
+                      className="home-cardinalympics__counter"
+                      color={COUNTER_COLORS[i]}
+                    />
+                    <span className="home-cardinalympics__pts-label">pts</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       )}
       {showScoresAndScoreboard && scoreboardRows.length > 0 && (
         <div className="cardinalympics-scoreboard" id="detailed-scoreboard">
@@ -319,9 +319,9 @@ export default function Cardinalympics({
         </div>
       )}
       {showEvents && (
-        <section className="cardinalympics-content info-page">
+      <section className="cardinalympics-content info-page">
           <CardinalympicsEventsSchedule events={cardinalympicsEvents} />
-        </section>
+      </section>
       )}
     </div>
   );

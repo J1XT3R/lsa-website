@@ -20,11 +20,78 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { buildNavLinks } from "../config/navLinks.js";
 import { areElectionBoardsPublic } from "../utils/electionAccess.js";
 
+function normalizeElectionNavKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/_/g, "-");
+}
+
+function buildEnabledElectionSlugSet(electionsConfig) {
+  const set = new Set();
+  const enabled = Array.isArray(electionsConfig?.enabledElectionBoards)
+    ? electionsConfig.enabledElectionBoards
+    : [];
+  const meta = electionsConfig?.electionBoardMeta || {};
+  const metaEntries = Object.entries(meta);
+
+  const add = (v) => {
+    const key = normalizeElectionNavKey(v);
+    if (key) set.add(key);
+  };
+
+  // Include slugs currently available in contenders (already merged from sheet/config in App.jsx).
+  const contenders = Array.isArray(electionsConfig?.contenders) ? electionsConfig.contenders : [];
+  contenders.forEach((c) => {
+    add(c?.slug);
+    add(c?.board);
+  });
+
+  // Include explicit enabled board keys + any mapped meta slug/title.
+  enabled.forEach((boardKey) => {
+    add(boardKey);
+    const match = metaEntries.find(([k]) => k.toLowerCase() === String(boardKey).toLowerCase());
+    if (match) {
+      const [, item] = match;
+      add(item?.slug);
+      add(item?.title);
+    }
+    const year = String(boardKey).match(/\b(20\d{2})\b/);
+    if (year) {
+      add(`LSA-${year[1]}`);
+      add(`LSA ${year[1]}`);
+    }
+  });
+
+  return set;
+}
+
 function filterElectionSubNav(links, electionsConfig) {
-  if (!electionsConfig || areElectionBoardsPublic(electionsConfig)) {
+  if (!electionsConfig) {
     return links;
   }
-  return links.map((link) => {
+
+  const allowed = buildEnabledElectionSlugSet(electionsConfig);
+  const nextLinks = links.map((link) => {
+    if (link.name !== "ELECTIONS") return link;
+    const subLinks = Array.isArray(link.subLinks) ? link.subLinks : [];
+    const filteredSubLinks =
+      allowed.size === 0
+        ? subLinks
+        : subLinks.filter((s) => {
+            const toKey = normalizeElectionNavKey(s?.to);
+            const nameKey = normalizeElectionNavKey(s?.name);
+            return allowed.has(toKey) || allowed.has(nameKey);
+          });
+    return { ...link, subLinks: filteredSubLinks };
+  });
+
+  if (areElectionBoardsPublic(electionsConfig)) {
+    return nextLinks;
+  }
+
+  return nextLinks.map((link) => {
     if (link.name !== "ELECTIONS") return link;
     return {
       ...link,

@@ -58,48 +58,66 @@
 
 // flexbox so when we have 2 cards on the last row they're centered instead of sad and left-aligned
 .elections-board-cards {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 2.25rem 1rem;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.5rem;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 1rem;
+  overflow-x: visible;
 }
 
 .elections-board-cards > * {
-  flex: 0 0 320px;
-  max-width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
 }
 
 .elections-board-card-link {
   text-decoration: none;
   color: inherit;
   display: flex;
+  width: 100%;
 }
 
 // the actual card - gradient header, dashed line under title, role list
 .election-board-card {
-  background: #fff;
-  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.25s ease, transform 0.2s ease;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.09),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
   display: flex;
   flex-direction: column;
   position: relative;
   height: 100%;
 }
 
+.elections-board-card-link:hover .election-board-card,
 .election-board-card:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
   transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--board-accent, #2d5a87) 35%, #ffffff);
+}
+
+.election-board-card-accent-dot {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.95rem;
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 50%;
+  background: var(--board-accent, var(--title-color));
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--board-accent, #2d5a87) 18%, transparent);
 }
 
 .election-board-card-header {
-  padding: 1rem 1.25rem;
-  border-left: 4px solid var(--board-accent, var(--title-color));
+  padding: 1rem 1.1rem 0.8rem 1.25rem;
+  border-left: 5px solid var(--board-accent, var(--title-color));
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--board-accent, #2d5a87) 12%, transparent),
@@ -108,7 +126,7 @@
 }
 
 .election-board-card-title {
-  margin: 0;
+  margin: 0 0 0.35rem;
   font-size: 1.15rem;
   font-weight: 700;
   color: #1a1a1a;
@@ -117,16 +135,27 @@
   border-bottom: 2px dashed var(--board-accent, var(--title-color));
 }
 
+.election-board-card-meta {
+  margin: 0;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #5e5e5e;
+}
+
 .election-board-card-body {
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 0.9rem 1.1rem 1rem;
   flex: 1;
   position: relative;
+  column-count: 2;
+  column-gap: 0.85rem;
 }
 
 .election-board-card-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25em 0.5em;
+  display: block;
+  break-inside: avoid;
+  page-break-inside: avoid;
   margin-bottom: 0.6rem;
   font-size: 0.95rem;
   line-height: 1.4;
@@ -137,13 +166,48 @@
 }
 
 .election-board-card-role {
+  display: block;
   font-weight: 600;
   color: var(--board-accent, var(--title-color));
-  flex-shrink: 0;
+  margin-bottom: 0.12rem;
 }
 
 .election-board-card-value {
+  display: block;
   color: #333;
+}
+
+.election-board-card-more {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  color: #6a6a6a;
+  font-weight: 600;
+}
+
+.election-board-card-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0.72rem 1.25rem 0.82rem;
+  background: #fafafa;
+}
+
+.election-board-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--board-accent, var(--title-color));
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.election-board-card-cta::after {
+  content: ">";
+  font-size: 0.85em;
+  line-height: 1;
+}
+
+.election-board-card-cta--static::after {
+  content: "";
 }
 
 // when there's nothing to show (elections off, no candidates yet, etc.)
@@ -178,9 +242,5 @@
 
   .elections-board-cards {
     padding: 1.5rem 1rem;
-
-    > * {
-      flex: 0 0 100%;
-    }
   }
 }
