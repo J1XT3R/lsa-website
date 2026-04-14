@@ -169,32 +169,35 @@ export default function Elections({
               <p>Candidate information will be posted here once available.</p>
             </div>
           ) : (
-            <div className="elections-board-cards">
-              {contenders.map((group, index) => {
-                const rows = (group.roles ?? []).map((r) => {
-                  const cands = Array.isArray(r.candidates) ? r.candidates : [];
-                  const names = cands.map((c) => (typeof c === "string" ? c : c?.name ?? "")).filter(Boolean);
-                  return { role: r.role, value: names.join(", ") };
-                });
-                const slug = group.slug;
-                const card = (
-                  <ElectionBoardCard
-                    key={index}
-                    board={group.board}
-                    color={group.color}
-                    rows={rows}
-                    interactive={Boolean(slug)}
-                  />
-                );
-                return slug ? (
-                  <Link key={index} to={`/Elections/${slug}`} className="elections-board-card-link">
-                    {card}
-                  </Link>
-                ) : (
-                  <div key={index}>{card}</div>
-                );
-              })}
-            </div>
+            <>
+              <p className="elections-scroll-hint">Swipe left/right to see all boards</p>
+              <div className="elections-board-cards">
+                {contenders.map((group, index) => {
+                  const rows = (group.roles ?? []).map((r) => {
+                    const cands = Array.isArray(r.candidates) ? r.candidates : [];
+                    const names = cands.map((c) => (typeof c === "string" ? c : c?.name ?? "")).filter(Boolean);
+                    return { role: r.role, value: names.join(", ") };
+                  });
+                  const slug = group.slug;
+                  const card = (
+                    <ElectionBoardCard
+                      key={index}
+                      board={group.board}
+                      color={group.color}
+                      rows={rows}
+                      interactive={Boolean(slug)}
+                    />
+                  );
+                  return slug ? (
+                    <Link key={index} to={`/Elections/${slug}`} className="elections-board-card-link">
+                      {card}
+                    </Link>
+                  ) : (
+                    <div key={index}>{card}</div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </section>
       </div>
@@ -240,6 +243,7 @@ export default function Elections({
         <span className="elections-hero-badge">Results</span>
       </header>
       <section className="election-section">
+        <p className="elections-scroll-hint">Swipe left/right to see all boards</p>
         <div className="elections-board-cards">
           {displayResults.map((element, index) => (
             <ElectionBoardCard
