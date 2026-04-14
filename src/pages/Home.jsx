@@ -63,7 +63,7 @@ export default function Home({
   const spotlightHref = spotlightClub
     ? `/Clubs/${encodeURIComponent(spotlightClub.Name)}`
     : "/Clubs";
-  const spotlightCtaText = spotlightClub ? "Learn more →" : "Browse clubs →";
+  const spotlightCtaText = spotlightClub ? "Learn more &rarr;" : "Browse clubs &rarr;";
   const spotlightInitial = spotlightDisplayName.trim()
     ? spotlightDisplayName.trim().charAt(0).toUpperCase()
     : "";
@@ -179,7 +179,7 @@ export default function Home({
                 </div>
               </div>
               <Link to="/Cardinalympics" className="home-cardinalympics__link">
-                Full scoreboard &amp; events →
+                Full scoreboard &amp; events &rarr;
               </Link>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default function Home({
                 {item.notes && <p className="applications-news-content">{item.notes}</p>}
                 {item.link && (
                   <a href={item.link} target="_blank" rel="noopener noreferrer" className="applications-news-link">
-                    Go to application →
+                    Go to application &rarr;
                   </a>
                 )}
               </div>

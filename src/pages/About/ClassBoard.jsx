@@ -56,17 +56,17 @@ export default function ClassBoard({ officerData: officerDataProp }) {
 
       <nav className="board-nav" aria-label="Board navigation">
         <Link to={prevBoard.path} className="board-nav__btn">
-          ← Previous board
+          &larr; Previous board
         </Link>
         <Link to="/LSA-EXPLORE" className="board-nav__btn">
           All boards
         </Link>
         {nextBoard ? (
           <Link to={nextBoard.path} className="board-nav__btn">
-            Next board ->
+            Next board &rarr;
           </Link>
         ) : (
-          <span className="board-nav__btn board-nav__btn--disabled">Next board -></span>
+          <span className="board-nav__btn board-nav__btn--disabled">Next board &rarr;</span>
         )}
       </nav>
 
@@ -104,17 +104,17 @@ export default function ClassBoard({ officerData: officerDataProp }) {
 
       <nav className="board-nav board-nav--bottom" aria-label="Board navigation bottom">
         <Link to={prevBoard.path} className="board-nav__btn">
-          ← Previous board
+          &larr; Previous board
         </Link>
         <Link to="/LSA-EXPLORE" className="board-nav__btn">
           All boards
         </Link>
         {nextBoard ? (
           <Link to={nextBoard.path} className="board-nav__btn">
-            Next board ->
+            Next board &rarr;
           </Link>
         ) : (
-          <span className="board-nav__btn board-nav__btn--disabled">Next board -></span>
+          <span className="board-nav__btn board-nav__btn--disabled">Next board &rarr;</span>
         )}
       </nav>
     </>

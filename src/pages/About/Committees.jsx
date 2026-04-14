@@ -81,7 +81,7 @@ export default function Committees() {
 
       <section className="committees-landing__footer">
         <Link to="/LSA" className="committees-landing__back">
-          ← Back to About LSA
+          &larr; Back to About LSA
         </Link>
       </section>
     </main>

@@ -65,13 +65,17 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   gap: 1rem;
-  overflow-x: visible;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
 }
 
 .elections-board-cards > * {
   flex: 1 1 0;
-  min-width: 0;
+  min-width: 300px;
   max-width: none;
+  scroll-snap-align: start;
 }
 
 .elections-board-card-link {
@@ -240,7 +244,51 @@
     padding: 2rem 1rem;
   }
 
+  .elections-state-header {
+    margin-bottom: 1.1rem;
+    padding: 1.5rem 0.85rem 0;
+
+    h1 {
+      font-size: 1.4rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      line-height: 1.35;
+    }
+  }
+
   .elections-board-cards {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem 1.25rem;
+    gap: 0.75rem;
+    justify-content: flex-start;
+  }
+
+  .elections-board-cards > * {
+    min-width: min(88vw, 340px);
+  }
+
+  .election-board-card-header {
+    padding: 0.8rem 0.9rem 0.7rem 1rem;
+  }
+
+  .election-board-card-title {
+    font-size: 1rem;
+  }
+
+  .election-board-card-body {
+    padding: 0.75rem 0.9rem 0.9rem;
+    column-count: 1;
+    column-gap: 0;
+  }
+
+  .election-board-card-row {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .election-board-card-footer {
+    padding: 0.6rem 1rem 0.7rem;
   }
 }

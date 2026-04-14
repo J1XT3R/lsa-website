@@ -463,20 +463,20 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
       <nav className="election-board-nav">
         {prevSlug ? (
           <Link to={`/Elections/${prevSlug}`} className="election-board-nav-btn election-board-nav-btn--prev">
-            ← Last board
+            &larr; Last board
           </Link>
         ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">← Last board</span>
+          <span className="election-board-nav-btn election-board-nav-btn--disabled">&larr; Last board</span>
         )}
         <Link to="/Elections" className="election-board-nav-btn">
           All boards
         </Link>
         {nextSlug ? (
           <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
-            Next board →
+            Next board &rarr;
           </Link>
         ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board →</span>
+          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board &rarr;</span>
         )}
       </nav>
       <ElectionMediaModal media={activeMedia} onClose={() => setActiveMedia(null)} />

@@ -42,12 +42,12 @@ export default function SBC({ officerData: officerDataProp }) {
       </div>
 
       <nav className="board-nav" aria-label="Board navigation">
-        <span className="board-nav__btn board-nav__btn--disabled">← Previous board</span>
+        <span className="board-nav__btn board-nav__btn--disabled">&larr; Previous board</span>
         <Link to="/LSA-EXPLORE" className="board-nav__btn">
           All boards
         </Link>
         <Link to="/LSA/Senior%20Board" className="board-nav__btn">
-          Next board →
+          Next board &rarr;
         </Link>
       </nav>
 
@@ -84,12 +84,12 @@ export default function SBC({ officerData: officerDataProp }) {
       </section>
 
       <nav className="board-nav board-nav--bottom" aria-label="Board navigation bottom">
-        <span className="board-nav__btn board-nav__btn--disabled">← Previous board</span>
+        <span className="board-nav__btn board-nav__btn--disabled">&larr; Previous board</span>
         <Link to="/LSA-EXPLORE" className="board-nav__btn">
           All boards
         </Link>
         <Link to="/LSA/Senior%20Board" className="board-nav__btn">
-          Next board →
+          Next board &rarr;
         </Link>
       </nav>
     </>
