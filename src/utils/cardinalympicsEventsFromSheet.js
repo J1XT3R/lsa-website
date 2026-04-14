@@ -1,5 +1,5 @@
 /**
- * Parse "Cardinalympics Events" tab: Name, Category, Date (MM/DD/YY), Description, Sign Up Link
+ * Parse "Cardinalympics Events" tab: Name, Category, Date (MM/DD/YY), Description, Sign Up Link, Points Possible
  */
 
 function parseMMDDYY(str) {
@@ -38,6 +38,13 @@ function parseSignUpCell(raw) {
   return { signUpLink: "", signUpClosed: false };
 }
 
+function parsePointsPossibleCell(raw) {
+  if (raw == null) return "";
+  const s = String(raw).trim();
+  if (!s || /^n\/?a$/i.test(s) || /^none$/i.test(s)) return "";
+  return s;
+}
+
 export function parseCardinalympicsEventsSheet(values) {
   if (!Array.isArray(values) || values.length < 2) return [];
 
@@ -61,6 +68,12 @@ export function parseCardinalympicsEventsSheet(values) {
   if (signIdx < 0) {
     signIdx = headers.findIndex((h) => h.includes("signup") || h.includes("sign-up"));
   }
+  let pointsPossibleIdx = headers.findIndex(
+    (h) => h === "points possible" || (h.includes("points") && h.includes("possible"))
+  );
+  if (pointsPossibleIdx < 0) {
+    pointsPossibleIdx = headers.findIndex((h) => h.includes("pts poss"));
+  }
 
   if (descIdx < 0) return [];
 
@@ -78,6 +91,8 @@ export function parseCardinalympicsEventsSheet(values) {
     const dateRaw = dateIdx >= 0 ? String(row?.[dateIdx] ?? "").trim() : "";
     const { signUpLink, signUpClosed } =
       signIdx >= 0 ? parseSignUpCell(row?.[signIdx]) : { signUpLink: "", signUpClosed: false };
+    const pointsPossible =
+      pointsPossibleIdx >= 0 ? parsePointsPossibleCell(row?.[pointsPossibleIdx]) : "";
 
     const sortDate = parseMMDDYY(dateRaw);
     const { headline, body } = splitDescription(description);
@@ -96,6 +111,7 @@ export function parseCardinalympicsEventsSheet(values) {
       descriptionFull: description,
       signUpLink,
       signUpClosed,
+      pointsPossible,
     });
   }
 
@@ -141,4 +157,64 @@ export function groupCardinalympicsEventsByCategory(events) {
   });
 
   return groups;
+}
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function sortEventsByDate(a, b) {
+  const ta = a.sortDate ? a.sortDate.getTime() : 0;
+  const tb = b.sortDate ? b.sortDate.getTime() : 0;
+  if (!a.sortDate && !b.sortDate) return 0;
+  if (!a.sortDate) return 1;
+  if (!b.sortDate) return -1;
+  return ta - tb;
+}
+
+/**
+ * Group events by week number (relative to first dated event), then day of week.
+ * Example output:
+ * [{ weekLabel: "Week 1", days: [{ dayLabel: "Monday", events: [...] }] }]
+ */
+export function groupCardinalympicsEventsByWeekAndDay(events) {
+  if (!events?.length) return [];
+
+  const sorted = [...events].sort(sortEventsByDate);
+  const dated = sorted.filter((ev) => ev.sortDate);
+  if (!dated.length) {
+    return [
+      {
+        weekLabel: "Week 1",
+        days: [{ dayLabel: "Unscheduled", events: sorted }],
+      },
+    ];
+  }
+
+  const earliestMs = startOfDay(dated[0].sortDate);
+  const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+  const dayFormatter = new Intl.DateTimeFormat("en-US", { weekday: "long" });
+
+  const weekMap = new Map();
+
+  for (const ev of sorted) {
+    const weekIndex = ev.sortDate
+      ? Math.floor((startOfDay(ev.sortDate) - earliestMs) / oneWeekMs) + 1
+      : 1;
+    const weekLabel = `Week ${weekIndex}`;
+    const dayLabel = ev.sortDate ? dayFormatter.format(ev.sortDate) : "Unscheduled";
+
+    if (!weekMap.has(weekLabel)) weekMap.set(weekLabel, new Map());
+    const dayMap = weekMap.get(weekLabel);
+    if (!dayMap.has(dayLabel)) dayMap.set(dayLabel, []);
+    dayMap.get(dayLabel).push(ev);
+  }
+
+  return [...weekMap.entries()].map(([weekLabel, dayMap]) => ({
+    weekLabel,
+    days: [...dayMap.entries()].map(([dayLabel, evs]) => ({
+      dayLabel,
+      events: evs.sort(sortEventsByDate),
+    })),
+  }));
 }

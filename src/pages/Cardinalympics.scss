@@ -9,8 +9,8 @@
 }
 
 .cardinalympics-hero {
-  background: linear-gradient(135deg, var(--title-color) 0%, var(--lowell-red) 100%);
-  color: white;
+  background: #fff;
+  color: var(--title-color);
   padding: 1.5rem 1rem 1rem;
   text-align: center;
 
@@ -26,6 +26,7 @@
     margin: 0;
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 700;
+    color: var(--title-color);
   }
 }
 
@@ -133,13 +134,54 @@
   }
 }
 
+.cardinalympics-week {
+  margin-bottom: 2.25rem;
+  padding-top: 0.9rem;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(156, 25, 25, 0.35) 20%, rgba(156, 25, 25, 0.35) 80%, transparent 100%);
+  }
+}
+
+.cardinalympics-week__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--lowell-red);
+  margin: 0 auto 1rem;
+  padding: 0.3rem 0.9rem;
+  border: 2px solid rgba(156, 25, 25, 0.35);
+  border-radius: 999px;
+  background: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cardinalympics-week__title::before {
+  content: none;
+}
+
 .cardinalympics-day__title {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--lowell-red);
-  margin: 0 0 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 3px solid var(--lowell-red);
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--lowell-red);
 }
 
 .cardinalympics-event {
@@ -163,6 +205,30 @@
       color: var(--lowell-red);
       font-weight: 600;
     }
+  }
+
+  .cardinalympics-event__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .cardinalympics-event__points-tag {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--lowell-red);
+    background: rgba(156, 25, 25, 0.1);
+    border: 1px solid rgba(156, 25, 25, 0.25);
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    margin-top: 0.1rem;
   }
 
   p.event-description {
