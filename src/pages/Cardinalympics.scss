@@ -134,6 +134,10 @@
   }
 }
 
+.cardinalympics-day__events {
+  width: 100%;
+}
+
 .cardinalympics-week {
   margin-bottom: 2.25rem;
   padding-top: 0.9rem;
@@ -507,6 +511,32 @@
 }
 
 @media (max-width: 768px) {
+  .cardinalympics-content {
+    padding: 0 1.35rem 2rem;
+  }
+
+  .cardinalympics-day {
+    padding: 0 0.45rem;
+  }
+
+  .cardinalympics-day__events {
+    width: min(100%, 560px);
+    margin: 0 auto;
+  }
+
+  .cardinalympics-event {
+    width: 100%;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  // cancel global App.scss `.event .event-description { margin-left: 1vw; }`
+  .cardinalympics-event .event-description {
+    margin-left: 0;
+  }
+
   .cardinalympics-scoreboard-table {
     font-size: 0.8rem;
     th, td {
