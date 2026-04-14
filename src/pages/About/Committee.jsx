@@ -32,7 +32,7 @@ export default function Committee({ officerData: allOfficers }) {
         <section className="committee-page__empty">
           <p>No officers are listed for this committee yet.</p>
           <Link to="/LSA/Commitees" className="committee-page__back">
-            ← Back to committees
+            &larr; Back to committees
           </Link>
         </section>
       </main>
@@ -69,7 +69,7 @@ export default function Committee({ officerData: allOfficers }) {
 
       <nav className="committee-page__nav" aria-label="Committee navigation">
         <Link to="/LSA/Commitees" className="committee-page__nav-link">
-          ← All committees
+          &larr; All committees
         </Link>
         <Link to="/LSA-EXPLORE" className="committee-page__nav-link">
           Explore LSA
