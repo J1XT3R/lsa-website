@@ -9,10 +9,23 @@ const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archiv
 
 function toSortableDate(input) {
   if (!input) return null;
-  const parsed = Date.parse(input);
+  const s = String(input).trim();
+
+  // Date (MM/DD/YY) column — parse before Date.parse to avoid locale ambiguity
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+  if (mdy) {
+    const month = parseInt(mdy[1], 10) - 1;
+    const day = parseInt(mdy[2], 10);
+    let year = parseInt(mdy[3], 10);
+    if (year < 100) year += 2000;
+    const d = new Date(year, month, day);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+
+  const parsed = Date.parse(s);
   if (!Number.isNaN(parsed)) return new Date(parsed);
 
-  const monthYear = String(input).trim().match(/^([A-Za-z]+)\s+(\d{4})$/);
+  const monthYear = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
   if (monthYear) {
     const [, monthName, year] = monthYear;
     const monthParsed = Date.parse(`${monthName} 1, ${year}`);
@@ -36,7 +49,13 @@ function parseSheetAnnouncements(values) {
   if (!Array.isArray(values) || values.length < 2) return [];
   const headers = values[0].map((h) => String(h || "").trim().toLowerCase());
   const titleIndex = headers.findIndex((h) => h === "name" || h === "title");
-  const dateIndex = headers.findIndex((h) => h === "year" || h === "date");
+  // Prefer "Date (MM/DD/YY)" column; fall back to Year / Date
+  let dateIndex = headers.findIndex(
+    (h) => h === "date (mm/dd/yy)" || h.includes("mm/dd/yy")
+  );
+  if (dateIndex < 0) {
+    dateIndex = headers.findIndex((h) => h === "year" || h === "date");
+  }
   const contentIndex = headers.findIndex((h) => h === "description" || h === "content");
   if (titleIndex < 0 || contentIndex < 0) return [];
 
@@ -128,6 +147,29 @@ export default function Announcements() {
   const visibleAnnouncements = filteredAnnouncements.slice(0, visibleCount);
   const hasMore = filteredAnnouncements.length > visibleCount;
 
+  const modalItem = useMemo(() => {
+    if (!openId) return null;
+    return (
+      filteredAnnouncements.find((i) => i.id === openId) ??
+      normalized.find((i) => i.id === openId) ??
+      null
+    );
+  }, [openId, filteredAnnouncements, normalized]);
+
+  useEffect(() => {
+    if (!openId) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [openId]);
+
   return (
     <section className="announcements-page info-page">
       <div className="announcements-page__header">
@@ -135,7 +177,7 @@ export default function Announcements() {
         <p>
           {loadingSheet
             ? "Loading annoucements"
-            : "Search and filter updates by month, then click a card for full details."}
+            : "Search and filter updates by month, then click a card to read the full announcement."}
         </p>
       </div>
 
@@ -189,44 +231,54 @@ export default function Announcements() {
         {!loadingSheet && visibleAnnouncements.length === 0 && (
           <p className="announcements-count">You&apos;re up to date!</p>
         )}
-        {visibleAnnouncements.map((item) => {
-          const isOpen = openId === item.id;
-          return (
-            <div className="announcement-card-shell" key={item.id}>
-              <button
-                type="button"
-                className="announcement-card"
-                aria-expanded={isOpen}
-                onClick={() => setOpenId(isOpen ? null : item.id)}
-              >
-                <h3>{item.title}</h3>
-                <p className="announcement-card-date">{item.date}</p>
-                <p className="announcement-card-preview">{trimPreview(item.content)}</p>
-                <p className="announcement-card-cta">
-                  {isOpen ? "Hide details" : "View details"}
-                </p>
-              </button>
-
-              {isOpen && (
-                <div className="announcement-popup" role="dialog" aria-label={item.title}>
-                  <div className="announcement-popup-header">
-                    <h4>{item.title}</h4>
-                    <button
-                      type="button"
-                      aria-label="Close details"
-                      onClick={() => setOpenId(null)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <p className="announcement-popup-date">{item.date}</p>
-                  <p className="announcement-popup-content">{item.content}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {visibleAnnouncements.map((item) => (
+          <div className="announcement-card-wrap" key={item.id}>
+            <button
+              type="button"
+              className="announcement-card"
+              aria-haspopup="dialog"
+              onClick={() => setOpenId(item.id)}
+            >
+              <h3>{item.title}</h3>
+              <p className="announcement-card-date">{item.date}</p>
+              <p className="announcement-card-preview">{trimPreview(item.content)}</p>
+              <p className="announcement-card-cta">View details</p>
+            </button>
+          </div>
+        ))}
       </div>
+
+      {modalItem && (
+        <div
+          className="announcement-modal-backdrop"
+          role="presentation"
+          onClick={() => setOpenId(null)}
+        >
+          <div
+            className="announcement-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="announcement-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="announcement-modal-close"
+              aria-label="Close announcement"
+              onClick={() => setOpenId(null)}
+            >
+              ×
+            </button>
+            <h2 id="announcement-modal-title" className="announcement-modal-title">
+              {modalItem.title}
+            </h2>
+            <p className="announcement-modal-date">{modalItem.date}</p>
+            <div className="announcement-modal-body">
+              <p className="announcement-modal-content">{modalItem.content}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {hasMore && (
         <button

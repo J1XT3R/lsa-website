@@ -487,8 +487,8 @@
     align-items: start;
   }
 
-  .announcement-card-shell {
-    position: relative;
+  .announcement-card-wrap {
+    min-width: 0;
   }
 
   .announcement-card {
@@ -536,55 +536,80 @@
     font-weight: 700;
   }
 
-  .announcement-popup {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    right: 0;
-    z-index: 50;
-    border-radius: 10px;
-    border: 1px solid #d6d6d6;
-    background: #fff;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
-    padding: 0.85rem 0.95rem;
-    animation: announcement-drop 0.18s ease;
-  }
-
-  .announcement-popup-header {
+  .announcement-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.55);
+    animation: announcement-modal-fade 0.2s ease;
+  }
 
-    h4 {
-      margin: 0;
-      font-size: 1rem;
-      color: var(--lowell-red);
-    }
+  .announcement-modal {
+    position: relative;
+    width: min(640px, 100%);
+    max-height: min(85vh, 720px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    padding: 1.25rem 1.25rem 1rem;
+    text-align: left;
+    animation: announcement-modal-rise 0.22s ease;
+  }
 
-    button {
-      border: none;
-      background: transparent;
-      color: #666;
-      font-size: 1.2rem;
-      line-height: 1;
-      cursor: pointer;
-      padding: 0;
+  .announcement-modal-close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 999px;
+    background: #f0f0f0;
+    color: #444;
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #e4e4e4;
     }
   }
 
-  .announcement-popup-date {
-    margin: 0.5rem 0;
-    font-size: 0.8rem;
+  .announcement-modal-title {
+    margin: 0 2.25rem 0.35rem 0;
+    padding-right: 0.25rem;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    color: var(--lowell-red);
+    line-height: 1.25;
+  }
+
+  .announcement-modal-date {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
     color: #666;
     font-style: italic;
   }
 
-  .announcement-popup-content {
+  .announcement-modal-body {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-right: 0.15rem;
+  }
+
+  .announcement-modal-content {
     margin: 0;
     color: #333;
-    font-size: 0.93rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
   }
 
   .announcements-load-more {
@@ -608,10 +633,19 @@
   }
 }
 
-@keyframes announcement-drop {
+@keyframes announcement-modal-fade {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes announcement-modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
