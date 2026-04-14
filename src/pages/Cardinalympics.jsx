@@ -206,45 +206,47 @@ function CardinalympicsEventsSchedule({ events }) {
           {weekGroup.days.map((dayGroup, dayIndex) => (
             <div className="cardinalympics-day" key={`${weekGroup.weekLabel}-${dayGroup.dayLabel}-${dayIndex}`}>
               <h4 className="cardinalympics-day__title">{dayGroup.dayLabel}</h4>
-              {dayGroup.events.map((ev) => (
-                <div className="event cardinalympics-event" key={ev.id}>
-                  <div className="cardinalympics-event__head">
-                    <h3 className="event-description">{ev.heading}</h3>
-                    {ev.pointsPossible ? (
-                      <span className="cardinalympics-event__points-tag">
-                        {ev.pointsPossible} pts possible
-                      </span>
+              <div className="cardinalympics-day__events">
+                {dayGroup.events.map((ev) => (
+                  <div className="event cardinalympics-event" key={ev.id}>
+                    <div className="cardinalympics-event__head">
+                      <h3 className="event-description">{ev.heading}</h3>
+                      {ev.pointsPossible ? (
+                        <span className="cardinalympics-event__points-tag">
+                          {ev.pointsPossible} pts possible
+                        </span>
+                      ) : null}
+                    </div>
+                    {ev.dateDisplay ? (
+                      <p className="event-description">
+                        <strong>Date:</strong> {ev.dateDisplay}
+                      </p>
+                    ) : null}
+                    {ev.bodyText ? (
+                      <div className="event-description cardinalympics-event__body">{ev.bodyText}</div>
+                    ) : null}
+                    {ev.signUpClosed ? (
+                      <button
+                        type="button"
+                        className="event-description cardinalympics-event-closed"
+                        disabled
+                        aria-label={`${ev.heading} sign up is closed`}
+                      >
+                        <strong>Closed</strong>
+                      </button>
+                    ) : ev.signUpLink ? (
+                      <a
+                        className="event-description"
+                        href={ev.signUpLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <strong>Sign up</strong>
+                      </a>
                     ) : null}
                   </div>
-                  {ev.dateDisplay ? (
-                    <p className="event-description">
-                      <strong>Date:</strong> {ev.dateDisplay}
-                    </p>
-                  ) : null}
-                  {ev.bodyText ? (
-                    <div className="event-description cardinalympics-event__body">{ev.bodyText}</div>
-                  ) : null}
-                  {ev.signUpClosed ? (
-                    <button
-                      type="button"
-                      className="event-description cardinalympics-event-closed"
-                      disabled
-                      aria-label={`${ev.heading} sign up is closed`}
-                    >
-                      <strong>Closed</strong>
-                    </button>
-                  ) : ev.signUpLink ? (
-                    <a
-                      className="event-description"
-                      href={ev.signUpLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <strong>Sign up</strong>
-                    </a>
-                  ) : null}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ))}
         </section>
