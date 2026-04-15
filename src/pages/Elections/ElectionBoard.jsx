@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
@@ -98,6 +98,8 @@ async function getAverageColorWithFallback(url) {
     throw new Error("Image color sampling unavailable");
   }
 }
+
+const ELECTION_CANDIDATE_MEDIA_COLUMN_HEIGHT_PX = (300 * 4) / 3;
 
 // one candidate: photo (hover = video), name, bio, vote button
 function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteButton = true }) {
@@ -277,6 +279,67 @@ function normalizeCandidate(c) {
   };
 }
 
+function ElectionBoardCandidatesGrid({ candidates, accentColor, onOpenMedia, showVoteButton }) {
+  const gridRef = useRef(null);
+  const stackedLatchRef = useRef(false);
+  const [stacked, setStacked] = useState(false);
+
+  const candidatesKey = `${showVoteButton ? "1" : "0"};;${candidates
+    .map((c) => `${c.name}|${c.description ?? ""}|${c.pfp ?? ""}|${c.video ?? ""}`)
+    .join(";;")}`;
+
+  useLayoutEffect(() => {
+    stackedLatchRef.current = false;
+    setStacked(false);
+
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const measure = () => {
+      if (stackedLatchRef.current) return;
+      const cardEls = grid.querySelectorAll(".election-candidate-card");
+      for (const el of cardEls) {
+        if (el.getBoundingClientRect().height > ELECTION_CANDIDATE_MEDIA_COLUMN_HEIGHT_PX + 0.5) {
+          stackedLatchRef.current = true;
+          setStacked(true);
+          return;
+        }
+      }
+    };
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(grid);
+    grid.querySelectorAll(".election-candidate-card").forEach((el) => ro.observe(el));
+    measure();
+
+    return () => ro.disconnect();
+  }, [candidatesKey]);
+
+  return (
+    <div
+      ref={gridRef}
+      className={`election-board-candidates-grid${stacked ? " election-board-candidates-grid--stacked" : ""}`}
+    >
+      {candidates.map((c, i) => (
+        <ElectionCandidateCard
+          key={i}
+          candidate={c}
+          accentColor={accentColor}
+          onOpenMedia={onOpenMedia}
+          showVoteButton={showVoteButton}
+        />
+      ))}
+    </div>
+  );
+}
+
+ElectionBoardCandidatesGrid.propTypes = {
+  candidates: PropTypes.arrayOf(PropTypes.object).isRequired,
+  accentColor: PropTypes.string,
+  onOpenMedia: PropTypes.func.isRequired,
+  showVoteButton: PropTypes.bool,
+};
+
 function extractDriveId(urlRaw) {
   const url = String(urlRaw ?? "").trim();
   if (!url) return "";
@@ -444,17 +507,12 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
               <h2 className="election-board-role-title" style={{ borderLeftColor: accentColor }}>
                 {roleGroup.role}
               </h2>
-              <div className="election-board-candidates-grid">
-                {candidates.map((c, i) => (
-                  <ElectionCandidateCard
-                    key={i}
-                    candidate={c}
-                    accentColor={accentColor}
-                    onOpenMedia={(candidate) => setActiveMedia(candidate)}
-                    showVoteButton={showVoteNowButtons}
-                  />
-                ))}
-              </div>
+              <ElectionBoardCandidatesGrid
+                candidates={candidates}
+                accentColor={accentColor}
+                onOpenMedia={(candidate) => setActiveMedia(candidate)}
+                showVoteButton={showVoteNowButtons}
+              />
             </section>
           );
         })}
