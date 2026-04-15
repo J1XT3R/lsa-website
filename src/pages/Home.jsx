@@ -112,6 +112,31 @@ export default function Home({
       {showElectionBanner && (
         <ElectionBanner config={site.elections} />
       )}
+      {showCardinalympicsSignupNow && homeSignupEvents.length > 0 && (
+        <section className="home-cardinalympics-signup" aria-labelledby="home-cardinalympics-signup-heading">
+          <div className="home-cardinalympics-signup__inner">
+            <div className="home-cardinalympics-signup__rings" aria-hidden="true">
+              <CardinalympicLogo variant="homeBackdrop" />
+            </div>
+            <div className="home-cardinalympics-signup__content">
+              <h2 id="home-cardinalympics-signup-heading">Cardinalympics events sign up now</h2>
+              {signupEventNamesTicker ? (
+                <div className="home-cardinalympics-signup__ticker-wrap" aria-hidden="true">
+                  <div className="home-cardinalympics-signup__ticker-track">
+                    <p className="home-cardinalympics-signup__ticker">{signupEventNamesTicker}</p>
+                  </div>
+                </div>
+              ) : null}
+              <p className="home-cardinalympics-signup__subtitle">
+                Spots are limited for many events. Check openings and sign up before they close.
+              </p>
+              <Link to="/Cardinalympics" className="home-cardinalympics-signup__button">
+                View events
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
 
 
@@ -293,31 +318,6 @@ export default function Home({
             </Link>
           </p>
         </div>
-      )}
-      {showCardinalympicsSignupNow && homeSignupEvents.length > 0 && (
-        <section className="home-cardinalympics-signup" aria-labelledby="home-cardinalympics-signup-heading">
-          <div className="home-cardinalympics-signup__inner">
-            <div className="home-cardinalympics-signup__rings" aria-hidden="true">
-              <CardinalympicLogo variant="homeBackdrop" />
-            </div>
-            <div className="home-cardinalympics-signup__content">
-              <h2 id="home-cardinalympics-signup-heading">Cardinalympics events sign up now</h2>
-              {signupEventNamesTicker ? (
-                <div className="home-cardinalympics-signup__ticker-wrap" aria-hidden="true">
-                  <div className="home-cardinalympics-signup__ticker-track">
-                    <p className="home-cardinalympics-signup__ticker">{signupEventNamesTicker}</p>
-                  </div>
-                </div>
-              ) : null}
-              <p className="home-cardinalympics-signup__subtitle">
-                Spots are limited for many events. Check openings and sign up before they close.
-              </p>
-              <Link to="/Cardinalympics" className="home-cardinalympics-signup__button">
-                View events
-              </Link>
-            </div>
-          </div>
-        </section>
       )}
       <News newsData={newsData} />
       <div className="life-at-lowell">

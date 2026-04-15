@@ -8,32 +8,6 @@
   padding: 0;
 }
 
-.cardinalympics-hero {
-  background: #fff;
-  color: var(--title-color);
-  padding: 1.5rem 1rem 1rem;
-  text-align: center;
-
-  .title {
-    margin: 0 0 0.5rem;
-    height: auto;
-    padding: 0;
-    background: transparent;
-    gap: 0;
-  }
-
-  .title h1 {
-    margin: 0;
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 700;
-    color: var(--title-color);
-  }
-}
-
-.cardinalympics-hero__logo {
-  margin-top: 0.5rem;
-}
-
 // Spirit totals: card with points cap + score grid (see Cardinalympics.jsx)
 .cardinalympics-page .home-cardinalympics.cardinalympics-spirit-scores-only {
   padding: 1rem 1rem 1.75rem;
@@ -140,21 +114,9 @@
 
 .cardinalympics-week {
   margin-bottom: 2.25rem;
-  padding-top: 0.9rem;
-  position: relative;
 
   &:last-child {
     margin-bottom: 0;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent 0%, rgba(156, 25, 25, 0.35) 20%, rgba(156, 25, 25, 0.35) 80%, transparent 100%);
   }
 }
 
