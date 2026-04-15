@@ -14,9 +14,6 @@ export default defineConfig({
           if (id.includes('node_modules/react-router')) {
             return 'react-router-vendor'
           }
-          if (id.includes('node_modules/@fortawesome')) {
-            return 'fontawesome-vendor'
-          }
         },
       },
     },
