@@ -90,7 +90,8 @@
   max-width: 900px;
   margin: 2rem auto 0;
   padding: 0 1rem 2rem;
-  min-height: unset;
+  // Keep section height stable while sheet-backed events render.
+  min-height: 55vh;
 }
 
 .cardinalympics-events-empty {

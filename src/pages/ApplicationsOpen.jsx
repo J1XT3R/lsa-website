@@ -66,14 +66,7 @@ export default function ApplicationsOpen({
 
         {!applicationsLoading && applicationsError && (
           <div className="applications-open__error" role="alert">
-            <p>
-              <strong>Could not load listings.</strong> {applicationsError}
-            </p>
-            <p className="applications-open__error-hint">
-              If this keeps happening, check that the Google Sheet tab name in{" "}
-              <code>applications.config.js</code> matches your spreadsheet, and that the
-              sheet is shared for viewing with the API key.
-            </p>
+            <p>Could not load listings.</p>
             <Link to="/Clubs" className="applications-open__link applications-open__link--primary">
               Browse clubs instead
             </Link>

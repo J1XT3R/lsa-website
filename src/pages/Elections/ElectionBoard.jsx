@@ -490,6 +490,27 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
 
   const accentColor = board.color || "var(--title-color)";
   const showVoteNowButtons = config?.showVoteNowButtons !== false;
+  const boardNav = (
+    <>
+      {prevSlug ? (
+        <Link to={`/Elections/${prevSlug}`} className="election-board-nav-btn election-board-nav-btn--prev">
+          &larr; Last board
+        </Link>
+      ) : (
+        <span className="election-board-nav-btn election-board-nav-btn--disabled">&larr; Last board</span>
+      )}
+      <Link to="/Elections" className="election-board-nav-btn">
+        All boards
+      </Link>
+      {nextSlug ? (
+        <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
+          Next board &rarr;
+        </Link>
+      ) : (
+        <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board &rarr;</span>
+      )}
+    </>
+  );
 
   return (
     <div className="election-board-page" style={{ "--board-accent": accentColor }}>
@@ -497,6 +518,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
         <h1 className="election-board-hero-title">{board.board}</h1>
         <p className="election-board-hero-subtitle">Meet the candidates</p>
       </header>
+      <nav className="election-board-nav election-board-nav--top">{boardNav}</nav>
 
       <main className="election-board-main">
         {(board.roles ?? []).map((roleGroup, roleIndex) => {
@@ -518,25 +540,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
         })}
       </main>
 
-      <nav className="election-board-nav">
-        {prevSlug ? (
-          <Link to={`/Elections/${prevSlug}`} className="election-board-nav-btn election-board-nav-btn--prev">
-            &larr; Last board
-          </Link>
-        ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">&larr; Last board</span>
-        )}
-        <Link to="/Elections" className="election-board-nav-btn">
-          All boards
-        </Link>
-        {nextSlug ? (
-          <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
-            Next board &rarr;
-          </Link>
-        ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board &rarr;</span>
-        )}
-      </nav>
+      <nav className="election-board-nav">{boardNav}</nav>
       <ElectionMediaModal media={activeMedia} onClose={() => setActiveMedia(null)} />
     </div>
   );

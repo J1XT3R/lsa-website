@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import './App.scss'
-import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
+import { Routes, Route, Outlet, Navigate, useLocation } from 'react-router-dom'
 import Home from "./pages/Home"
 import Elections from "./pages/Elections"
 import ElectionBoard from "./pages/Elections/ElectionBoard"
@@ -53,6 +53,25 @@ const SHEETS_LAST_CHECK_COOKIE = "lsa_sheets_last_check_ms_v1";
 const SHEETS_RETRY_ATTEMPTS = 3;
 const SHEETS_RETRY_DELAY_MS = 700;
 const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archive", "Announcements"];
+
+/** Live Cardinalympics sheet fetch + polling only on routes that show scores or events from the sheet. */
+function routeWantsCardinalympicsLiveFetch(pathname) {
+  const p = pathname || "/";
+  if (p === "/") return true;
+  return p === "/Cardinalympics" || p.startsWith("/Cardinalympics/");
+}
+
+/** Home page News section uses `newsData` from the announcements sheet. */
+function routeWantsHomeAnnouncementsFetch(pathname) {
+  return (pathname || "/") === "/";
+}
+
+/** Home preview + ApplicationsOpen page need live applications sheet data. */
+function routeWantsApplicationsLiveFetch(pathname) {
+  const p = pathname || "/";
+  if (p === "/") return true;
+  return p === "/ApplicationsOpen";
+}
 
 function readCookie(name) {
   if (typeof document === "undefined") return null;
@@ -110,14 +129,15 @@ function delay(ms) {
 }
 
 /**
- * Google Sheets A1 ranges: tab names with spaces, commas, etc. must be wrapped in single quotes
- * (e.g. 'Sp, 25', 'Cardinalympics Events'). Otherwise the API parses commas as range separators -> 400.
+ * Build an A1 range for values:batchGet / values.get. Tab-only strings are rejected (400 "Unable to parse range").
+ * Names with spaces, commas, etc. must be wrapped in single quotes (see Google Sheets A1 notation).
  */
-function quoteSheetTabForApi(tabName) {
+function tabNameToValuesRangeA1(tabName) {
   const s = String(tabName ?? "").trim();
-  if (!s) return s;
-  if (/^[A-Za-z0-9_]+$/.test(s)) return s;
-  return `'${s.replace(/'/g, "''")}'`;
+  if (!s) return "";
+  if (s.includes("!")) return s;
+  const escaped = s.replace(/'/g, "''");
+  return `'${escaped}'!A:ZZZ`;
 }
 
 /** One HTTP request for multiple tabs on the same spreadsheet (saves quota vs. separate values.get calls). */
@@ -131,7 +151,8 @@ async function fetchSheetBatchGetWithRetry(spreadsheetId, rangeNames, apiKey, op
       const params = new URLSearchParams();
       params.set("key", apiKey);
       for (const r of rangeNames) {
-        params.append("ranges", quoteSheetTabForApi(r));
+        const range = tabNameToValuesRangeA1(r);
+        if (range) params.append("ranges", range);
       }
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${params.toString()}`;
       const res = await fetch(url, options.fetchOptions);
@@ -153,36 +174,6 @@ async function fetchSheetBatchGetWithRetry(spreadsheetId, rangeNames, apiKey, op
   }
 
   return { valueRanges: null, error: lastError || "Failed to fetch sheet data" };
-}
-
-async function fetchSingleSheetValuesWithRetry(spreadsheetId, rangeName, apiKey, options = {}) {
-  const attempts = options.attempts ?? SHEETS_RETRY_ATTEMPTS;
-  const delayMs = options.delayMs ?? SHEETS_RETRY_DELAY_MS;
-  let lastError = null;
-
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const range = encodeURIComponent(rangeName);
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
-      const res = await fetch(url, options.fetchOptions);
-      const json = await res.json();
-      if (json?.error) {
-        lastError = json.error.message || "Unknown API error";
-      } else if (Array.isArray(json?.values)) {
-        return { values: json.values, error: null };
-      } else {
-        lastError = "No data returned";
-      }
-    } catch (error) {
-      lastError = error?.message || "Network error";
-    }
-
-    if (i < attempts - 1) {
-      await delay(delayMs);
-    }
-  }
-
-  return { values: null, error: lastError || "Failed to fetch sheet data" };
 }
 
 function parseAnnouncementDate(input) {
@@ -243,6 +234,7 @@ function processAnnouncementsSheetData(values) {
 }
 
 function App() {
+    const location = useLocation();
     // main site data from Google Sheets (yes the key is here, we're not doing auth for a read-only sheet)
     const KEY = "AIzaSyAgshc5Aqd8B149h5RpsenMh_SQAeb4AXc";
     const SPREADSHEET_ID = "1Kk7Bs58DAWZ9pHvqD-RFvoV1ePeThQ1Yr9c5RsDeAq4";
@@ -354,32 +346,38 @@ function App() {
         if (cachedAnnouncementsValues?.length) {
           setNewsData(processAnnouncementsSheetData(cachedAnnouncementsValues));
         }
+        if (!routeWantsHomeAnnouncementsFetch(location.pathname)) {
+          return;
+        }
         if (!shouldCheckSheetsNow && cachedAnnouncementsValues?.length) return;
 
         try {
-          for (const sheetName of ANNOUNCEMENTS_SHEET_NAMES) {
-            const result = await fetchSingleSheetValuesWithRetry(
-              SPREADSHEET_ID,
-              sheetName,
-              KEY
-            );
-            if (!result.values?.length) {
-              console.warn("Announcements sheet fetch:", sheetName, result.error || "No values");
-              continue;
+          const batch = await fetchSheetBatchGetWithRetry(
+            SPREADSHEET_ID,
+            ANNOUNCEMENTS_SHEET_NAMES,
+            KEY
+          );
+          if (batch.error || !batch.valueRanges?.length) {
+            console.warn("Announcements sheet batch:", batch.error || "No ranges");
+          } else {
+            const { valueRanges } = batch;
+            for (let i = 0; i < ANNOUNCEMENTS_SHEET_NAMES.length; i++) {
+              const values = valueRanges[i]?.values;
+              if (!values?.length) continue;
+              const parsed = processAnnouncementsSheetData(values);
+              if (!parsed.length) continue;
+              setNewsData(parsed);
+              writeJsonCookie(announcementsCookieKey, values);
+              return;
             }
-            const parsed = processAnnouncementsSheetData(result.values);
-            if (!parsed.length) continue;
-            setNewsData(parsed);
-            writeJsonCookie(announcementsCookieKey, result.values);
-            return;
+            console.warn("Announcements sheet fetch: no non-empty tab found");
           }
-          console.warn("Announcements sheet fetch: no non-empty tab found");
         } catch (error) {
           console.warn("Announcements sheet fetch failed:", error);
         }
       }
       fetchHomeAnnouncementsData();
-    }, [shouldCheckSheetsNow]);
+    }, [shouldCheckSheetsNow, location.pathname]);
 
 
     const CARDINALYMPICS_POLL_MS = 30_000;
@@ -410,6 +408,17 @@ function App() {
       function applyCardinalympicsEventsValues(values) {
         if (!Array.isArray(values) || values.length === 0) return;
         setCardinalympicsEvents(parseCardinalympicsEventsSheet(values));
+      }
+
+      const cardinalympicsRouteActive = routeWantsCardinalympicsLiveFetch(location.pathname);
+      if (!cardinalympicsRouteActive) {
+        const cardinalympicsCookieKey = "lsa_sheet_cardinalympics_v1";
+        const eventsCookieKey = "lsa_sheet_cardinalympics_events_v1";
+        const cachedValues = readJsonCookie(cardinalympicsCookieKey);
+        const cachedEventsValues = readJsonCookie(eventsCookieKey);
+        if (showScoresAndScoreboard && cachedValues?.length) applyCardinalympicsValues(cachedValues);
+        if (needsCardinalympicsEventsData && cachedEventsValues?.length) applyCardinalympicsEventsValues(cachedEventsValues);
+        return undefined;
       }
 
       async function fetchCardinalympicsData() {
@@ -495,18 +504,70 @@ function App() {
         if (needsCardinalympicsEventsData && cachedEventsValues?.length) applyCardinalympicsEventsValues(cachedEventsValues);
       }
 
-      const pollId = setInterval(fetchCardinalympicsData, CARDINALYMPICS_POLL_MS);
-      return () => clearInterval(pollId);
-    }, [shouldCheckSheetsNow, showScoresAndScoreboard, showEvents, showHomeEventsSignupNow, needsCardinalympicsEventsData]);
+      let pollId = null;
+      const armPolling = () => {
+        if (pollId != null) {
+          clearInterval(pollId);
+          pollId = null;
+        }
+        pollId = window.setInterval(fetchCardinalympicsData, CARDINALYMPICS_POLL_MS);
+      };
+
+      const onVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+          if (pollId != null) {
+            clearInterval(pollId);
+            pollId = null;
+          }
+        } else {
+          void fetchCardinalympicsData();
+          armPolling();
+        }
+      };
+
+      if (typeof document !== "undefined") {
+        if (!document.hidden) {
+          armPolling();
+        }
+        document.addEventListener("visibilitychange", onVisibilityChange);
+      }
+
+      return () => {
+        if (typeof document !== "undefined") {
+          document.removeEventListener("visibilitychange", onVisibilityChange);
+        }
+        if (pollId != null) {
+          clearInterval(pollId);
+        }
+      };
+    }, [
+      shouldCheckSheetsNow,
+      showScoresAndScoreboard,
+      showEvents,
+      showHomeEventsSignupNow,
+      needsCardinalympicsEventsData,
+      location.pathname,
+    ]);
 
     useEffect(() => {
       async function fetchApplicationsData() {
         setApplicationsError(null);
         setApplicationsLoading(true);
+        const configuredSpreadsheetId = String(applicationsSheetConfig?.spreadsheetId ?? "").trim();
+        if (!configuredSpreadsheetId) {
+          // Explicitly treat blank config as "feature off": no API calls, no error state.
+          setApplicationsData([]);
+          setApplicationsLoading(false);
+          return;
+        }
         const appsCookieKey = "lsa_sheet_applications_v1";
         const cachedApplicationsValues = readJsonCookie(appsCookieKey);
         if (cachedApplicationsValues?.length) {
           setApplicationsData(processApplicationsSheetData(cachedApplicationsValues));
+        }
+        if (!routeWantsApplicationsLiveFetch(location.pathname)) {
+          setApplicationsLoading(false);
+          return;
         }
         if (!shouldCheckSheetsNow && cachedApplicationsValues?.length) {
           setApplicationsLoading(false);
@@ -560,7 +621,7 @@ function App() {
         }
       }
       fetchApplicationsData();
-    }, [shouldCheckSheetsNow]);
+    }, [shouldCheckSheetsNow, location.pathname]);
 
 
     function arrayCleanUp(array) {
@@ -616,7 +677,6 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
         <ScrollToTop />
         <Routes>
           <Route element={<Layout clubData={clubData} electionsEnabled={site.electionsEnabled} electionsConfig={electionsConfigResolved} />}>
@@ -688,7 +748,6 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-      </BrowserRouter>
     </>
   )
 }

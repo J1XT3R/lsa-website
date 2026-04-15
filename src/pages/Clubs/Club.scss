@@ -23,6 +23,7 @@
     margin: 0 0 0.75rem;
     font-size: clamp(1.75rem, 4vw, 2.75rem);
     font-weight: 600;
+    line-height: 1.15;
     letter-spacing: -0.02em;
     color: white;
   }
@@ -34,6 +35,7 @@
   font-size: 1.05rem;
   opacity: 0.95;
   line-height: 1.5;
+  min-height: calc(1.5em * 2);
   font-family: var(--primary-font);
 }
 
@@ -55,6 +57,7 @@
   gap: 0.75rem 1rem;
   align-items: center;
   justify-content: center;
+  min-height: 5.25rem;
 }
 
 .clubs-page__search {
@@ -67,6 +70,9 @@
 }
 
 .clubs-page__search-label {
+  display: block;
+  min-height: 1.25rem;
+  line-height: 1.25rem;
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -77,6 +83,8 @@
 .clubs-page__search-input {
   width: 100%;
   max-width: 320px;
+  height: 2.25rem;
+  min-height: 2.25rem;
   padding: 0.55rem 0.9rem;
   border-radius: 999px;
   border: 1px solid #d6d6d6;
@@ -104,9 +112,11 @@
   gap: 0.5rem;
   align-items: center;
   justify-content: center;
+  min-height: 2.5rem;
 }
 
 .clubs-page__filter-btn {
+  min-height: 2.25rem;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   font-weight: 500;
@@ -158,6 +168,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
+  min-height: 55vh;
 }
 
 .clubs-page__empty {
@@ -274,6 +285,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
+    min-height: 0;
   }
 
   .clubs-page__filters {
