@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useState, useMemo } from "react";
-import CardinalympicLogo from "../components/CardinalympicLogo";
 import Counter from "../components/Counter";
 import { groupCardinalympicsEventsByWeekAndDay } from "../utils/cardinalympicsEventsFromSheet";
 import "./Cardinalympics.scss";
@@ -273,14 +272,6 @@ export default function Cardinalympics({
 
   return (
     <div className="cardinalympics-page">
-      <header className="cardinalympics-hero">
-        <div className="title">
-          <h1>2025 Cardinalympics</h1>
-        </div>
-        <div className="cardinalympics-hero__logo">
-          <CardinalympicLogo />
-        </div>
-      </header>
       {showScoresAndScoreboard && (
       <section
         className="home-cardinalympics cardinalympics-spirit-scores-only"

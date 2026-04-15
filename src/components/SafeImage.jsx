@@ -59,8 +59,15 @@ export default function SafeImage({
 
   useEffect(() => {
     setSourceIndex(0);
-    setCurrentSrc(sourceList[0] || src);
-  }, [src, sourceList]);
+    const first = sourceList[0];
+    if (first) {
+      setCurrentSrc(first);
+    } else if (typeof src === "string" && src.trim()) {
+      setCurrentSrc(src.trim());
+    } else {
+      setCurrentSrc(fallbackSrc);
+    }
+  }, [src, sourceList, fallbackSrc]);
 
   const handleError = () => {
     if (sourceIndex < sourceList.length - 1) {

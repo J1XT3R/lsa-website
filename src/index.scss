@@ -109,6 +109,11 @@ footer div {
 
 footer a {
   color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 footer a:nth-child(1):hover {
@@ -131,6 +136,9 @@ footer a:nth-child(3):hover {
 .footer-icon {
   font-size: 2.5rem;
   cursor: pointer;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
 }
 
 .ml-16 {

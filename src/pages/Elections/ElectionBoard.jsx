@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
@@ -98,6 +98,8 @@ async function getAverageColorWithFallback(url) {
     throw new Error("Image color sampling unavailable");
   }
 }
+
+const ELECTION_CANDIDATE_MEDIA_COLUMN_HEIGHT_PX = (300 * 4) / 3;
 
 // one candidate: photo (hover = video), name, bio, vote button
 function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteButton = true }) {
@@ -277,6 +279,67 @@ function normalizeCandidate(c) {
   };
 }
 
+function ElectionBoardCandidatesGrid({ candidates, accentColor, onOpenMedia, showVoteButton }) {
+  const gridRef = useRef(null);
+  const stackedLatchRef = useRef(false);
+  const [stacked, setStacked] = useState(false);
+
+  const candidatesKey = `${showVoteButton ? "1" : "0"};;${candidates
+    .map((c) => `${c.name}|${c.description ?? ""}|${c.pfp ?? ""}|${c.video ?? ""}`)
+    .join(";;")}`;
+
+  useLayoutEffect(() => {
+    stackedLatchRef.current = false;
+    setStacked(false);
+
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const measure = () => {
+      if (stackedLatchRef.current) return;
+      const cardEls = grid.querySelectorAll(".election-candidate-card");
+      for (const el of cardEls) {
+        if (el.getBoundingClientRect().height > ELECTION_CANDIDATE_MEDIA_COLUMN_HEIGHT_PX + 0.5) {
+          stackedLatchRef.current = true;
+          setStacked(true);
+          return;
+        }
+      }
+    };
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(grid);
+    grid.querySelectorAll(".election-candidate-card").forEach((el) => ro.observe(el));
+    measure();
+
+    return () => ro.disconnect();
+  }, [candidatesKey]);
+
+  return (
+    <div
+      ref={gridRef}
+      className={`election-board-candidates-grid${stacked ? " election-board-candidates-grid--stacked" : ""}`}
+    >
+      {candidates.map((c, i) => (
+        <ElectionCandidateCard
+          key={i}
+          candidate={c}
+          accentColor={accentColor}
+          onOpenMedia={onOpenMedia}
+          showVoteButton={showVoteButton}
+        />
+      ))}
+    </div>
+  );
+}
+
+ElectionBoardCandidatesGrid.propTypes = {
+  candidates: PropTypes.arrayOf(PropTypes.object).isRequired,
+  accentColor: PropTypes.string,
+  onOpenMedia: PropTypes.func.isRequired,
+  showVoteButton: PropTypes.bool,
+};
+
 function extractDriveId(urlRaw) {
   const url = String(urlRaw ?? "").trim();
   if (!url) return "";
@@ -427,6 +490,27 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
 
   const accentColor = board.color || "var(--title-color)";
   const showVoteNowButtons = config?.showVoteNowButtons !== false;
+  const boardNav = (
+    <>
+      {prevSlug ? (
+        <Link to={`/Elections/${prevSlug}`} className="election-board-nav-btn election-board-nav-btn--prev">
+          &larr; Last board
+        </Link>
+      ) : (
+        <span className="election-board-nav-btn election-board-nav-btn--disabled">&larr; Last board</span>
+      )}
+      <Link to="/Elections" className="election-board-nav-btn">
+        All boards
+      </Link>
+      {nextSlug ? (
+        <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
+          Next board &rarr;
+        </Link>
+      ) : (
+        <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board &rarr;</span>
+      )}
+    </>
+  );
 
   return (
     <div className="election-board-page" style={{ "--board-accent": accentColor }}>
@@ -434,6 +518,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
         <h1 className="election-board-hero-title">{board.board}</h1>
         <p className="election-board-hero-subtitle">Meet the candidates</p>
       </header>
+      <nav className="election-board-nav election-board-nav--top">{boardNav}</nav>
 
       <main className="election-board-main">
         {(board.roles ?? []).map((roleGroup, roleIndex) => {
@@ -444,41 +529,18 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
               <h2 className="election-board-role-title" style={{ borderLeftColor: accentColor }}>
                 {roleGroup.role}
               </h2>
-              <div className="election-board-candidates-grid">
-                {candidates.map((c, i) => (
-                  <ElectionCandidateCard
-                    key={i}
-                    candidate={c}
-                    accentColor={accentColor}
-                    onOpenMedia={(candidate) => setActiveMedia(candidate)}
-                    showVoteButton={showVoteNowButtons}
-                  />
-                ))}
-              </div>
+              <ElectionBoardCandidatesGrid
+                candidates={candidates}
+                accentColor={accentColor}
+                onOpenMedia={(candidate) => setActiveMedia(candidate)}
+                showVoteButton={showVoteNowButtons}
+              />
             </section>
           );
         })}
       </main>
 
-      <nav className="election-board-nav">
-        {prevSlug ? (
-          <Link to={`/Elections/${prevSlug}`} className="election-board-nav-btn election-board-nav-btn--prev">
-            &larr; Last board
-          </Link>
-        ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">&larr; Last board</span>
-        )}
-        <Link to="/Elections" className="election-board-nav-btn">
-          All boards
-        </Link>
-        {nextSlug ? (
-          <Link to={`/Elections/${nextSlug}`} className="election-board-nav-btn election-board-nav-btn--next">
-            Next board &rarr;
-          </Link>
-        ) : (
-          <span className="election-board-nav-btn election-board-nav-btn--disabled">Next board &rarr;</span>
-        )}
-      </nav>
+      <nav className="election-board-nav">{boardNav}</nav>
       <ElectionMediaModal media={activeMedia} onClose={() => setActiveMedia(null)} />
     </div>
   );
