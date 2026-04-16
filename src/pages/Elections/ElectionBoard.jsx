@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import electionsConfig from "../../config/elections.config.js";
 import LoadingTruck from "../../components/LoadingTruck";
@@ -101,16 +102,86 @@ async function getAverageColorWithFallback(url) {
 
 const ELECTION_CANDIDATE_MEDIA_COLUMN_HEIGHT_PX = (300 * 4) / 3;
 
+
+function postYoutubeIframeCommand(iframe, func, args = []) {
+  if (!iframe?.contentWindow) return;
+  try {
+    iframe.contentWindow.postMessage(
+      JSON.stringify({
+        event: "command",
+        func,
+        args: Array.isArray(args) ? args : [],
+      }),
+      "*"
+    );
+  } catch {
+    // ignore
+  }
+}
+
+function kickYoutubeAudible(iframe) {
+  postYoutubeIframeCommand(iframe, "unMute");
+  postYoutubeIframeCommand(iframe, "playVideo");
+  window.setTimeout(() => {
+    postYoutubeIframeCommand(iframe, "unMute");
+    postYoutubeIframeCommand(iframe, "playVideo");
+  }, 200);
+}
+
+function silenceYoutubePreview(iframe) {
+  postYoutubeIframeCommand(iframe, "pauseVideo");
+  postYoutubeIframeCommand(iframe, "mute");
+}
+
 // one candidate: photo (hover = video), name, bio, vote button
-function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteButton = true }) {
+function ElectionCandidateCard({
+  candidate,
+  accentColor,
+  onOpenMedia,
+  showVoteButton = true,
+  activeMedia = null,
+  modalVideoHostEl = null,
+}) {
   const { name, description, pfp, video } = candidate;
-  const isDriveVideo = typeof video === "string" && video.includes("drive.google.com");
+  const youtubeVideoId = useMemo(() => extractYouTubeVideoId(video), [video]);
+  const isYouTubeVideo = Boolean(youtubeVideoId);
+  const youtubeCardEmbedSrc = useMemo(() => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return buildYouTubeElectionCardEmbedSrc(youtubeVideoId, origin);
+  }, [youtubeVideoId]);
   const flyerSources = useMemo(() => imageSourceCandidates(pfp), [pfp]);
   const playableVideoSources = useMemo(() => videoSourceCandidates(video), [video]);
   const hasVideo = Boolean(video);
   const [isHoverPreviewVisible, setIsHoverPreviewVisible] = useState(false);
   const [cardGlowColor, setCardGlowColor] = useState("transparent");
   const [videoSourceIndex, setVideoSourceIndex] = useState(0);
+  const articleRef = useRef(null);
+  const youtubeIframeRef = useRef(null);
+  const youtubeIframeHomeRef = useRef(null);
+  const fileVideoRef = useRef(null);
+  const fileVideoHomeRef = useRef(null);
+  const videoSrc = playableVideoSources[videoSourceIndex] || video || "";
+  const myMediaKey = electionCandidateMediaKey(candidate);
+  const activeMediaKey = electionCandidateMediaKey(activeMedia);
+  const youtubePlaysInModal = Boolean(
+    isYouTubeVideo && activeMedia && activeMediaKey === myMediaKey && modalVideoHostEl
+  );
+  const filePlaysInModal = Boolean(
+    !isYouTubeVideo && video && activeMedia && activeMediaKey === myMediaKey && modalVideoHostEl
+  );
+
+  const [youtubeSlotEl, setYoutubeSlotEl] = useState(null);
+  const [fileSlotEl, setFileSlotEl] = useState(null);
+
+  useLayoutEffect(() => {
+    const el = youtubeIframeHomeRef.current;
+    setYoutubeSlotEl((prev) => (prev === el ? prev : el));
+  }, [isYouTubeVideo, video]);
+
+  useLayoutEffect(() => {
+    const el = fileVideoHomeRef.current;
+    setFileSlotEl((prev) => (prev === el ? prev : el));
+  }, [isYouTubeVideo, video]);
 
   useEffect(() => {
     setVideoSourceIndex(0);
@@ -143,40 +214,115 @@ function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteBu
     };
   }, [pfp]);
 
-  function setVideoVisible(container, visible) {
-    const videoEl = container?.querySelector(".election-candidate-card-video-preview");
-    if (!videoEl) return;
-    videoEl.classList.toggle("election-candidate-card-video--visible", visible);
-    if (typeof videoEl.play === "function") {
-      if (visible) videoEl.play().catch(() => {});
-      else {
-        videoEl.pause();
-        videoEl.currentTime = 0;
+  const hoverPreviewRef = useRef(false);
+
+  const onYoutubePreviewIframeLoad = () => {
+    const iframe = youtubeIframeRef.current;
+    if (!iframe) return;
+    if (hoverPreviewRef.current) kickYoutubeAudible(iframe);
+    else silenceYoutubePreview(iframe);
+  };
+
+  const youtubeIframeNeedsSrc = useCallback(
+    (frame) => {
+      if (!frame || !youtubeCardEmbedSrc || !youtubeVideoId) return true;
+      const src = String(frame.src || "");
+      return !src || !src.includes(youtubeVideoId);
+    },
+    [youtubeCardEmbedSrc, youtubeVideoId]
+  );
+
+  useEffect(() => {
+    if (!isYouTubeVideo || !youtubeCardEmbedSrc) return;
+    const root = articleRef.current;
+    if (!root) return;
+    const frame = youtubeIframeRef.current;
+    if (frame) {
+      frame.src = "";
+      frame.classList.remove("election-candidate-card-video--visible");
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const f = youtubeIframeRef.current;
+        if (!f || !entry) return;
+        if (!root.contains(f)) return;
+        if (entry.isIntersecting) {
+          if (youtubeIframeNeedsSrc(f)) f.src = youtubeCardEmbedSrc;
+        } else {
+          f.src = "";
+          f.classList.remove("election-candidate-card-video--visible");
+        }
+      },
+      { root: null, rootMargin: "160px 0px 120px 0px", threshold: 0 }
+    );
+    io.observe(root);
+    return () => io.disconnect();
+  }, [isYouTubeVideo, youtubeCardEmbedSrc, youtubeIframeNeedsSrc]);
+
+  function setMediaPreviewVisible(container, visible) {
+    const videoEl = fileVideoRef.current;
+    if (videoEl && !isYouTubeVideo) {
+      videoEl.classList.toggle("election-candidate-card-video--visible", visible);
+      if (typeof videoEl.play === "function") {
+        if (visible) {
+          videoEl.muted = false;
+          videoEl
+            .play()
+            .catch(() => {
+              videoEl.muted = true;
+              return videoEl.play();
+            })
+            .catch(() => {});
+        } else {
+          videoEl.muted = true;
+          videoEl.pause();
+        }
+      }
+    }
+    const iframeEl = youtubeIframeRef.current;
+    if (iframeEl && isYouTubeVideo) {
+      iframeEl.classList.toggle("election-candidate-card-video--visible", visible);
+      if (visible) {
+        if (youtubeCardEmbedSrc && youtubeIframeNeedsSrc(iframeEl)) iframeEl.src = youtubeCardEmbedSrc;
+        kickYoutubeAudible(iframeEl);
+      } else {
+        silenceYoutubePreview(iframeEl);
       }
     }
   }
 
   const handleMouseEnter = (e) => {
     if (!hasVideo) return;
-    const videoEl = e.currentTarget.querySelector(".election-candidate-card-video-preview");
-    const src = videoEl?.getAttribute("data-video-src");
-    if (src && videoEl && videoEl.src !== src) videoEl.src = src;
+    hoverPreviewRef.current = true;
+    setMediaPreviewVisible(e.currentTarget, true);
     setIsHoverPreviewVisible(true);
-    setVideoVisible(e.currentTarget, true);
   };
 
   const handleMouseLeave = (e) => {
     if (!hasVideo) return;
+    setMediaPreviewVisible(e.currentTarget, false);
+    hoverPreviewRef.current = false;
     setIsHoverPreviewVisible(false);
-    setVideoVisible(e.currentTarget, false);
   };
 
   const handleMediaClick = () => {
     onOpenMedia(candidate);
   };
 
+  const youtubePortalHost = youtubePlaysInModal ? modalVideoHostEl : youtubeSlotEl;
+  const filePortalHost = filePlaysInModal ? modalVideoHostEl : fileSlotEl;
+
+  const youtubeIframeClassName = youtubePlaysInModal
+    ? "election-media-modal-video election-media-modal-frame"
+    : "election-candidate-card-video election-candidate-card-youtube-preview election-candidate-card-video-preview";
+
+  const fileVideoClassName = filePlaysInModal
+    ? "election-media-modal-video"
+    : "election-candidate-card-video election-candidate-card-video-preview";
+
   return (
     <article
+      ref={articleRef}
       className="election-candidate-card"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -199,31 +345,43 @@ function ElectionCandidateCard({ candidate, accentColor, onOpenMedia, showVoteBu
           loading="lazy"
           variant="club"
         />
-        {video && !isDriveVideo && (
-          <video
-            className="election-candidate-card-video election-candidate-card-video-preview"
-            data-video-src={playableVideoSources[videoSourceIndex] || video}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onError={() => {
-              setVideoSourceIndex((i) => (i < playableVideoSources.length - 1 ? i + 1 : i));
-            }}
-          />
+        {video && isYouTubeVideo && (
+          <div ref={youtubeIframeHomeRef} className="election-candidate-card-preview-player-slot">
+            {youtubePortalHost &&
+              createPortal(
+                <iframe
+                  key={youtubeCardEmbedSrc || youtubeVideoId || "yt"}
+                  ref={youtubeIframeRef}
+                  title={`${name} campaign video preview`}
+                  className={youtubeIframeClassName}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  onLoad={onYoutubePreviewIframeLoad}
+                />,
+                youtubePortalHost
+              )}
+          </div>
         )}
-        {isDriveVideo && (
-          <video
-            className="election-candidate-card-video election-candidate-card-video-preview"
-            data-video-src={playableVideoSources[videoSourceIndex] || video}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onError={() => {
-              setVideoSourceIndex((i) => (i < playableVideoSources.length - 1 ? i + 1 : i));
-            }}
-          />
+        {video && !isYouTubeVideo && (
+          <div ref={fileVideoHomeRef} className="election-candidate-card-preview-player-slot">
+            {filePortalHost &&
+              createPortal(
+                <video
+                  key={videoSrc || video || "file"}
+                  ref={fileVideoRef}
+                  className={fileVideoClassName}
+                  src={videoSrc || undefined}
+                  controls={filePlaysInModal}
+                  muted={!isHoverPreviewVisible}
+                  loop
+                  playsInline
+                  preload="auto"
+                  onError={() => {
+                    setVideoSourceIndex((i) => (i < playableVideoSources.length - 1 ? i + 1 : i));
+                  }}
+                />,
+                filePortalHost
+              )}
+          </div>
         )}
         <div className="election-candidate-card-media-bar" aria-hidden>
           {video && (
@@ -264,6 +422,8 @@ ElectionCandidateCard.propTypes = {
   accentColor: PropTypes.string,
   onOpenMedia: PropTypes.func.isRequired,
   showVoteButton: PropTypes.bool,
+  activeMedia: PropTypes.object,
+  modalVideoHostEl: PropTypes.any,
 };
 
 // config sometimes gives us just a name string - turn it into a proper candidate object so we arent cooked
@@ -279,7 +439,19 @@ function normalizeCandidate(c) {
   };
 }
 
-function ElectionBoardCandidatesGrid({ candidates, accentColor, onOpenMedia, showVoteButton }) {
+function electionCandidateMediaKey(c) {
+  if (!c) return "";
+  return `${String(c.name ?? "")}|||${String(c.video ?? "")}`;
+}
+
+function ElectionBoardCandidatesGrid({
+  candidates,
+  accentColor,
+  onOpenMedia,
+  showVoteButton,
+  activeMedia,
+  modalVideoHostEl,
+}) {
   const gridRef = useRef(null);
   const stackedLatchRef = useRef(false);
   const [stacked, setStacked] = useState(false);
@@ -327,6 +499,8 @@ function ElectionBoardCandidatesGrid({ candidates, accentColor, onOpenMedia, sho
           accentColor={accentColor}
           onOpenMedia={onOpenMedia}
           showVoteButton={showVoteButton}
+          activeMedia={activeMedia}
+          modalVideoHostEl={modalVideoHostEl}
         />
       ))}
     </div>
@@ -338,6 +512,8 @@ ElectionBoardCandidatesGrid.propTypes = {
   accentColor: PropTypes.string,
   onOpenMedia: PropTypes.func.isRequired,
   showVoteButton: PropTypes.bool,
+  activeMedia: PropTypes.object,
+  modalVideoHostEl: PropTypes.any,
 };
 
 function extractDriveId(urlRaw) {
@@ -348,6 +524,65 @@ function extractDriveId(urlRaw) {
   const fromPath = url.match(/\/file\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)/);
   const fromQuery = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   return fromPath?.[1] || fromQuery?.[1] || "";
+}
+
+function extractYouTubeVideoId(urlRaw) {
+  const raw = String(urlRaw ?? "").trim();
+  if (!raw) return "";
+  const tryParse = (href) => {
+    try {
+      return new URL(href.includes("://") ? href : `https://${href.replace(/^\/\//, "")}`);
+    } catch {
+      return null;
+    }
+  };
+  const u = tryParse(raw);
+  if (!u) return "";
+  const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+  if (host === "youtu.be") {
+    const id = u.pathname.replace(/^\//, "").split("/")[0]?.split("?")[0] ?? "";
+    return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : "";
+  }
+  if (host === "m.youtube.com" || host === "youtube.com" || host.endsWith(".youtube.com")) {
+    const parts = u.pathname.split("/").filter(Boolean);
+    const vParam = u.searchParams.get("v");
+    if (vParam && /^[a-zA-Z0-9_-]{11}$/.test(vParam)) return vParam;
+    if (parts[0] === "embed" && parts[1]) {
+      const id = parts[1].split("?")[0];
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : "";
+    }
+    if (parts[0] === "shorts" && parts[1]) {
+      const id = parts[1].split("?")[0];
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : "";
+    }
+    if (parts[0] === "live" && parts[1]) {
+      const id = parts[1].split("?")[0];
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : "";
+    }
+  }
+  return "";
+}
+
+/** Single card URL: always mute=1 for autoplay; use postMessage unMute/playVideo on hover (no src swap). */
+function buildYouTubeElectionCardEmbedSrc(videoId, pageOrigin) {
+  if (!videoId) return "";
+  const originQ = pageOrigin ? `&origin=${encodeURIComponent(pageOrigin)}` : "";
+  return `https://www.youtube.com/embed/${encodeURIComponent(
+    videoId
+  )}?autoplay=1&mute=1&loop=1&playlist=${encodeURIComponent(
+    videoId
+  )}&controls=0&showinfo=0&rel=0&disablekb=1&fs=0&playsinline=1&enablejsapi=1${originQ}`;
+}
+
+function boardHasYouTubeCandidate(boardData) {
+  if (!boardData?.roles) return false;
+  for (const rg of boardData.roles) {
+    for (const c of rg.candidates || []) {
+      const cand = normalizeCandidate(c);
+      if (extractYouTubeVideoId(cand.video)) return true;
+    }
+  }
+  return false;
 }
 
 // Dont even ask how the f**K this code works, I have no idea. - Gavin Z.
@@ -389,17 +624,17 @@ function videoSourceCandidates(srcRaw) {
   ];
 }
 
-function ElectionMediaModal({ media, onClose }) {
+function ElectionMediaModal({ media, onClose, onModalVideoHostEl }) {
   const hasVideo = Boolean(media?.video);
-  const isDriveVideo = typeof media?.video === "string" && media.video.includes("drive.google.com");
   const flyerSources = useMemo(() => imageSourceCandidates(media?.pfp), [media?.pfp]);
-  const playableVideoSources = useMemo(() => videoSourceCandidates(media?.video), [media?.video]);
-  const [modalVideoIndex, setModalVideoIndex] = useState(0);
-  const [modalVideoFailed, setModalVideoFailed] = useState(false);
-  useEffect(() => {
-    setModalVideoIndex(0);
-    setModalVideoFailed(false);
-  }, [media?.video, media?.name]);
+
+  const bindModalPlayerMount = useCallback(
+    (el) => {
+      onModalVideoHostEl?.(el);
+    },
+    [onModalVideoHostEl]
+  );
+
   if (!media) return null;
 
   return (
@@ -416,31 +651,10 @@ function ElectionMediaModal({ media, onClose }) {
         <h3 className="election-media-modal-title">{media.name}</h3>
         <div className="election-media-modal-content">
           {hasVideo ? (
-            <>
-              <video
-                className="election-media-modal-video"
-                src={playableVideoSources[modalVideoIndex] || media.video}
-                controls
-                autoPlay
-                playsInline
-                onError={() => {
-                  if (modalVideoIndex < playableVideoSources.length - 1) {
-                    setModalVideoIndex((i) => i + 1);
-                    return;
-                  }
-                  setModalVideoFailed(true);
-                }}
-              />
-              {modalVideoFailed && (
-                <p style={{ marginTop: "0.75rem", color: "#ddd" }}>
-                  {isDriveVideo ? "Drive blocked embedded playback for this file. " : "Could not embed this video here. "}
-                  <a href={media.video} target="_blank" rel="noreferrer">
-                    Open video in Google Drive
-                  </a>
-                  .
-                </p>
-              )}
-            </>
+            <div
+              ref={bindModalPlayerMount}
+              className="election-media-modal-video election-media-modal-frame election-media-modal-player-mount"
+            />
           ) : (
             <SafeImage
               src={flyerSources}
@@ -462,11 +676,27 @@ ElectionMediaModal.propTypes = {
     video: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
+  onModalVideoHostEl: PropTypes.func,
 };
 
 export default function ElectionBoard({ electionsConfig: config = electionsConfig }) {
   const { boardSlug } = useParams();
   const [activeMedia, setActiveMedia] = useState(null);
+  const [modalVideoHostEl, setModalVideoHostEl] = useState(null);
+
+  const onModalVideoHostEl = useCallback((el) => {
+    setModalVideoHostEl(el);
+  }, []);
+
+  const handleOpenElectionMedia = useCallback((payload) => {
+    setModalVideoHostEl(null);
+    setActiveMedia(payload);
+  }, []);
+
+  const handleCloseElectionMedia = useCallback(() => {
+    setActiveMedia(null);
+    setModalVideoHostEl(null);
+  }, []);
 
   const { board, prevSlug, nextSlug } = useMemo(() => {
     const contenders = config?.contenders ?? [];
@@ -479,6 +709,24 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
       nextSlug: index >= 0 && index < list.length - 1 ? list[index + 1].slug : null,
     };
   }, [config, boardSlug]);
+
+  const hasYoutubeOnBoard = useMemo(() => boardHasYouTubeCandidate(board), [board]);
+
+  useEffect(() => {
+    if (!hasYoutubeOnBoard) return;
+    const hrefs = ["https://www.youtube.com", "https://i.ytimg.com"];
+    const created = [];
+    for (const href of hrefs) {
+      const link = document.createElement("link");
+      link.rel = "preconnect";
+      link.href = href;
+      document.head.appendChild(link);
+      created.push(link);
+    }
+    return () => {
+      created.forEach((el) => el.remove());
+    };
+  }, [hasYoutubeOnBoard]);
 
   if (!areElectionBoardsPublic(config)) {
     return <Navigate to="/Elections" replace />;
@@ -514,6 +762,11 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
 
   return (
     <div className="election-board-page" style={{ "--board-accent": accentColor }}>
+      <ElectionMediaModal
+        media={activeMedia}
+        onClose={handleCloseElectionMedia}
+        onModalVideoHostEl={onModalVideoHostEl}
+      />
       <header className="election-board-hero">
         <h1 className="election-board-hero-title">{board.board}</h1>
         <p className="election-board-hero-subtitle">Meet the candidates</p>
@@ -530,10 +783,13 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
                 {roleGroup.role}
               </h2>
               <ElectionBoardCandidatesGrid
+                key={`${boardSlug}-${roleIndex}`}
                 candidates={candidates}
                 accentColor={accentColor}
-                onOpenMedia={(candidate) => setActiveMedia(candidate)}
+                onOpenMedia={handleOpenElectionMedia}
                 showVoteButton={showVoteNowButtons}
+                activeMedia={activeMedia}
+                modalVideoHostEl={modalVideoHostEl}
               />
             </section>
           );
@@ -541,7 +797,6 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
       </main>
 
       <nav className="election-board-nav">{boardNav}</nav>
-      <ElectionMediaModal media={activeMedia} onClose={() => setActiveMedia(null)} />
     </div>
   );
 }
