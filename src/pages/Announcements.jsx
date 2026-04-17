@@ -5,7 +5,8 @@ const LOAD_MORE_STEP = 9;
 const PREVIEW_LENGTH = 120;
 const GOOGLE_API_KEY = "AIzaSyAgshc5Aqd8B149h5RpsenMh_SQAeb4AXc";
 const ANNOUNCEMENTS_SPREADSHEET_ID = "1Kk7Bs58DAWZ9pHvqD-RFvoV1ePeThQ1Yr9c5RsDeAq4";
-const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archive", "Announcements"];
+// Tab title in the spreadsheet is misspelled "Annoucements" (one n). Keeps one values.get per page load.
+const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive"];
 
 function toSortableDate(input) {
   if (!input) return null;

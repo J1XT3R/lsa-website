@@ -129,6 +129,56 @@
     opacity: 0.9;
 }
 
+// SBC + class boards: same --board-accent treatment as election board pages
+.board-page {
+    position: relative;
+    padding-bottom: 3rem;
+    min-height: 100vh;
+    background: #f5f5f5 linear-gradient(135deg, color-mix(in srgb, var(--board-accent, #9c1919) 6%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--board-accent, #9c1919) 4%, transparent) 100%);
+    background-attachment: scroll;
+}
+
+.board-page .board-hero {
+    background: linear-gradient(180deg, var(--board-accent, #9c1919) 0%, color-mix(in srgb, var(--board-accent, #9c1919) 75%, #1a0a0a) 100%);
+}
+
+.board-page .board-hero-year {
+    background: var(--board-accent, var(--lowell-red));
+}
+
+.board-page .board-contact-item strong {
+    color: var(--board-accent, var(--lowell-red));
+}
+
+.board-page .board-nav__btn {
+    color: var(--board-accent, var(--lowell-red));
+    border-color: color-mix(in srgb, var(--board-accent, var(--lowell-red)) 38%, #d0d0d0);
+}
+
+.board-page .board-nav__btn:hover {
+    background: color-mix(in srgb, var(--board-accent, var(--lowell-red)) 10%, #fff);
+}
+
+.board-page .board-officers-heading {
+    color: var(--board-accent, var(--title-color));
+    text-align: center;
+    padding-bottom: 0.5rem;
+}
+
+.board-page .board-officers-heading::after {
+    content: "";
+    display: block;
+    width: 3.5rem;
+    height: 3px;
+    margin: 0.45rem auto 0;
+    background: var(--board-accent, var(--title-color));
+    border-radius: 2px;
+}
+
+.board-page .board-officer-card-role {
+    color: var(--board-accent, var(--lowell-red));
+}
+
 // SBC and Class Board pages - hero + officer cards
 .board-hero {
     text-align: center;

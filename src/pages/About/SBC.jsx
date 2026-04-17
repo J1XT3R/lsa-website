@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
 import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
+import { getLsaCurrentBoardAccent } from "../../config/lsaCurrentBoardAccents.js";
 import "./About.scss";
 
 export default function SBC({ officerData: officerDataProp }) {
@@ -18,8 +19,10 @@ export default function SBC({ officerData: officerDataProp }) {
     return <LoadingTruck />;
   }
 
+  const boardAccent = getLsaCurrentBoardAccent("SBC");
+
   return (
-    <>
+    <div className="board-page" style={{ "--board-accent": boardAccent }}>
       <header className="board-hero">
         <h1 className="board-hero-title">Student Body Council</h1>
         <p className="board-hero-subtitle">SBC</p>
@@ -92,7 +95,7 @@ export default function SBC({ officerData: officerDataProp }) {
           Next board &rarr;
         </Link>
       </nav>
-    </>
+    </div>
   );
 }
 

@@ -142,6 +142,13 @@ export default function Clubs({ clubData }) {
               }}
             />
           </div>
+          <p className="clubs-page__filter-scroll-hint">
+            Swipe or scroll sideways{" "}
+            <span className="clubs-page__filter-scroll-hint-arrows" aria-hidden="true">
+              ← →
+            </span>{" "}
+            for all categories
+          </p>
           <div className="clubs-page__filter-list">
             {filterButtons}
             {(categoryFilter || searchQuery) && (

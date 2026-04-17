@@ -52,18 +52,14 @@ const SHEETS_CHECK_WINDOW_MS = 60 * 1000;
 const SHEETS_LAST_CHECK_COOKIE = "lsa_sheets_last_check_ms_v1";
 const SHEETS_RETRY_ATTEMPTS = 3;
 const SHEETS_RETRY_DELAY_MS = 700;
-const ANNOUNCEMENTS_SHEET_NAMES = ["Annoucements Archive", "Announcements Archive", "Announcements"];
+/** Tab title in the spreadsheet is misspelled "Annoucements" (one n). */
+const ANNOUNCEMENTS_ARCHIVE_SHEET_NAME = "Annoucements Archive";
 
 /** Live Cardinalympics sheet fetch + polling only on routes that show scores or events from the sheet. */
 function routeWantsCardinalympicsLiveFetch(pathname) {
   const p = pathname || "/";
   if (p === "/") return true;
   return p === "/Cardinalympics" || p.startsWith("/Cardinalympics/");
-}
-
-/** Home page News section uses `newsData` from the announcements sheet. */
-function routeWantsHomeAnnouncementsFetch(pathname) {
-  return (pathname || "/") === "/";
 }
 
 /** Home preview + ApplicationsOpen page need live applications sheet data. */
@@ -129,15 +125,16 @@ function delay(ms) {
 }
 
 /**
- * Build an A1 range for values:batchGet / values.get. Tab-only strings are rejected (400 "Unable to parse range").
- * Names with spaces, commas, etc. must be wrapped in single quotes (see Google Sheets A1 notation).
+ * Build an A1 range for values:batchGet / values.get.
+ * values:batchGet rejects a tab-only string like 'My Tab' (400 "Unable to parse range").
+ * Use explicit column span: A:ZZ is valid; A:ZZZ and huge rectangles like A1:ZZ100000 are not.
  */
 function tabNameToValuesRangeA1(tabName) {
   const s = String(tabName ?? "").trim();
   if (!s) return "";
   if (s.includes("!")) return s;
   const escaped = s.replace(/'/g, "''");
-  return `'${escaped}'!A:ZZZ`;
+  return `'${escaped}'!A:ZZ`;
 }
 
 /** One HTTP request for multiple tabs on the same spreadsheet (saves quota vs. separate values.get calls). */
@@ -156,9 +153,16 @@ async function fetchSheetBatchGetWithRetry(spreadsheetId, rangeNames, apiKey, op
       }
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${params.toString()}`;
       const res = await fetch(url, options.fetchOptions);
-      const json = await res.json();
-      if (json?.error) {
-        lastError = json.error.message || "Unknown API error";
+      const json = await res.json().catch(() => ({}));
+      const httpStatus = res.status;
+      const apiMessage = json?.error?.message;
+
+      if (!res.ok || json?.error) {
+        lastError = apiMessage || res.statusText || `HTTP ${httpStatus}`;
+        const retryable = httpStatus === 429 || httpStatus >= 500 || httpStatus === 0;
+        if (!retryable) {
+          break;
+        }
       } else if (Array.isArray(json?.valueRanges)) {
         return { valueRanges: json.valueRanges, error: null };
       } else {
@@ -261,15 +265,18 @@ function App() {
     const [applicationsError, setApplicationsError] = useState(null);
     const shouldCheckSheetsNow = useMemo(() => reserveSheetsRefreshWindow(), []);
 
-    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs -> 1 API call)
+    // Website Info + Officers + Elections + announcements archive: one batchGet per refresh (4 tabs -> 1 API call).
+    // Elections tab loads on every route because Layout/Navbar/banner use electionsConfigResolved (sheet merge), not only /Elections.
     useEffect(() => {
-      async function fetchCoreSheets() {
+      async function fetchCoreSheetsAndAnnouncements() {
         const clubCookieKey = "lsa_sheet_website_info_v1";
         const officerCookieKey = "lsa_sheet_officers_v1";
         const electionCookieKey = "lsa_sheet_elections_v1";
+        const announcementsCookieKey = "lsa_sheet_home_announcements_v1";
         const cachedClubValues = readJsonCookie(clubCookieKey);
         const cachedOfficerValues = readJsonCookie(officerCookieKey);
         const cachedElectionValues = readJsonCookie(electionCookieKey);
+        const cachedAnnouncementsValues = readJsonCookie(announcementsCookieKey);
 
         if (cachedClubValues?.length) {
           setClubData(processSheetData(cachedClubValues));
@@ -280,20 +287,21 @@ function App() {
         if (cachedElectionValues?.length) {
           setElectionSheetValues(cachedElectionValues);
         }
+        if (cachedAnnouncementsValues?.length) {
+          setNewsData(processAnnouncementsSheetData(cachedAnnouncementsValues));
+        }
 
         const skipNetwork =
           !shouldCheckSheetsNow &&
           cachedClubValues?.length &&
           cachedOfficerValues?.length &&
-          cachedElectionValues?.length;
+          cachedElectionValues?.length &&
+          cachedAnnouncementsValues?.length;
         if (skipNetwork) return;
 
         try {
-          const batch = await fetchSheetBatchGetWithRetry(
-            SPREADSHEET_ID,
-            [SHEET_NAME, SHEET_NAME2, SHEET_NAME4],
-            KEY
-          );
+          const batchTabNames = [SHEET_NAME, SHEET_NAME2, SHEET_NAME4, ANNOUNCEMENTS_ARCHIVE_SHEET_NAME];
+          const batch = await fetchSheetBatchGetWithRetry(SPREADSHEET_ID, batchTabNames, KEY);
           if (batch.error || !batch.valueRanges?.length) {
             console.warn("Main spreadsheet batch:", batch.error);
             return;
@@ -302,6 +310,7 @@ function App() {
           const clubVals = vr[0]?.values;
           const officerVals = vr[1]?.values;
           const electionVals = vr[2]?.values;
+          const announcementVals = vr[3]?.values;
 
           if (clubVals?.length) {
             setClubData(processSheetData(clubVals));
@@ -321,11 +330,22 @@ function App() {
           } else {
             console.warn("Elections sheet: empty or missing");
           }
+          if (announcementVals?.length) {
+            const parsed = processAnnouncementsSheetData(announcementVals);
+            if (parsed.length) {
+              setNewsData(parsed);
+              writeJsonCookie(announcementsCookieKey, announcementVals);
+            } else {
+              console.warn("Announcements archive tab: no parsed rows");
+            }
+          } else {
+            console.warn("Announcements archive sheet: empty or missing");
+          }
         } catch (error) {
           console.log(error);
         }
       }
-      fetchCoreSheets();
+      fetchCoreSheetsAndAnnouncements();
     }, [shouldCheckSheetsNow]);
 
     const electionData = useMemo(() => {
@@ -338,47 +358,6 @@ function App() {
       () => mergeElectionConfigWithSheet(site.elections, electionSheetValues),
       [electionSheetValues]
     );
-
-    useEffect(() => {
-      async function fetchHomeAnnouncementsData() {
-        const announcementsCookieKey = "lsa_sheet_home_announcements_v1";
-        const cachedAnnouncementsValues = readJsonCookie(announcementsCookieKey);
-        if (cachedAnnouncementsValues?.length) {
-          setNewsData(processAnnouncementsSheetData(cachedAnnouncementsValues));
-        }
-        if (!routeWantsHomeAnnouncementsFetch(location.pathname)) {
-          return;
-        }
-        if (!shouldCheckSheetsNow && cachedAnnouncementsValues?.length) return;
-
-        try {
-          const batch = await fetchSheetBatchGetWithRetry(
-            SPREADSHEET_ID,
-            ANNOUNCEMENTS_SHEET_NAMES,
-            KEY
-          );
-          if (batch.error || !batch.valueRanges?.length) {
-            console.warn("Announcements sheet batch:", batch.error || "No ranges");
-          } else {
-            const { valueRanges } = batch;
-            for (let i = 0; i < ANNOUNCEMENTS_SHEET_NAMES.length; i++) {
-              const values = valueRanges[i]?.values;
-              if (!values?.length) continue;
-              const parsed = processAnnouncementsSheetData(values);
-              if (!parsed.length) continue;
-              setNewsData(parsed);
-              writeJsonCookie(announcementsCookieKey, values);
-              return;
-            }
-            console.warn("Announcements sheet fetch: no non-empty tab found");
-          }
-        } catch (error) {
-          console.warn("Announcements sheet fetch failed:", error);
-        }
-      }
-      fetchHomeAnnouncementsData();
-    }, [shouldCheckSheetsNow, location.pathname]);
-
 
     const CARDINALYMPICS_POLL_MS = 30_000;
     const { showScoresAndScoreboard, showEvents, showHomeEventsSignupNow } = cardinalympicsConfig;

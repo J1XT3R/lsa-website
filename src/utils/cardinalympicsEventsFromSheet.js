@@ -163,6 +163,19 @@ function startOfDay(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
+/**
+ * True when the sheet has a sign-up URL but the event calendar day (MM/DD/YY → sortDate)
+ * is strictly before today (local). Used to show "Closed" instead of the link after that day.
+ */
+export function isCardinalympicsSignupPastEventDay(ev) {
+  if (!ev?.signUpLink || ev.signUpClosed) return false;
+  if (!ev.sortDate) return false;
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const eventDayStart = startOfDay(ev.sortDate);
+  return eventDayStart < todayStart;
+}
+
 function sortEventsByDate(a, b) {
   const ta = a.sortDate ? a.sortDate.getTime() : 0;
   const tb = b.sortDate ? b.sortDate.getTime() : 0;
