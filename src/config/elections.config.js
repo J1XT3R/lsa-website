@@ -17,20 +17,25 @@ export default {
       title: "SBC Elections",
       color: "#9c1919",
     },
+    "2026": {
+      slug: "LSA-2026",
+      title: "LSA-2026",
+      color: "#9c1919",
+    },
     "2027": {
       slug: "LSA-2027",
       title: "LSA-2027 Elections",
-      color: "#9c1919",
+      color: "#1565c0",
     },
     "2028": {
       slug: "LSA-2028",
       title: "LSA-2028 Elections",
-      color: "#2d5a87",
+      color: "#6a1b9a",
     },
     "2029": {
       slug: "LSA-2029",
       title: "LSA-2029 Elections",
-      color: "#6b2d5c",
+      color: "#2e7d32",
     },
   },
 

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import LoadingTruck from "../../components/LoadingTruck";
 import SafeImage from "../../components/SafeImage";
 import { driveThumbnailCandidates } from "../../utils/driveMedia.js";
+import { getLsaCurrentBoardAccent } from "../../config/lsaCurrentBoardAccents.js";
 import "./About.scss";
 
 const CLASS_BOARD_ORDER = [
@@ -47,8 +48,10 @@ export default function ClassBoard({ officerData: officerDataProp }) {
         }
       : null;
 
+  const boardAccent = getLsaCurrentBoardAccent(params);
+
   return (
-    <>
+    <div className="board-page" style={{ "--board-accent": boardAccent }}>
       <header className="board-hero board-hero--class">
         <h1 className="board-hero-title">LSA {params}</h1>
         <span className="board-hero-year">2025-2026</span>
@@ -117,7 +120,7 @@ export default function ClassBoard({ officerData: officerDataProp }) {
           <span className="board-nav__btn board-nav__btn--disabled">Next board &rarr;</span>
         )}
       </nav>
-    </>
+    </div>
   );
 }
 

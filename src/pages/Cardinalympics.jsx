@@ -1,7 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState, useMemo } from "react";
 import Counter from "../components/Counter";
-import { groupCardinalympicsEventsByWeekAndDay } from "../utils/cardinalympicsEventsFromSheet";
+import {
+  groupCardinalympicsEventsByWeekAndDay,
+  isCardinalympicsSignupPastEventDay,
+} from "../utils/cardinalympicsEventsFromSheet";
 import "./Cardinalympics.scss";
 
 const CLASS_NAMES = ["Freshman", "Sophomore", "Junior", "Senior"];
@@ -224,7 +227,7 @@ function CardinalympicsEventsSchedule({ events }) {
                     {ev.bodyText ? (
                       <div className="event-description cardinalympics-event__body">{ev.bodyText}</div>
                     ) : null}
-                    {ev.signUpClosed ? (
+                    {ev.signUpClosed || isCardinalympicsSignupPastEventDay(ev) ? (
                       <button
                         type="button"
                         className="event-description cardinalympics-event-closed"
