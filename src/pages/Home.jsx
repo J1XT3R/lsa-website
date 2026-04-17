@@ -63,7 +63,7 @@ export default function Home({
   const spotlightHref = spotlightClub
     ? `/Clubs/${encodeURIComponent(spotlightClub.Name)}`
     : "/Clubs";
-  const spotlightCtaText = spotlightClub ? "Learn more &rarr;" : "Browse clubs &rarr;";
+  const spotlightCtaText = spotlightClub ? "Learn more →" : "Browse clubs →";
   const spotlightInitial = spotlightDisplayName.trim()
     ? spotlightDisplayName.trim().charAt(0).toUpperCase()
     : "";
