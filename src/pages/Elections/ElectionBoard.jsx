@@ -140,7 +140,6 @@ function ElectionCandidateCard({
   onOpenMedia,
   showVoteButton = true,
   activeMedia = null,
-  modalVideoHostEl = null,
 }) {
   const { name, description, pfp, video } = candidate;
   const youtubeVideoId = useMemo(() => extractYouTubeVideoId(video), [video]);
@@ -162,16 +161,22 @@ function ElectionCandidateCard({
   const fileVideoHomeRef = useRef(null);
   const videoSrc = playableVideoSources[videoSourceIndex] || video || "";
   const myMediaKey = electionCandidateMediaKey(candidate);
-  const activeMediaKey = electionCandidateMediaKey(activeMedia);
-  const youtubePlaysInModal = Boolean(
-    isYouTubeVideo && activeMedia && activeMediaKey === myMediaKey && modalVideoHostEl
-  );
-  const filePlaysInModal = Boolean(
-    !isYouTubeVideo && video && activeMedia && activeMediaKey === myMediaKey && modalVideoHostEl
-  );
+  const isThisModalOpen =
+    Boolean(activeMedia) && electionCandidateMediaKey(activeMedia) === myMediaKey;
 
   const [youtubeSlotEl, setYoutubeSlotEl] = useState(null);
   const [fileSlotEl, setFileSlotEl] = useState(null);
+
+  useEffect(() => {
+    if (!isThisModalOpen) return undefined;
+    silenceYoutubePreview(youtubeIframeRef.current);
+    const v = fileVideoRef.current;
+    if (v) {
+      v.pause();
+      v.muted = true;
+    }
+    return undefined;
+  }, [isThisModalOpen]);
 
   useLayoutEffect(() => {
     const el = youtubeIframeHomeRef.current;
@@ -309,17 +314,6 @@ function ElectionCandidateCard({
     onOpenMedia(candidate);
   };
 
-  const youtubePortalHost = youtubePlaysInModal ? modalVideoHostEl : youtubeSlotEl;
-  const filePortalHost = filePlaysInModal ? modalVideoHostEl : fileSlotEl;
-
-  const youtubeIframeClassName = youtubePlaysInModal
-    ? "election-media-modal-video election-media-modal-frame"
-    : "election-candidate-card-video election-candidate-card-youtube-preview election-candidate-card-video-preview";
-
-  const fileVideoClassName = filePlaysInModal
-    ? "election-media-modal-video"
-    : "election-candidate-card-video election-candidate-card-video-preview";
-
   return (
     <article
       ref={articleRef}
@@ -347,39 +341,39 @@ function ElectionCandidateCard({
         />
         {video && isYouTubeVideo && (
           <div ref={youtubeIframeHomeRef} className="election-candidate-card-preview-player-slot">
-            {youtubePortalHost &&
+            {youtubeSlotEl &&
               createPortal(
                 <iframe
                   key={youtubeCardEmbedSrc || youtubeVideoId || "yt"}
                   ref={youtubeIframeRef}
                   title={`${name} campaign video preview`}
-                  className={youtubeIframeClassName}
+                  className="election-candidate-card-video election-candidate-card-youtube-preview election-candidate-card-video-preview"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   onLoad={onYoutubePreviewIframeLoad}
                 />,
-                youtubePortalHost
+                youtubeSlotEl
               )}
           </div>
         )}
         {video && !isYouTubeVideo && (
           <div ref={fileVideoHomeRef} className="election-candidate-card-preview-player-slot">
-            {filePortalHost &&
+            {fileSlotEl &&
               createPortal(
                 <video
                   key={videoSrc || video || "file"}
                   ref={fileVideoRef}
-                  className={fileVideoClassName}
+                  className="election-candidate-card-video election-candidate-card-video-preview"
                   src={videoSrc || undefined}
-                  controls={filePlaysInModal}
+                  controls={false}
                   muted={!isHoverPreviewVisible}
                   loop
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                   onError={() => {
                     setVideoSourceIndex((i) => (i < playableVideoSources.length - 1 ? i + 1 : i));
                   }}
                 />,
-                filePortalHost
+                fileSlotEl
               )}
           </div>
         )}
@@ -423,7 +417,6 @@ ElectionCandidateCard.propTypes = {
   onOpenMedia: PropTypes.func.isRequired,
   showVoteButton: PropTypes.bool,
   activeMedia: PropTypes.object,
-  modalVideoHostEl: PropTypes.any,
 };
 
 // config sometimes gives us just a name string - turn it into a proper candidate object so we arent cooked
@@ -450,7 +443,6 @@ function ElectionBoardCandidatesGrid({
   onOpenMedia,
   showVoteButton,
   activeMedia,
-  modalVideoHostEl,
 }) {
   const gridRef = useRef(null);
   const stackedLatchRef = useRef(false);
@@ -500,7 +492,6 @@ function ElectionBoardCandidatesGrid({
           onOpenMedia={onOpenMedia}
           showVoteButton={showVoteButton}
           activeMedia={activeMedia}
-          modalVideoHostEl={modalVideoHostEl}
         />
       ))}
     </div>
@@ -513,7 +504,6 @@ ElectionBoardCandidatesGrid.propTypes = {
   onOpenMedia: PropTypes.func.isRequired,
   showVoteButton: PropTypes.bool,
   activeMedia: PropTypes.object,
-  modalVideoHostEl: PropTypes.any,
 };
 
 function extractDriveId(urlRaw) {
@@ -574,6 +564,15 @@ function buildYouTubeElectionCardEmbedSrc(videoId, pageOrigin) {
   )}&controls=0&showinfo=0&rel=0&disablekb=1&fs=0&playsinline=1&enablejsapi=1${originQ}`;
 }
 
+/** Modal: dedicated embed (not the card preview URL) so the iframe mounts with src immediately — no portal / ref delay. */
+function buildYouTubeElectionModalEmbedSrc(videoId, pageOrigin) {
+  if (!videoId) return "";
+  const originQ = pageOrigin ? `&origin=${encodeURIComponent(pageOrigin)}` : "";
+  return `https://www.youtube.com/embed/${encodeURIComponent(
+    videoId
+  )}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0&playsinline=1&enablejsapi=1${originQ}`;
+}
+
 function boardHasYouTubeCandidate(boardData) {
   if (!boardData?.roles) return false;
   for (const rg of boardData.roles) {
@@ -624,16 +623,39 @@ function videoSourceCandidates(srcRaw) {
   ];
 }
 
-function ElectionMediaModal({ media, onClose, onModalVideoHostEl }) {
-  const hasVideo = Boolean(media?.video);
+function ElectionMediaModal({ media, onClose }) {
+  const videoRaw = media?.video;
+  const hasVideo = Boolean(videoRaw);
+  const youtubeVideoId = useMemo(() => extractYouTubeVideoId(videoRaw), [videoRaw]);
+  const isYouTube = Boolean(youtubeVideoId);
+  const pageOrigin = typeof window !== "undefined" ? window.location.origin : "";
+  const modalYoutubeSrc = useMemo(
+    () => (youtubeVideoId ? buildYouTubeElectionModalEmbedSrc(youtubeVideoId, pageOrigin) : ""),
+    [youtubeVideoId, pageOrigin]
+  );
+  const playableVideoSources = useMemo(() => videoSourceCandidates(videoRaw), [videoRaw]);
+  const [fileSourceIndex, setFileSourceIndex] = useState(0);
+  const modalYoutubeRef = useRef(null);
+  const fileVideoSrc = playableVideoSources[fileSourceIndex] || videoRaw || "";
+
   const flyerSources = useMemo(() => imageSourceCandidates(media?.pfp), [media?.pfp]);
 
-  const bindModalPlayerMount = useCallback(
-    (el) => {
-      onModalVideoHostEl?.(el);
-    },
-    [onModalVideoHostEl]
-  );
+  useEffect(() => {
+    setFileSourceIndex(0);
+  }, [videoRaw]);
+
+  useEffect(() => {
+    if (!media) return undefined;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [media]);
+
+  const onModalYoutubeLoad = useCallback(() => {
+    kickYoutubeAudible(modalYoutubeRef.current);
+  }, []);
 
   if (!media) return null;
 
@@ -651,10 +673,31 @@ function ElectionMediaModal({ media, onClose, onModalVideoHostEl }) {
         <h3 className="election-media-modal-title">{media.name}</h3>
         <div className="election-media-modal-content">
           {hasVideo ? (
-            <div
-              ref={bindModalPlayerMount}
-              className="election-media-modal-video election-media-modal-frame election-media-modal-player-mount"
-            />
+            isYouTube ? (
+              <iframe
+                ref={modalYoutubeRef}
+                key={youtubeVideoId}
+                src={modalYoutubeSrc}
+                title={`${media.name} campaign video`}
+                className="election-media-modal-video election-media-modal-frame"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                fetchPriority="high"
+                onLoad={onModalYoutubeLoad}
+              />
+            ) : (
+              <video
+                key={`${fileVideoSrc}-modal`}
+                className="election-media-modal-video"
+                src={fileVideoSrc || undefined}
+                controls
+                playsInline
+                preload="auto"
+                onError={() => {
+                  setFileSourceIndex((i) => (i < playableVideoSources.length - 1 ? i + 1 : i));
+                }}
+              />
+            )
           ) : (
             <SafeImage
               src={flyerSources}
@@ -676,26 +719,18 @@ ElectionMediaModal.propTypes = {
     video: PropTypes.string,
   }),
   onClose: PropTypes.func.isRequired,
-  onModalVideoHostEl: PropTypes.func,
 };
 
 export default function ElectionBoard({ electionsConfig: config = electionsConfig }) {
   const { boardSlug } = useParams();
   const [activeMedia, setActiveMedia] = useState(null);
-  const [modalVideoHostEl, setModalVideoHostEl] = useState(null);
-
-  const onModalVideoHostEl = useCallback((el) => {
-    setModalVideoHostEl(el);
-  }, []);
 
   const handleOpenElectionMedia = useCallback((payload) => {
-    setModalVideoHostEl(null);
     setActiveMedia(payload);
   }, []);
 
   const handleCloseElectionMedia = useCallback(() => {
     setActiveMedia(null);
-    setModalVideoHostEl(null);
   }, []);
 
   const { board, prevSlug, nextSlug } = useMemo(() => {
@@ -762,11 +797,7 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
 
   return (
     <div className="election-board-page" style={{ "--board-accent": accentColor }}>
-      <ElectionMediaModal
-        media={activeMedia}
-        onClose={handleCloseElectionMedia}
-        onModalVideoHostEl={onModalVideoHostEl}
-      />
+      <ElectionMediaModal media={activeMedia} onClose={handleCloseElectionMedia} />
       <header className="election-board-hero">
         <h1 className="election-board-hero-title">{board.board}</h1>
         <p className="election-board-hero-subtitle">Meet the candidates</p>
@@ -789,7 +820,6 @@ export default function ElectionBoard({ electionsConfig: config = electionsConfi
                 onOpenMedia={handleOpenElectionMedia}
                 showVoteButton={showVoteNowButtons}
                 activeMedia={activeMedia}
-                modalVideoHostEl={modalVideoHostEl}
               />
             </section>
           );
