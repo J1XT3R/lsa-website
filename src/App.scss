@@ -1802,12 +1802,41 @@
   color: #666;
 }
 
+@keyframes election-banner-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px color-mix(in srgb, var(--lowell-red, #861212) 55%, transparent),
+      0 0 32px color-mix(in srgb, var(--lowell-red, #861212) 35%, transparent),
+      0 0 48px color-mix(in srgb, var(--lowell-red, #861212) 18%, transparent),
+      0 4px 14px rgba(0, 0, 0, 0.18);
+  }
+
+  50% {
+    box-shadow:
+      0 0 22px color-mix(in srgb, var(--lowell-red, #861212) 70%, transparent),
+      0 0 44px color-mix(in srgb, var(--lowell-red, #861212) 45%, transparent),
+      0 0 64px color-mix(in srgb, var(--lowell-red, #861212) 28%, transparent),
+      0 4px 14px rgba(0, 0, 0, 0.18);
+  }
+}
+
 .election-banner {
   background: linear-gradient(135deg, var(--lowell-red, #861212) 0%, #a01818 100%);
   color: white;
   padding: 0.9rem 1.5rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--lowell-red, #861212) 50%, transparent),
+    0 0 36px color-mix(in srgb, var(--lowell-red, #861212) 32%, transparent),
+    0 4px 14px rgba(0, 0, 0, 0.18);
+  animation: election-banner-glow 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .election-banner {
+    animation: none;
+  }
 }
 
 .election-banner-inner {
