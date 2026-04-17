@@ -61,11 +61,6 @@ function routeWantsCardinalympicsLiveFetch(pathname) {
   return p === "/Cardinalympics" || p.startsWith("/Cardinalympics/");
 }
 
-/** Home page News section uses `newsData` from the announcements sheet. */
-function routeWantsHomeAnnouncementsFetch(pathname) {
-  return (pathname || "/") === "/";
-}
-
 /** Home preview + ApplicationsOpen page need live applications sheet data. */
 function routeWantsApplicationsLiveFetch(pathname) {
   const p = pathname || "/";
@@ -129,15 +124,16 @@ function delay(ms) {
 }
 
 /**
- * Build an A1 range for values:batchGet / values.get. Tab-only strings are rejected (400 "Unable to parse range").
- * Names with spaces, commas, etc. must be wrapped in single quotes (see Google Sheets A1 notation).
+ * Build an A1 range for values:batchGet / values.get.
+ * Per Sheets API A1 rules, a quoted tab name alone (e.g. 'My Tab') means the entire sheet — no cell suffix.
+ * Suffixes like !A:ZZZ or !A1:ZZ100000 are rejected or fragile to parse ("Unable to parse range").
  */
 function tabNameToValuesRangeA1(tabName) {
   const s = String(tabName ?? "").trim();
   if (!s) return "";
   if (s.includes("!")) return s;
   const escaped = s.replace(/'/g, "''");
-  return `'${escaped}'!A:ZZZ`;
+  return `'${escaped}'`;
 }
 
 /** One HTTP request for multiple tabs on the same spreadsheet (saves quota vs. separate values.get calls). */
@@ -261,7 +257,8 @@ function App() {
     const [applicationsError, setApplicationsError] = useState(null);
     const shouldCheckSheetsNow = useMemo(() => reserveSheetsRefreshWindow(), []);
 
-    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs -> 1 API call)
+    // Website Info + Officers + Elections: one batchGet per refresh (3 tabs -> 1 API call).
+    // Elections tab loads on every route because Layout/Navbar/banner use electionsConfigResolved (sheet merge), not only /Elections.
     useEffect(() => {
       async function fetchCoreSheets() {
         const clubCookieKey = "lsa_sheet_website_info_v1";
@@ -346,9 +343,8 @@ function App() {
         if (cachedAnnouncementsValues?.length) {
           setNewsData(processAnnouncementsSheetData(cachedAnnouncementsValues));
         }
-        if (!routeWantsHomeAnnouncementsFetch(location.pathname)) {
-          return;
-        }
+        // Fetch on any route (not only "/") so Home's News & Announcements is fresh when users land there
+        // without visiting /Announcements first. Same throttle as other sheet reads.
         if (!shouldCheckSheetsNow && cachedAnnouncementsValues?.length) return;
 
         try {
@@ -377,7 +373,7 @@ function App() {
         }
       }
       fetchHomeAnnouncementsData();
-    }, [shouldCheckSheetsNow, location.pathname]);
+    }, [shouldCheckSheetsNow]);
 
 
     const CARDINALYMPICS_POLL_MS = 30_000;
